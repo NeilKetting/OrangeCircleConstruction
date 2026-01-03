@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.ProjectSummary"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:Class="OCC.Client.Views.Home.ProjectSummary.ProjectPulseView"
+             x:DataType="vm:ProjectSummaryViewModel">
+
+    <StackPanel Spacing="10">
+        <TextBlock Text="Team Pulse" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+        <Border Classes="WidgetCard">
+            <StackPanel>
+                <TextBlock Text="TEAM UTILIZATION" Classes="LabelSmall" Margin="0,0,0,15"/>
+                <ItemsControl ItemsSource="{Binding TeamPulse}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,8">
+                                <!-- Avatar -->
+                                <Border Grid.Column="0" Width="30" Height="30" CornerRadius="15" Background="{Binding Color}">
+                                    <TextBlock Text="{Binding Initials}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                </Border>
+                                
+                                <!-- Name -->
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0" Foreground="{DynamicResource TextPrimaryDark}" FontSize="13"/>
+                                
+                                <!-- Count -->
+                                <TextBlock Grid.Column="2" Text="{Binding Count}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

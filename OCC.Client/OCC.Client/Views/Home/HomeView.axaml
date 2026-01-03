@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home"
+			 xmlns:homeComp="clr-namespace:OCC.Client.Views.Home"
+             xmlns:homeDash="clr-namespace:OCC.Client.Views.Home.Dashboard"
+             xmlns:ps="clr-namespace:OCC.Client.Views.Home.ProjectSummary"
+             xmlns:homeTasks="clr-namespace:OCC.Client.Views.Home.Tasks"
+			xmlns:homeShared="clr-namespace:OCC.Client.Views.Home.Shared"
+			xmlns:homeCal="clr-namespace:OCC.Client.Views.Home.Calendar"
+			xmlns:homeTime="clr-namespace:OCC.Client.Views.Time"
+			xmlns:homeTeam="clr-namespace:OCC.Client.Views.Team"
+			xmlns:homeProjects="clr-namespace:OCC.Client.Views.Projects"
+			xmlns:notifications="clr-namespace:OCC.Client.Views.Notifications"
+			xmlns:globalComp="clr-namespace:OCC.Client.Views.Shared"
+			xmlns:conv="clr-namespace:OCC.Client.Converters"
+			mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+			x:Class="OCC.Client.Views.Home.HomeView"
+			x:DataType="vm:HomeViewModel">
+
+
+	<Grid ColumnDefinitions="Auto, *">
+		<!-- Sidebar -->
+		<globalComp:SidebarView Grid.Column="0" DataContext="{Binding Sidebar}"/>
+
+		<!-- Main Content Area -->
+		<Grid Grid.Column="1" RowDefinitions="Auto, *">
+			<!-- Top Bar Border Wrapper for correct Visibility Binding -->
+            <Border Grid.Row="0" IsVisible="{Binding IsTopBarVisible}">
+			    <homeShared:TopBarView DataContext="{Binding TopBar}"/>
+            </Border>
+
+			<!-- Dashboard Content -->
+			<Grid Grid.Row="1" Background="{DynamicResource AppBackgroundSlate}">
+				<!-- Dashboard View -->
+				<ScrollViewer IsVisible="{Binding IsDashboardVisible}">
+					<Grid RowDefinitions="Auto, *" RowSpacing="25" Margin="30">
+						<!-- Greeting Area -->
+						<StackPanel Spacing="5">
+							<TextBlock Text="{Binding Greeting}"
+									   FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+							<TextBlock Text="{Binding CurrentDate}" Foreground="{DynamicResource TextSecondaryGray}" FontSize="14"/>
+						</StackPanel>
+
+						<!-- Widgets Content -->
+                        <Panel Grid.Row="1">
+						    <!-- My Summary (Original Dashboard) -->
+						    <Grid ColumnDefinitions="1.5*, 1*, *" RowDefinitions="*, *" IsVisible="{Binding IsMySummaryVisible}">
+							    <!-- My Summary Widget -->
+							    <homeDash:SummaryView Grid.Column="0" MinWidth="450" DataContext="{Binding MySummary}"/>
+
+							    <!-- Project Pulse Widget -->
+							    <homeDash:PulseView Grid.Column="1" MinWidth="450" DataContext="{Binding ProjectPulse}"/>
+
+							    <!-- My Tasks Widget -->
+							    <homeDash:TasksWidgetView Grid.Column="0" Grid.Row="1" DataContext="{Binding MyTasks}"/>
+						    </Grid>
+
+                            <!-- Project Summary View -->
+                            <Border Grid.Row="1" Grid.Column="2" IsVisible="{Binding IsProjectSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
+                                <ps:ProjectSummaryView DataContext="{Binding ProjectSummary}"/>
+                            </Border>
+
+                            <!-- Team Summary View -->
+                            <Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
+                                <homeDash:TeamSummaryView DataContext="{Binding TeamSummary}"/>
+                            </Border>
+                        </Panel>
+					</Grid>
+				</ScrollViewer>
+
+				<!-- List View -->
+				<Border IsVisible="{Binding IsListVisible}">
+					<homeTasks:TaskListView DataContext="{Binding ListViewModel}"/>
+				</Border>
+
+                <!-- Calendar View -->
+                <Border IsVisible="{Binding IsCalendarVisible}">
+                    <homeCal:CalendarView DataContext="{Binding Calendar}"/>
+                </Border>
+
+                <!-- Time View -->
+                <Border IsVisible="{Binding IsTimeVisible}">
+                    <homeTime:TimeView DataContext="{Binding Time}"/>
+                </Border>
+
+                <!-- Team View -->
+                <Border IsVisible="{Binding IsTeamVisible}">
+                    <homeTeam:TeamView DataContext="{Binding Team}"/>
+                </Border>
+
+                <!-- Projects View -->
+                <Border IsVisible="{Binding IsProjectsVisible}">
+                    <homeProjects:ProjectsView DataContext="{Binding Projects}"/>
+                </Border>
+
+                <!-- Notifications View -->
+                <Border IsVisible="{Binding IsNotificationsVisible}">
+                    <notifications:NotificationsView DataContext="{Binding Notifications}"/>
+                </Border>
+			</Grid>
+            
+            <!-- Overlay Layer -->
+            <Grid Grid.Row="0" Grid.RowSpan="2" 
+                  IsVisible="{Binding IsTaskDetailVisible, FallbackValue=false}"
+                  Background="#40000000"
+                  ClipToBounds="False"
+                  Name="OverlayGrid"
+                  PointerPressed="OnOverlayPointerPressed">
+                <homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail, FallbackValue=false}"
+                                         Width="1000"
+                                         HorizontalAlignment="Right"/>
+            </Grid>
+
+            <!-- Roll-Call Overlay -->
+            <Grid Grid.Row="0" Grid.RowSpan="2" 
+                  IsVisible="{Binding IsRollCallVisible, FallbackValue=false}"
+                  Background="#40000000">
+                <homeTime:RollCallView DataContext="{Binding CurrentRollCall}"
+                                      Width="700" Height="700"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+            </Grid>
+		</Grid>
+	</Grid>
+</UserControl>

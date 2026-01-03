@@ -1,0 +1,172 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using OCC.Client.Services;
+using OCC.Shared.Models;
+using System.Linq;
+using System;
+
+namespace OCC.Client.ViewModels.Home.Dashboard
+{
+    public partial class SummaryViewModel : ViewModelBase
+    {
+        private readonly IRepository<Project> _projectRepository;
+        private readonly IRepository<TaskItem> _taskRepository;
+
+        [ObservableProperty]
+        private string _totalProjects = "0";
+
+        [ObservableProperty]
+        private string _activeProjects = "0";
+
+        [ObservableProperty]
+        private string _projectsCompleted = "0";
+
+        // Task Graph Properties
+        [ObservableProperty]
+        private int _notStartedCount;
+
+        [ObservableProperty]
+        private int _inProgressCount;
+        
+        [ObservableProperty]
+        private int _completedCount;
+
+        [ObservableProperty]
+        private int _totalTaskCount;
+
+        [ObservableProperty]
+        private double _notStartedAngle;       
+        [ObservableProperty]
+        private double _inProgressAngle;      
+        [ObservableProperty]
+        private double _completedAngle;
+
+        [ObservableProperty]
+        private double _notStartedStartAngle;
+        [ObservableProperty]
+        private double _inProgressStartAngle;
+        [ObservableProperty]
+        private double _completedStartAngle;
+
+        public SummaryViewModel(IRepository<Project> projectRepository, IRepository<TaskItem> taskRepository)
+        {
+            _projectRepository = projectRepository;
+            _taskRepository = taskRepository;
+            LoadSummary();
+        }
+
+        // Design-time ctor
+        public SummaryViewModel() : this(new MockProjectRepository(), new MockTaskItemRepository()) { }
+
+        private async void LoadSummary()
+        {
+            // Load Projects
+            var projects = await _projectRepository.GetAllAsync();
+            var projectList = projects.ToList();
+
+            TotalProjects = projectList.Count.ToString();
+            ActiveProjects = projectList.Count(p => p.Status == "Active").ToString();
+            ProjectsCompleted = projectList.Count(p => p.Status == "Completed").ToString();
+
+            // Load Tasks
+            var tasks = await _taskRepository.GetAllAsync();
+            var allTasks = tasks.ToList();
+            TotalTaskCount = allTasks.Count;
+
+            var now = System.DateTime.Now.Date;
+
+            CompletedCount = allTasks.Count(t => t.ActualCompleteDate.HasValue);
+            
+            InProgressCount = allTasks.Count(t => 
+                !t.ActualCompleteDate.HasValue && 
+                (t.ActualStartDate.HasValue || (t.PlanedStartDate.HasValue && t.PlanedStartDate.Value.Date <= now)));
+
+            NotStartedCount = allTasks.Count(t => 
+                !t.ActualCompleteDate.HasValue && 
+                !t.ActualStartDate.HasValue && 
+                (!t.PlanedStartDate.HasValue || t.PlanedStartDate.Value.Date > now));
+
+            CalculateTimeStatistics(allTasks);
+            CalculateChartAngles();
+        }
+
+        private void CalculateChartAngles()
+        {
+            if (TotalTaskCount == 0) return;
+
+            double notStartedSweep = (double)NotStartedCount / TotalTaskCount * 360;
+            double inProgressSweep = (double)InProgressCount / TotalTaskCount * 360;
+            double completedSweep = (double)CompletedCount / TotalTaskCount * 360;
+
+            NotStartedAngle = notStartedSweep;
+            InProgressAngle = inProgressSweep;
+            CompletedAngle = completedSweep;
+
+            NotStartedStartAngle = -90;
+            InProgressStartAngle = NotStartedStartAngle + NotStartedAngle;
+            CompletedStartAngle = InProgressStartAngle + InProgressAngle;
+        }
+
+        // Time Chart Properties
+        [ObservableProperty]
+        private double _totalActualHours;
+
+        [ObservableProperty]
+        private double _totalPlannedHours;
+
+        [ObservableProperty]
+        private double _timeChartAngle;
+
+        [ObservableProperty]
+        private double _timeChartStartAngle = -90;
+
+        [ObservableProperty]
+        private string _timeChartColor = "#22C55E"; // Green by default
+
+        [ObservableProperty]
+        private double _timeEfficiencyPercentage;
+
+        private void CalculateTimeStatistics(System.Collections.Generic.List<TaskItem> allTasks)
+        {
+            double planned = 0;
+            double actual = 0;
+
+            foreach (var t in allTasks)
+            {
+                if (t.PlanedDurationHours.HasValue)
+                    planned += t.PlanedDurationHours.Value.TotalHours;
+
+                if (t.ActualDuration.HasValue)
+                    actual += t.ActualDuration.Value.TotalHours;
+            }
+
+            TotalPlannedHours = Math.Round(planned, 1);
+            TotalActualHours = Math.Round(actual, 1);
+
+            if (TotalPlannedHours > 0)
+            {
+                // Efficiency Ratio: Actual / Planned
+                double ratio = actual / planned;
+                
+                // If Ratio > 1, we are over budget (Red)
+                // If Ratio <= 1, we are under/on budget (Green)
+                if (ratio > 1.0)
+                {
+                    TimeChartColor = "#EF4444"; // Red 500
+                    TimeChartAngle = 360; 
+                    TimeEfficiencyPercentage = 100;
+                }
+                else
+                {
+                    TimeChartColor = "#22C55E"; // Green 500
+                    TimeChartAngle = ratio * 360;
+                    TimeEfficiencyPercentage = ratio * 100;
+                }
+            }
+            else
+            {
+                TimeChartAngle = 0;
+                TimeEfficiencyPercentage = 0;
+            }
+        }
+    }
+}

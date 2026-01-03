@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.Dashboard"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+			 x:Class="OCC.Client.Views.Home.Dashboard.TasksWidgetView"
+			 x:DataType="vm:TasksWidgetViewModel">
+
+	<Border Classes="WidgetCard">
+		<StackPanel Spacing="15">
+			<TextBlock Text="My Tasks" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+			<Grid ColumnDefinitions="*, *">
+				<StackPanel Grid.Column="0">
+					<TextBlock Text="DUE TODAY" Classes="LabelSmall" Margin="0,0,0,10"/>
+					<TextBlock Text="There is no task due today" Foreground="{DynamicResource TextSecondaryGray}" FontSize="14"/>
+				</StackPanel>
+				<StackPanel Grid.Column="1">
+					<TextBlock Text="DUE THIS WEEK" Classes="LabelSmall" Margin="0,0,0,10"/>
+					<TextBlock Text="There is no task due this week" Foreground="{DynamicResource TextSecondaryGray}" FontSize="14"/>
+				</StackPanel>
+			</Grid>
+		</StackPanel>
+	</Border>
+</UserControl>

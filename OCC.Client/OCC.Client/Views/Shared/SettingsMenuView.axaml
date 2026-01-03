@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Shared"
+             x:Class="OCC.Client.Views.Shared.SettingsMenuView"
+             x:DataType="vm:SidebarViewModel">
+    <Border Background="White" 
+            BorderBrush="{DynamicResource BorderGray}" 
+            BorderThickness="1" 
+            CornerRadius="8" 
+            Padding="0,5"
+            Margin="55"
+            BoxShadow="0 15 50 0 #60000000">
+        <StackPanel Background="Transparent" Margin="0,5">
+            <!-- Account Settings Group -->
+            <TextBlock Text="ACCOUNT SETTINGS" Classes="LabelSmall" Margin="25,10,20,5"/>
+            
+            <Button Classes="SidebarButton" Command="{Binding UsersTeamsCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="Users &amp; Teams" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding SecurityCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="Security" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding AlertsCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="Alerts" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding AuditLogCommand}">
+                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
+                    <TextBlock Text="Audit Log" VerticalAlignment="Center" FontSize="14"/>
+                    <PathIcon Grid.Column="1" Data="{StaticResource IconUpgrade}" Width="14" Height="14" Foreground="#0EA5E9" Margin="10,0,0,0"/>
+                </Grid>
+            </Button>
+            
+            <Separator Classes="MenuSeparator" Margin="15,10"/>
+    
+            <!-- Personal Preferences Group -->
+            <TextBlock Text="PERSONAL PREFERENCES" Classes="LabelSmall" Margin="25,10,20,5"/>
+            
+            <Button Classes="SidebarButton" Command="{Binding ToggleThemeCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="Enable Dark Mode" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding SettingsCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="My Profile" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding MyWorkspacesCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="My Workspaces" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+            
+            <Button Classes="SidebarButton" Command="{Binding LogoutCommand}">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                    <TextBlock Text="Logout" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>

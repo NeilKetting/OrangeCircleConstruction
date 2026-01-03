@@ -1,0 +1,195 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.Calendar"
+             xmlns:converters="clr-namespace:OCC.Client.Converters"
+             xmlns:local="clr-namespace:OCC.Client.Views.Home.Calendar"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="OCC.Client.Views.Home.Calendar.CalendarView"
+             x:DataType="vm:CalendarViewModel"
+             Name="Root">
+
+    <UserControl.Styles>
+        <Style Selector="Button.CreateButton">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.DayCell:pointerover Button.CreateButton">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+    </UserControl.Styles>
+
+    <UserControl.Styles>
+        <Style Selector="Button.CreateButton">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.DayCell:pointerover Button.CreateButton">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid>
+        <Grid RowDefinitions="Auto, Auto, *">
+            
+            <!-- Header / Navigation -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto, *" Margin="20,20,10,10">
+                <!-- Navigation Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+                     <Button Command="{Binding PreviousMonthCommand}" Classes="IconButton">
+                        <PathIcon Data="{StaticResource IconChevronLeft}" Width="16" Height="16"/>
+                    </Button>
+                    
+                    <Border Background="White" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="4" Padding="10,5">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding MonthName}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding YearName}" Foreground="{DynamicResource TextSecondaryGray}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Command="{Binding NextMonthCommand}" Classes="IconButton">
+                        <PathIcon Data="{StaticResource IconChevronRight}" Width="16" Height="16"/>
+                    </Button>
+                </StackPanel>
+                
+                <!-- Right Side Actions (Placeholder) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Classes="IconButton">
+                         <PathIcon Data="{StaticResource IconFilter}" Width="16" Height="16"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Week Day Headers -->
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding WeekDays}" Margin="0,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" Columns="7"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="5" BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1">
+                            <TextBlock Text="{Binding}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextTertiarySlate}"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Calendar Grid -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1,1,0,0" Margin="20,0,20,20">
+                <ItemsControl ItemsSource="{Binding Days}">
+                    <ItemsControl.Resources>
+                        <converters:BoolToBackgroundConverter x:Key="BoolToBackgroundConverter"/>
+                        <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
+                    </ItemsControl.Resources>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="6" Columns="7"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Name="DayCell" 
+                                    Classes="DayCell"
+                                    BorderBrush="{DynamicResource BorderGray}" 
+                                    BorderThickness="0,0,1,1" 
+                                    Background="{Binding IsCurrentMonth, Converter={StaticResource BoolToBackgroundConverter}}">
+                                <Grid RowDefinitions="Auto, *">
+                                    <!-- Day Number -->
+                                    <TextBlock Text="{Binding DayNumber}" 
+                                               Margin="8,5" 
+                                               FontSize="13"
+                                               FontWeight="Medium"
+                                               Foreground="{DynamicResource TextPrimaryDark}" 
+                                               Opacity="{Binding IsCurrentMonth, Converter={StaticResource BoolToOpacityConverter}}"/>
+                                           
+                                    <!-- Tasks List -->
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Tasks}" Margin="0,2,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <Grid />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Height="24"
+                                                        VerticalAlignment="Top"
+                                                        Margin="{Binding Margin}"
+                                                        Background="{Binding Color}" 
+                                                        CornerRadius="{Binding CornerRadius}" 
+                                                        Padding="4,2"
+                                                        PointerMoved="OnTaskPointerMoved" 
+                                                        PointerExited="OnTaskPointerExited"
+                                                        Cursor="Hand">
+                                                    <TextBlock Text="{Binding Name}" 
+                                                               FontSize="10" 
+                                                               Foreground="White" 
+                                                               TextTrimming="CharacterEllipsis"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- Create Button (Hidden by default, shown on hover) -->
+                                    <Button Grid.Row="0"
+                                            Grid.RowSpan="2" 
+                                            VerticalAlignment="Top" 
+                                            HorizontalAlignment="Right" 
+                                            Classes="Link CreateButton" 
+                                            FontSize="11"
+                                            Margin="0,5,5,0"
+                                            ZIndex="5"
+                                            IsVisible="{Binding IsCurrentMonth}"
+                                            Command="{Binding #Root.DataContext.OpenCreatePopupCommand}"
+                                            CommandParameter="{Binding Date}">
+                                        <TextBlock Text="+ Create" Foreground="{DynamicResource PrimaryTeal}" FontWeight="Bold"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <!-- Create Task Popup Overlay -->
+            <Grid Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding IsCreatePopupVisible}" Background="#40000000">
+                <local:CreateTaskPopupView DataContext="{Binding CreateTaskPopup}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <!-- Hover Popup -->
+        <Border Name="TaskHoverPopup" 
+                IsVisible="False" 
+                Background="White" 
+                CornerRadius="6" 
+                BoxShadow="0 4 15 0 #20000000" 
+                Padding="12" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top"
+                ZIndex="100"
+                IsHitTestVisible="False">
+            <Border.RenderTransform>
+                <TranslateTransform X="0" Y="0" />
+            </Border.RenderTransform>
+            <StackPanel Spacing="5" Width="200">
+                <TextBlock Name="PopupTitle" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}" TextWrapping="Wrap"/>
+                <TextBlock Name="PopupTime" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}"/>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                     <PathIcon Data="{StaticResource IconTime}" Width="10" Height="10"/>
+                     <TextBlock Name="PopupStatus" FontSize="11" Foreground="{DynamicResource TextTertiarySlate}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

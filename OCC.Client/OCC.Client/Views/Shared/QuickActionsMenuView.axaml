@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Shared"
+			 x:Class="OCC.Client.Views.Shared.QuickActionsMenuView"
+			 x:DataType="vm:SidebarViewModel">
+
+	<Border Background="White" 
+            BorderBrush="{DynamicResource BorderGray}" 
+            BorderThickness="1" 
+            CornerRadius="8" 
+            Padding="0,5"
+            Margin="55"
+            BoxShadow="0 15 50 0 #60000000">
+        <StackPanel>
+            <TextBlock Text="ACTIONS" Classes="LabelSmall" Margin="25,10,20,10"/>
+            <Separator Classes="MenuSeparator" Margin="15,0,15,5"/>
+
+            <Button Classes="SidebarButton" Command="{Binding NewTaskCommand}">
+                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
+                    <TextBlock Text="Task" VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1E293B"/>
+                    <Border Grid.Column="1" Classes="ActionHotkey">
+                        <TextBlock Text="t" Classes="HotkeyText"/>
+                    </Border>
+                </Grid>
+            </Button>
+            <Separator Classes="MenuSeparator" Margin="15,0"/>
+
+            <Button Classes="SidebarButton" Command="{Binding NewMeetingCommand}">
+                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
+                    <TextBlock Text="Meeting" VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1E293B"/>
+                    <Border Grid.Column="1" Classes="ActionHotkey">
+                        <TextBlock Text="m" Classes="HotkeyText"/>
+                    </Border>
+                </Grid>
+            </Button>
+            <Separator Classes="MenuSeparator" Margin="15,0"/>
+
+            <Button Classes="SidebarButton" Command="{Binding NewProjectCommand}">
+                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
+                    <TextBlock Text="Project" VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1E293B"/>
+                    <Border Grid.Column="1" Classes="ActionHotkey">
+                        <TextBlock Text="p" Classes="HotkeyText"/>
+                    </Border>
+                </Grid>
+            </Button>
+            <Separator Classes="MenuSeparator" Margin="15,0"/>
+
+            <Button Classes="SidebarButton" Command="{Binding InviteUserCommand}">
+                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
+                    <TextBlock Text="Invite" VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold" Foreground="#1E293B"/>
+                    <Border Grid.Column="1" Classes="ActionHotkey">
+                        <TextBlock Text="i" Classes="HotkeyText"/>
+                    </Border>
+                </Grid>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>

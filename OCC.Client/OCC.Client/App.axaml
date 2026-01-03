@@ -1,0 +1,43 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:OCC.Client"
+             x:Class="OCC.Client.App"
+             RequestedThemeVariant="Light">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Brand & Primary Colors -->
+            <SolidColorBrush x:Key="PrimaryTeal">#00b5ad</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryTealHover">#00a39c</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryTealLight">#e0f2f1</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentOrange">#ffa500</SolidColorBrush>
+
+            <!-- Background & Surface Colors -->
+            <SolidColorBrush x:Key="AppBackgroundSlate">#f8fafc</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceWhite">#FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="BorderGray">#e2e8f0</SolidColorBrush>
+
+            <!-- Text Colors -->
+            <SolidColorBrush x:Key="TextPrimaryDark">#181c24</SolidColorBrush>
+            <SolidColorBrush x:Key="TextSecondaryDark">#475569</SolidColorBrush>
+            <SolidColorBrush x:Key="TextSecondaryGray">#64748b</SolidColorBrush>
+            <SolidColorBrush x:Key="TextTertiarySlate">#94a3b8</SolidColorBrush>
+
+            <!-- Status & Misc -->
+            <SolidColorBrush x:Key="StatusGreen">#22c55e</SolidColorBrush>
+            <SolidColorBrush x:Key="LoginBackgroundDark">#0f172a</SolidColorBrush>
+            <SolidColorBrush x:Key="LoginTextDark">#1e293b</SolidColorBrush>
+            <SolidColorBrush x:Key="LoginTextLight">#64748b</SolidColorBrush>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://OCC.Client/Styles/AppStyles.axaml" />
+    </Application.Styles>
+</Application>

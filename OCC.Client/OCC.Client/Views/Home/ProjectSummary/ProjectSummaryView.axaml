@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.ProjectSummary"
+             xmlns:conv="clr-namespace:OCC.Client.Converters"
+             xmlns:local="clr-namespace:OCC.Client.Views.Home.ProjectSummary"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="OCC.Client.Views.Home.ProjectSummary.ProjectSummaryView"
+             x:DataType="vm:ProjectSummaryViewModel">
+
+    <UserControl.Resources>
+        <conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+    </UserControl.Resources>
+
+    <Grid ColumnDefinitions="2*, 1*" ColumnSpacing="20">
+        <!-- Left Column -->
+        <StackPanel Grid.Column="0" Spacing="20">
+            <!-- Project Summary Section (Pipeline & Cost/Budget) -->
+            <local:ProjectSummarySectionView/>
+
+            <!-- Project Breakdown -->
+            <local:ProjectBreakdownView/>
+        </StackPanel>
+
+        <!-- Right Column -->
+        <StackPanel Grid.Column="1" Spacing="20">
+            <!-- Team Pulse -->
+            <local:ProjectPulseView/>
+
+            <!-- Workstream -->
+            <local:ProjectWorkstreamView/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,155 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Shared"
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 xmlns:local="clr-namespace:OCC.Client.Views.Shared"
+			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="800"
+			 x:Class="OCC.Client.Views.Shared.SidebarView"
+			 x:DataType="vm:SidebarViewModel"
+			 Focusable="True"
+			 PointerPressed="Sidebar_PointerPressed">
+
+	<UserControl.KeyBindings>
+		<KeyBinding Gesture="T" Command="{Binding NewTaskCommand}"/>
+		<KeyBinding Gesture="M" Command="{Binding NewMeetingCommand}"/>
+		<KeyBinding Gesture="P" Command="{Binding NewProjectCommand}"/>
+		<KeyBinding Gesture="I" Command="{Binding InviteUserCommand}"/>
+	</UserControl.KeyBindings>
+
+	<!-- Main Sidebar Border -->
+	<!-- BoxShadow Format: OffsetX OffsetY BlurRadius Spread Color -->
+	<!-- Tweak 'BlurRadius' (3rd value) for softness. Tweak Color Alpha (first 2 hex digits) for intensity. -->
+	<Border Background="{DynamicResource AppBackgroundSlate}"
+			BorderBrush="{DynamicResource BorderGray}"
+			BorderThickness="0,0,1,0"
+			BoxShadow="4 0 15 0 #10000000"
+			Width="{Binding IsCollapsed, Converter={x:Static conv:SidebarConverters.CollapseWidth}}">
+		<Grid RowDefinitions="Auto,*,Auto">
+			<!-- Logo area -->
+			<StackPanel Grid.Row="0" Margin="20,25" Orientation="Horizontal" Spacing="10" Background="Transparent" DoubleTapped="Sidebar_DoubleTapped">
+				<Border Classes="LogoContainer" Width="32" Height="32">
+					<Ellipse Width="34" Height="34" Stroke="{DynamicResource AccentOrange}" StrokeThickness="3" Margin="0,0,10,0"/>
+
+				</Border>
+				<StackPanel>
+					<TextBlock Text="Orange Circle" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+					<TextBlock Text="Construction" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}" HorizontalAlignment="Center"/>
+
+				</StackPanel>
+			</StackPanel>
+
+			<!-- Navigation Links -->
+			<ScrollViewer Grid.Row="1">
+				<StackPanel>
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Home">
+						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+							<PathIcon Data="{StaticResource IconHome}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Home}"/>
+							<TextBlock Text="Home" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Home}"/>
+						</StackPanel>
+					</Button>
+
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Notifications">
+						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+							<PathIcon Data="{StaticResource IconNotifications}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Notifications}"/>
+							<TextBlock Text="Notifications" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Notifications}"/>
+						</StackPanel>
+					</Button>
+
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Time">
+						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+							<PathIcon Data="{StaticResource IconTime}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Time}"/>
+							<TextBlock Text="Time" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Time}"/>
+						</StackPanel>
+					</Button>
+
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Team">
+						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+							<PathIcon Data="{StaticResource IconTeam}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Team}"/>
+							<TextBlock Text="Team" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Team}"/>
+						</StackPanel>
+					</Button>
+
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Portfolio">
+						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+							<PathIcon Data="{StaticResource IconPortfolio}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Portfolio}"/>
+							<TextBlock Text="Projects" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Portfolio}"/>
+							<PathIcon Data="{StaticResource IconChevronRight}" Width="12" Height="12" HorizontalAlignment="Right" IsVisible="{Binding !IsCollapsed}"/>
+						</StackPanel>
+					</Button>
+				</StackPanel>
+			</ScrollViewer>
+
+			<!-- Bottom section -->
+			<StackPanel Grid.Row="2" Margin="0,10">
+
+			<Button Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}">
+				<Button.Flyout>
+					<Flyout FlyoutPresenterClasses="SidebarFlyout" Placement="RightEdgeAlignedBottom" HorizontalOffset="10">
+						<local:QuickActionsMenuView/>
+					</Flyout>
+				</Button.Flyout>
+				<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+					<TextBlock Text="+" FontSize="22" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+					<TextBlock Text="New" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+				</StackPanel>
+			</Button>
+
+				<Button Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}">
+					<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+						<TextBlock Text="?" FontSize="18" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+						<TextBlock Text="Help" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+					</StackPanel>
+				</Button>
+
+                <!-- Action Feedback Display -->
+				<TextBlock Text="{Binding LastActionMessage}"
+						   FontSize="11"
+						   Foreground="{DynamicResource TextTertiarySlate}"
+						   HorizontalAlignment="Stretch"
+						   Margin="10,0,10,5"
+						   TextWrapping="Wrap"
+						   TextAlignment="Center"/>
+
+                <!-- Setup / Version Info -->
+                <StackPanel Margin="0,0,0,10" IsVisible="{Binding !IsCollapsed}">
+                    <TextBlock Text="POWERED BY ORIGIZE63" 
+                               FontSize="9" 
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center" 
+                               Foreground="{DynamicResource TextTertiarySlate}"
+                               Opacity="0.6"/>
+                    <TextBlock Text="{Binding AppVersion}" 
+                               FontSize="9" 
+                               HorizontalAlignment="Center" 
+                               Foreground="{DynamicResource TextTertiarySlate}"
+                               Opacity="0.5"/>
+                     <Button Content="Check Updates" 
+                            Command="{Binding CheckForUpdatesCommand}"
+                            FontSize="10"
+                            HorizontalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="{DynamicResource AccentOrange}"/>
+                </StackPanel>
+
+				<Button Classes="SidebarButton" Padding="0" HorizontalAlignment="Stretch">
+					<Button.Flyout>
+						<Flyout FlyoutPresenterClasses="SidebarFlyout" Placement="RightEdgeAlignedBottom" HorizontalOffset="10">
+							<local:SettingsMenuView/>
+						</Flyout>
+					</Button.Flyout>
+					<Grid ColumnDefinitions="Auto, *" Margin="20,15">
+						<Border Width="32" Height="32" CornerRadius="16" Background="{DynamicResource PrimaryTeal}">
+							<TextBlock Text="{Binding UserInitials}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+						<TextBlock Grid.Column="1" Text="{Binding UserEmail}" IsVisible="{Binding !IsCollapsed}"
+								   VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}"
+								   Margin="10,0,0,0" TextTrimming="CharacterEllipsis"/>
+					</Grid>
+				</Button>
+			</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

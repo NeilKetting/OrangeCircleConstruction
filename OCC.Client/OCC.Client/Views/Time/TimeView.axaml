@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+             xmlns:conv="clr-namespace:OCC.Client.Converters"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:Class="OCC.Client.Views.Time.TimeView"
+             x:DataType="vm:TimeViewModel">
+
+	<UserControl.Styles>
+		<Style Selector="Button.ToolbarAction">
+			<Setter Property="Background" Value="#E2E8F0"/>
+			<Setter Property="Foreground" Value="{DynamicResource TextPrimaryDark}"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="Padding" Value="12,8"/>
+			<Setter Property="CornerRadius" Value="4"/>
+		</Style>
+		<Style Selector="TextBox.TimeEntryBox">
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="Height" Value="32"/>
+			<Setter Property="Width" Value="35"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="Margin" Value="2"/>
+		</Style>
+		<Style Selector="TextBlock.TotalText">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Foreground" Value="{DynamicResource TextSecondaryGray}"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Grid RowDefinitions="Auto, Auto, *, Auto" Margin="30">
+		<!-- Toolbar / Header -->
+		<Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, Auto, Auto, 15, Auto, 10, Auto, *, Auto, Auto" Margin="0,0,0,30">
+			<!-- Actions -->
+			<Button Grid.Column="0" Content="+ Add Tasks" Classes="ToolbarAction"/>
+			<Button Grid.Column="1" Content="Copy Last Week" Classes="ToolbarAction" Margin="10,0"/>
+			<Button Grid.Column="2" Content="Auto-Fill" Classes="ToolbarAction"/>
+			<Button Grid.Column="3" Content="Daily Roll-Call" Command="{Binding OpenRollCallCommand}" Classes="ToolbarAction" Background="{DynamicResource PrimaryTeal}" Foreground="White" Margin="10,0"/>
+
+			<Border Grid.Column="4" Width="1" Background="{DynamicResource BorderGray}" Margin="10,5"/>
+
+			<!-- User Selector -->
+			<ComboBox Grid.Column="5" ItemsSource="{Binding AvailableUsers}" 
+					  SelectedItem="{Binding SelectedUserEmail}"
+					  Width="200" Classes="SeamlessComboBox"/>
+
+			<!-- Week Selector -->
+			<StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="5">
+				<DatePicker SelectedDate="{Binding WeekStarting}" BorderThickness="0" Background="Transparent"/>
+			</StackPanel>
+
+			<!-- Icons -->
+			<StackPanel Grid.Column="9" Orientation="Horizontal" Spacing="15">
+				<PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+				<PathIcon Data="{StaticResource IconShare}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+			</StackPanel>
+		</Grid>
+
+		<!-- Grid Header -->
+		<Grid Grid.Row="1" ColumnDefinitions="2*, 2*, *, *, *, *, *, *, *, *, *, *" Margin="0,0,0,10">
+			<TextBlock Grid.Column="0" Text="PROJECT" Classes="LabelSmall" VerticalAlignment="Center"/>
+			<TextBlock Grid.Column="1" Text="TASK" Classes="LabelSmall" VerticalAlignment="Center"/>
+			
+			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+				<Button Command="{Binding PreviousWeek}" Classes="IconButton" Width="20">
+					<PathIcon Data="{StaticResource IconChevronLeft}" Width="10"/>
+				</Button>
+			</StackPanel>
+
+			<StackPanel Grid.Column="3" HorizontalAlignment="Center">
+				<TextBlock Text="Mon" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="29th" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="4" HorizontalAlignment="Center">
+				<TextBlock Text="Tue" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="30th" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="5" HorizontalAlignment="Center">
+				<TextBlock Text="Wed" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="31st" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="6" HorizontalAlignment="Center">
+				<TextBlock Text="Thu" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="1st" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="7" HorizontalAlignment="Center">
+				<TextBlock Text="Fri" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="2nd" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="8" HorizontalAlignment="Center">
+				<TextBlock Text="Sat" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="3rd" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+			<StackPanel Grid.Column="9" HorizontalAlignment="Center">
+				<TextBlock Text="Sun" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+				<TextBlock Text="4th" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="10" Orientation="Horizontal" HorizontalAlignment="Center">
+				<Button Command="{Binding NextWeek}" Classes="IconButton" Width="20">
+					<PathIcon Data="{StaticResource IconChevronRight}" Width="10"/>
+				</Button>
+			</StackPanel>
+
+			<TextBlock Grid.Column="11" Text="TOTAL" Classes="LabelSmall" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			<TextBlock Grid.Column="12" Text="%" Classes="LabelSmall" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</Grid>
+
+		<!-- Grid Content -->
+		<ScrollViewer Grid.Row="2">
+			<ItemsControl ItemsSource="{Binding Rows}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="0,15">
+							<Grid ColumnDefinitions="2*, 2*, 40, *, *, *, *, *, *, *, 40, *, *">
+								<TextBlock Grid.Column="0" Text="{Binding ProjectName}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}" FontSize="14"/>
+								<TextBlock Grid.Column="1" Text="{Binding TaskName}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}" FontSize="14"/>
+								
+								<!-- Hours Boxes -->
+								<TextBox Grid.Column="3" Text="{Binding MondayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="4" Text="{Binding TuesdayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="5" Text="{Binding WednesdayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="6" Text="{Binding ThursdayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="7" Text="{Binding FridayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="8" Text="{Binding SaturdayHours}" Classes="TimeEntryBox"/>
+								<TextBox Grid.Column="9" Text="{Binding SundayHours}" Classes="TimeEntryBox"/>
+
+								<TextBlock Grid.Column="11" Text="{Binding TotalHours}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+								<TextBlock Grid.Column="12" Text="{Binding CompletionPercentage, StringFormat={}{0}%}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<!-- Footer Totals -->
+		<Border Grid.Row="3" Padding="0,10" Margin="0,10,0,0">
+			<Grid ColumnDefinitions="2*, 2*, 40, *, *, *, *, *, *, *, 40, *, *">
+				<StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="5">
+					<TextBlock Text="{Binding LastUpdatedText}" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}"/>
+					<PathIcon Data="{StaticResource IconCheck}" Width="12" Height="12" Foreground="{DynamicResource SuccesGreen}"/>
+				</StackPanel>
+
+				<TextBlock Grid.Column="2" Text="Totals:" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+				
+				<TextBlock Grid.Column="3" Text="{Binding MondayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="4" Text="{Binding TuesdayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="5" Text="{Binding WednesdayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="6" Text="{Binding ThursdayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="7" Text="{Binding FridayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="8" Text="{Binding SaturdayTotal}" Classes="TotalText"/>
+				<TextBlock Grid.Column="9" Text="{Binding SundayTotal}" Classes="TotalText"/>
+
+				<TextBlock Grid.Column="11" Text="{Binding GrandTotal}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+			</Grid>
+		</Border>
+	</Grid>
+</UserControl>

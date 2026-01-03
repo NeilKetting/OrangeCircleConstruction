@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.Tasks"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:Class="OCC.Client.Views.Home.Tasks.TaskListView"
+             x:DataType="vm:TaskListViewModel">
+    
+    <UserControl.Styles>
+        <Style Selector="CheckBox">
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="3"/>
+        </Style>
+        <Style Selector="PathIcon.HeaderIcon">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiarySlate}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="20,10">
+            <Grid ColumnDefinitions="40, 2*, 1*, 1*, 1*, 1*, 40, 40, 40">
+                <TextBlock Grid.Column="0" Text="DONE" Classes="LabelSmall"/>
+                <TextBlock Grid.Column="1" Text="TASK NAME" Classes="LabelSmall"/>
+                <TextBlock Grid.Column="2" Text="PROJECT" Classes="LabelSmall"/>
+                <TextBlock Grid.Column="3" Text="PROGRESS" Classes="LabelSmall"/>
+                <TextBlock Grid.Column="4" Text="PRIORITY" Classes="LabelSmall"/>
+                <TextBlock Grid.Column="5" Text="DUE" Classes="LabelSmall"/>
+                
+                <PathIcon Grid.Column="6" Classes="HeaderIcon" Data="{StaticResource IconChat}" HorizontalAlignment="Center"/>
+                <PathIcon Grid.Column="7" Classes="HeaderIcon" Data="{StaticResource IconAttach}" HorizontalAlignment="Center"/>
+                <PathIcon Grid.Column="8" Classes="HeaderIcon" Data="{StaticResource IconFilter}" HorizontalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- List -->
+        <StackPanel Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Tasks}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding $parent[UserControl].((vm:TaskListViewModel)DataContext).SelectTaskCommand}"
+                                CommandParameter="{Binding Id}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Padding="0"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                CornerRadius="0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#f1f5f9"/>
+                                </Style>
+                            </Button.Styles>
+                            <Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="20,12" Background="Transparent">
+                                <Grid ColumnDefinitions="40, 2*, 1*, 1*, 1*, 1*, 40, 40, 40">
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted}" Margin="0,-5,0,0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding TaskName}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Project}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Progress}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+                                    <TextBlock Grid.Column="4" Text="{Binding Priority}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                    <TextBlock Grid.Column="5" Text="{Binding Due}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                    
+                                    <!-- Placeholder for row actions/indicators if needed later -->
+                                    <TextBlock Grid.Column="6" Text="" />
+                                    <TextBlock Grid.Column="7" Text="" />
+                                    <TextBlock Grid.Column="8" Text="" />
+                                </Grid>
+                            </Border>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- New Task Button -->
+            <Button Background="Transparent" Padding="20,12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="15">
+                    <Border Width="20" Height="20" CornerRadius="10" Background="{DynamicResource TextSecondaryGray}">
+                        <PathIcon Data="{StaticResource IconPlus}" Width="10" Height="10" Foreground="White"/>
+                    </Border>
+                    <TextBlock Text="New Task" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

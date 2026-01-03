@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.ProjectSummary"
+             xmlns:conv="clr-namespace:OCC.Client.Converters"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="300"
+             x:Class="OCC.Client.Views.Home.ProjectSummary.ProjectBreakdownView"
+             x:DataType="vm:ProjectSummaryViewModel">
+
+    <UserControl.Resources>
+        <conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="10">
+        <TextBlock Text="Project Breakdown" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+        <Border Classes="WidgetCard" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="*"/>    <!-- Items -->
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="3*, 1*, 1*, 1.5*, 1.5*, 1.5*" Background="Transparent" Margin="20,15">
+                    <TextBlock Grid.Column="0" Text="PROJECT" Classes="LabelSmall"/>
+                    <TextBlock Grid.Column="1" Text="TIME" Classes="LabelSmall" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="COST" Classes="LabelSmall" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text="WORKLOAD" Classes="LabelSmall" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="4" Text="PROGRESS" Classes="LabelSmall" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="5" Text="TOTAL COST" Classes="LabelSmall" HorizontalAlignment="Right"/>
+                </Grid>
+                <Separator Grid.Row="0" VerticalAlignment="Bottom" Background="#E2E8F0" Height="1"/>
+
+                <!-- Items -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Projects}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Padding="20,15">
+                                <Grid ColumnDefinitions="3*, 1*, 1*, 1.5*, 1.5*, 1.5*">
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+                                    
+                                    <!-- Time Status -->
+                                    <Border Grid.Column="1" Width="8" Height="8" CornerRadius="4" Background="{Binding TimeStatus, Converter={StaticResource StatusToBrushConverter}}" HorizontalAlignment="Center"/>
+                                    
+                                    <!-- Cost Status -->
+                                    <Border Grid.Column="2" Width="8" Height="8" CornerRadius="4" Background="{Binding CostStatus, Converter={StaticResource StatusToBrushConverter}}" HorizontalAlignment="Center"/>
+                                    
+                                    <!-- Workload Status -->
+                                    <Border Grid.Column="3" Width="8" Height="8" CornerRadius="4" Background="{Binding WorkloadStatus, Converter={StaticResource StatusToBrushConverter}}" HorizontalAlignment="Center"/>
+                                    
+                                    <!-- Progress -->
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                                         <PathIcon Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" Width="14" Height="14" Foreground="#94A3B8"/>
+                                        <TextBlock Text="{Binding Progress, StringFormat='{}{0}%'}" VerticalAlignment="Center" Foreground="#475569"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="5" Text="{Binding TotalCost, StringFormat='R{0}'}" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryDark}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

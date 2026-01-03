@@ -1,0 +1,2 @@
+﻿MSBUILD : error MSB1009: Project file does not exist.
+Switch: c:\Users\Neil\source\repos\OCC-Rev5\OCC.Client\OCC.Client.sln

@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.Calendar"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="OCC.Client.Views.Home.Calendar.CreateTaskPopupView"
+             x:DataType="vm:CreateTaskPopupViewModel">
+
+    <Border Width="400" Background="White" CornerRadius="8" BoxShadow="0 10 30 0 #30000000" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0">
+         <Grid RowDefinitions="Auto, *">
+             <!-- Header -->
+             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="20,20,20,10">
+                 <TextBlock Text="Create New" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                 <Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="IconButton">
+                     <PathIcon Data="{StaticResource IconX}" Width="14" Height="14"/>
+                 </Button>
+             </Grid>
+             <Separator Grid.Row="0" VerticalAlignment="Bottom" Background="{DynamicResource BorderGray}" Height="1"/>
+
+             <!-- Content -->
+             <ScrollViewer Grid.Row="1">
+                 <StackPanel Spacing="15" Margin="20">
+                     <!-- Type -->
+                     <StackPanel Spacing="5">
+                         <TextBlock Text="TYPE" Classes="LabelSmall"/>
+                         <ComboBox ItemsSource="{Binding TaskTypes}" SelectedItem="{Binding SelectedType}" Classes="FormInput"/>
+                     </StackPanel>
+
+                     <!-- Name -->
+                     <StackPanel Spacing="5">
+                         <TextBlock Text="NAME" Classes="LabelSmall"/>
+                         <TextBox Text="{Binding Name}" Watermark="Task name" Classes="FormInput"/>
+                     </StackPanel>
+
+                     <!-- Assigned To -->
+                     <StackPanel Spacing="5">
+                         <TextBlock Text="ASSIGNED TO" Classes="LabelSmall"/>
+                         <StackPanel Orientation="Horizontal" Spacing="10">
+                              <Border Width="32" Height="32" CornerRadius="16" Background="{DynamicResource PrimaryTeal}">
+                                  <TextBlock Text="OR" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                              </Border>
+                              <TextBlock Text="{Binding CurrentUser.Email}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+                         </StackPanel>
+                     </StackPanel>
+
+                     <!-- Add To Project -->
+                     <StackPanel Spacing="5">
+                         <TextBlock Text="ADD TO PROJECT" Classes="LabelSmall"/>
+                         <ComboBox ItemsSource="{Binding Projects}" SelectedItem="{Binding SelectedProject}" PlaceholderText="None" Classes="FormInput">
+                             <ComboBox.ItemTemplate>
+                                 <DataTemplate>
+                                     <TextBlock Text="{Binding Name}"/>
+                                 </DataTemplate>
+                             </ComboBox.ItemTemplate>
+                         </ComboBox>
+                     </StackPanel>
+
+                     <!-- Due Date -->
+                     <StackPanel Spacing="5">
+                         <TextBlock Text="DUE DATE" Classes="LabelSmall"/>
+                         <TextBlock Text="{Binding DueDate, StringFormat='dd MMM yyyy'}" FontSize="14" Foreground="{DynamicResource TextPrimaryDark}"/>
+                     </StackPanel>
+
+                     <!-- Footer/Action -->
+                     <Button Command="{Binding CreateCommand}" Content="Create Task" Classes="Primary" Margin="0,10,0,0"/>
+
+                 </StackPanel>
+             </ScrollViewer>
+         </Grid>
+    </Border>
+</UserControl>
