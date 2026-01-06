@@ -12,7 +12,7 @@ using OCC.API.Data;
 namespace OCC.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260106165453_InitialCreate")]
+    [Migration("20260106173358_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -210,7 +210,7 @@ namespace OCC.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaffMembers");
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("OCC.Shared.Models.Notification", b =>

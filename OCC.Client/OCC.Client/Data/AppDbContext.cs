@@ -1,7 +1,8 @@
+using Avalonia.Controls;
 using Microsoft.EntityFrameworkCore;
 using OCC.Shared.Models;
-using System.Linq;
 using System;
+using System.Linq;
 
 namespace OCC.Client.Data
 {
@@ -30,8 +31,25 @@ namespace OCC.Client.Data
                     FirstName = "Neil",
                     LastName = "Ketting",
                     UserRole = UserRole.Admin,
-                    Location = "South Africa"
+                    Location = "South Africa",
+                    IsApproved = true,
+                    IsEmailVerified = true
                 });
+
+                SaveChanges();
+
+                Users.Add(new User
+                {
+                    Email = "vernon@orange-circle.co.za",
+                    Password = "Password",
+                    FirstName = "Vernon",
+                    LastName = "Steenberg",
+                    UserRole = UserRole.Admin,
+                    Location = "South Africa",
+                    IsApproved = true,
+                    IsEmailVerified = true
+                });
+
                 SaveChanges();
             }
         }

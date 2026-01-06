@@ -80,9 +80,11 @@ namespace OCC.Client
             // Let's swap the repositories first.
             
             // Auth Services
-            services.AddSingleton<MockAuthService>();
+            // Auth Services
+            // services.AddSingleton<MockAuthService>();
             services.AddSingleton<ApiAuthService>();
-            services.AddSingleton<IAuthService, HybridAuthService>();
+            // services.AddSingleton<IAuthService, HybridAuthService>();
+            services.AddSingleton<IAuthService>(sp => sp.GetRequiredService<ApiAuthService>());
             
             // Re-register specific repositories if they have specific interfaces or we want to force the generic one?
             // The generic registration `typeof(IRepository<>), typeof(SqlRepository<>)` handles any `IRepository<T>` request.
@@ -131,6 +133,7 @@ namespace OCC.Client
             services.AddTransient<EmployeeManagementViewModel>();
             services.AddTransient<ViewModels.Time.TimeViewModel>();
             services.AddTransient<ViewModels.Home.Calendar.CalendarViewModel>();
+            services.AddTransient<ProfileViewModel>();
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

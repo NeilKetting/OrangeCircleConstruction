@@ -26,7 +26,7 @@ namespace OCC.API.Controllers
         {
             try
             {
-                return await _context.StaffMembers.ToListAsync();
+                return await _context.Employees.ToListAsync();
             }
             catch (Exception ex)
             {
@@ -41,7 +41,7 @@ namespace OCC.API.Controllers
         {
             try
             {
-                var employee = await _context.StaffMembers.FindAsync(id);
+                var employee = await _context.Employees.FindAsync(id);
 
                 if (employee == null)
                 {
@@ -63,7 +63,7 @@ namespace OCC.API.Controllers
         {
             try
             {
-                _context.StaffMembers.Add(employee);
+                _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
 
                 // Explicit Audit Log if really needed (already covered by SaveChanges, but requested)
@@ -119,13 +119,13 @@ namespace OCC.API.Controllers
         {
             try
             {
-                var employee = await _context.StaffMembers.FindAsync(id);
+                var employee = await _context.Employees.FindAsync(id);
                 if (employee == null)
                 {
                     return NotFound();
                 }
 
-                _context.StaffMembers.Remove(employee);
+                _context.Employees.Remove(employee);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
@@ -139,7 +139,7 @@ namespace OCC.API.Controllers
 
         private bool EmployeeExists(Guid id)
         {
-            return _context.StaffMembers.Any(e => e.Id == id);
+            return _context.Employees.Any(e => e.Id == id);
         }
     }
 }

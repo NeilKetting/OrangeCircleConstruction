@@ -21,6 +21,7 @@
     public enum UserRole
     {
         Admin,
+        Office,
         SiteManager,
         ExternalContractor,
         Guest

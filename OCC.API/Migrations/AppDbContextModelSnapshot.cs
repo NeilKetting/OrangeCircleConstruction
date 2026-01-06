@@ -207,7 +207,7 @@ namespace OCC.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaffMembers");
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("OCC.Shared.Models.Notification", b =>

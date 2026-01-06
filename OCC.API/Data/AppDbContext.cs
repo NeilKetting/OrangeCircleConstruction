@@ -17,7 +17,7 @@ namespace OCC.API.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectTask> ProjectTasks { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Employee> StaffMembers { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Customer> Customers { get; set; }
 
         public DbSet<TimeRecord> TimeRecords { get; set; }
