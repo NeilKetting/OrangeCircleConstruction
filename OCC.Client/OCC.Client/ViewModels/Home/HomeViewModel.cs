@@ -65,6 +65,18 @@ namespace OCC.Client.ViewModels.Home
         private bool _isProjectSummaryVisible = false;
 
         [ObservableProperty]
+        private Calendar.CalendarViewModel _calendar;
+
+        [ObservableProperty]
+        private TaskListViewModel _taskList;
+
+        [ObservableProperty]
+        private bool _isListVisible;
+
+        [ObservableProperty]
+        private bool _isCalendarVisible;
+
+        [ObservableProperty]
         private string _greeting = string.Empty;
 
         [ObservableProperty]
@@ -108,6 +120,8 @@ namespace OCC.Client.ViewModels.Home
             _projectPulse = null!;
             _projectSummary = null!;
             _teamSummary = null!;
+            _calendar = null!;
+            _taskList = null!;
             _authService = null!;
             _timeService = null!;
             _projectTaskRepository = null!;
@@ -154,6 +168,8 @@ namespace OCC.Client.ViewModels.Home
             ProjectPulse = projectPulse;
             ProjectSummary = projectSummary;
             TeamSummary = new TeamSummaryViewModel();
+            Calendar = new Calendar.CalendarViewModel(_projectTaskRepository, _projectRepository, _authService);
+            TaskList = new TaskListViewModel(_projectTaskRepository);
 
             WeakReferenceMessenger.Default.Register<CreateProjectMessage>(this, (r, m) => OpenCreateProject());
             WeakReferenceMessenger.Default.Register<CreateNewTaskMessage>(this, (r, m) => OpenNewTaskPopup());
@@ -208,6 +224,8 @@ namespace OCC.Client.ViewModels.Home
             IsMySummaryVisible = false;
             IsTeamSummaryVisible = false;
             IsProjectSummaryVisible = false;
+            IsCalendarVisible = false;
+            IsListVisible = false;
 
             // Only care about tabs relevant to Dashboard
             switch (TopBar.ActiveTab)
@@ -218,6 +236,12 @@ namespace OCC.Client.ViewModels.Home
                     break;
                 case "Team Summary":
                     IsTeamSummaryVisible = true;
+                    break;
+                case "Calendar": 
+                    IsCalendarVisible = true;
+                    break;
+                case "List":
+                    IsListVisible = true;
                     break;
                 case "My Summary":
                 default:

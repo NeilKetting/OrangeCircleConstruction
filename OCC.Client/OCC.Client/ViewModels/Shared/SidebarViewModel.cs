@@ -275,6 +275,7 @@ namespace OCC.Client.ViewModels.Shared
         public void NewProject() 
         { 
             IsQuickActionsOpen = false;
+            ActiveSection = Infrastructure.NavigationRoutes.Home; // Ensure we are on Home View
             LastActionMessage = "Action Triggered: New Project (p)";
             WeakReferenceMessenger.Default.Send(new CreateProjectMessage());
         }

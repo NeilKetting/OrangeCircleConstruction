@@ -65,6 +65,16 @@
 						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
 							<homeDash:TeamSummaryView DataContext="{Binding TeamSummary}"/>
 						</Border>
+
+						<!-- Calendar View -->
+						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsCalendarVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
+							<homeCal:CalendarView DataContext="{Binding Calendar}"/>
+						</Border>
+
+						<!-- List View -->
+						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsListVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
+							<homeTasks:TaskListView DataContext="{Binding TaskList}"/>
+						</Border>
 					</Panel>
 				</Grid>
 			</ScrollViewer>

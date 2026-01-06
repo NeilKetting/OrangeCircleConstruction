@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OCC.Client.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
-             x:Class="OCC.Client.Views.Notifications.NotificationView"
+             x:Class="OCC.Client.Views.NotificationView"
              x:DataType="vm:NotificationViewModel"
              Background="{DynamicResource PageBackgroundBrush}">
 
