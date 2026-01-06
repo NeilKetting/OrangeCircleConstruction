@@ -10,8 +10,6 @@ using OCC.Shared.DTOs;
 using Microsoft.AspNetCore.SignalR;
 using OCC.API.Hubs;
 using OCC.API.Services;
-using System.Security.Claims;
-using System.Text;
 using System.Web; // For URL encoding
 
 namespace OCC.API.Controllers

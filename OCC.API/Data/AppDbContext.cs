@@ -145,15 +145,15 @@ namespace OCC.API.Data
         }
 
         public Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry Entry { get; }
-        public string UserId { get; set; }
-        public string TableName { get; set; }
-        public Dictionary<string, object> KeyValues { get; } = new Dictionary<string, object>();
-        public Dictionary<string, object> OldValues { get; } = new Dictionary<string, object>();
-        public Dictionary<string, object> NewValues { get; } = new Dictionary<string, object>();
+        public string UserId { get; set; } = string.Empty;
+        public string TableName { get; set; } = string.Empty;
+        public Dictionary<string, object?> KeyValues { get; } = new Dictionary<string, object?>();
+        public Dictionary<string, object?> OldValues { get; } = new Dictionary<string, object?>();
+        public Dictionary<string, object?> NewValues { get; } = new Dictionary<string, object?>();
         public List<Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry> TemporaryProperties { get; } = new List<Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry>();
         public List<string> ChangedColumns { get; } = new List<string>();
         public bool HasTemporaryProperties => TemporaryProperties.Any();
-        public string AuditType { get; set; }
+        public string AuditType { get; set; } = string.Empty;
 
         public AuditLog ToAuditLog()
         {
