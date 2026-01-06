@@ -5,6 +5,14 @@
     See https://docs.avaloniaui.net/docs/guides/platforms/platform-specific-code/dotnet for more details.-->
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <!-- Professional Metadata -->
+    <Authors>Orange Circle Construction</Authors>
+    <Company>Orange Circle Construction</Company>
+    <Product>OCC Client</Product>
+    <Description>Management application for Orange Circle Construction.</Description>
+    <Copyright>Copyright © 2026 Orange Circle Construction</Copyright>
+    <!-- Icon Configuration -->
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup>

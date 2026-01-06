@@ -31,4 +31,9 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE 
 }
 
+# Rename Setup.exe to something nicer
+if (Test-Path "Releases\Setup.exe") {
+    Rename-Item "Releases\Setup.exe" "OrangeCircleSetup.exe" -Force
+}
+
 Write-Host "Done! Release files are in the 'Releases' folder." -ForegroundColor Green
