@@ -1,9 +1,9 @@
-$ErrorActionPreference = "Stop"
-Set-Location $PSScriptRoot
-
 param(
     [string]$version = "1.0.0"
 )
+
+$ErrorActionPreference = "Stop"
+Set-Location $PSScriptRoot
 
 Write-Host "Building OCC.Client for version $version..." -ForegroundColor Cyan
 
