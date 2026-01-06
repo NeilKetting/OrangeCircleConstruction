@@ -6,7 +6,7 @@ namespace OCC.API.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(AppDbContext context)
+        public static void Initialize(AppDbContext context, OCC.API.Services.PasswordHasher hasher)
         {
             // Prepare DB (Apply Migrations)
             context.Database.Migrate();
@@ -22,7 +22,7 @@ namespace OCC.API.Data
                 new User
                 {
                     Email = "neil@mdk.co.za",
-                    Password = "pass", // Plain text as per AuthController
+                    Password = hasher.HashPassword("pass"), // Hashed Password
                     FirstName = "Neil",
                     LastName = "Admin",
                     UserRole = UserRole.Admin,

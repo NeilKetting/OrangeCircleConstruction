@@ -92,7 +92,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        DbInitializer.Initialize(context);
+        var hasher = services.GetRequiredService<OCC.API.Services.PasswordHasher>();
+        DbInitializer.Initialize(context, hasher);
     }
     catch (Exception ex)
     {

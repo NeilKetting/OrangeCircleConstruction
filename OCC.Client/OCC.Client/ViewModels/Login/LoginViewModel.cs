@@ -30,19 +30,6 @@ namespace OCC.Client.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
-        private bool _useApi;
-        public bool UseApi
-        {
-            get => _useApi;
-            set
-            {
-                if (SetProperty(ref _useApi, value))
-                {
-                    Services.ConnectionSettings.Instance.UseApi = value;
-                }
-            }
-        }
-
         #endregion
 
         #region Constructors
@@ -60,13 +47,8 @@ namespace OCC.Client.ViewModels
             _serviceProvider = serviceProvider;
             
             // Sync with singleton
-            UseApi = Services.ConnectionSettings.Instance.UseApi;
             Services.ConnectionSettings.Instance.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(Services.ConnectionSettings.UseApi))
-                {
-                    UseApi = Services.ConnectionSettings.Instance.UseApi;
-                }
             };
         }
 

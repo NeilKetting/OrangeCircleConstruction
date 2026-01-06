@@ -116,11 +116,6 @@
 								</StackPanel>
 
 								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,10,0,0">
-									<TextBlock Text="Use API Connection" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}" FontSize="12"/>
-									<ToggleSwitch IsChecked="{Binding UseApi}" OnContent="" OffContent="" />
-								</StackPanel>
-
-								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,10,0,0">
 									<TextBlock Text="Don't have an account?" Foreground="{DynamicResource LoginTextLight}" FontSize="13" VerticalAlignment="Center"/>
 									<Button Content="Register"
 											x:CompileBindings="False"
