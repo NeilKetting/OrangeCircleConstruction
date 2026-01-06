@@ -12,8 +12,8 @@ using OCC.API.Data;
 namespace OCC.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260106082501_AddUserApprovalAndAudit")]
-    partial class AddUserApprovalAndAudit
+    [Migration("20260106165453_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -521,17 +521,11 @@ namespace OCC.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("HourlyRate")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Language")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
                         .IsRequired()

@@ -37,7 +37,6 @@ namespace OCC.Client.Data
         }
 
         public DbSet<User> Users { get; set; }
-        // public DbSet<TaskItem> TaskItems { get; set; } // Merged into ProjectTask
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectTask> ProjectTasks { get; set; }
         public DbSet<Customer> Customers { get; set; }
