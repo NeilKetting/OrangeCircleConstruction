@@ -5,7 +5,7 @@ namespace OCC.API.Services
 {
     public class MockEmailService : IEmailService
     {
-        private readonly string _emailDirectory = @"c:\Users\Neil\source\repos\OCC-Rev5\Emails";
+        private readonly string _emailDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Emails");
 
         public MockEmailService()
         {
