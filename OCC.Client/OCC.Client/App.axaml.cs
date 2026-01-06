@@ -116,7 +116,7 @@ namespace OCC.Client
             services.AddTransient<TaskListViewModel>();
             services.AddTransient<ProjectsViewModel>();
             services.AddTransient<ProjectListViewModel>();
-            services.AddTransient<ProjectListViewModel>();
+
             services.AddTransient<ProjectGanttViewModel>();
             services.AddTransient<ViewModels.Settings.ManageUsersViewModel>();
             services.AddTransient<ViewModels.Settings.AuditLogViewModel>();

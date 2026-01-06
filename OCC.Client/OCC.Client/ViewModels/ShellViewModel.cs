@@ -6,7 +6,9 @@ using OCC.Client.ViewModels.Shared;
 using OCC.Client.ViewModels.Projects;
 using OCC.Client.ViewModels.EmployeeManagement;
 using OCC.Client.ViewModels.Messages;
+using OCC.Client.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace OCC.Client.ViewModels
 {
@@ -35,7 +37,7 @@ namespace OCC.Client.ViewModels
             // Parameterless constructor for design-time support
         }
 
-        public ShellViewModel(IServiceProvider serviceProvider, SidebarViewModel sidebar)
+        public ShellViewModel(IServiceProvider serviceProvider, SidebarViewModel sidebar, IUpdateService updateService)
         {
             _serviceProvider = serviceProvider;
             Sidebar = sidebar;
@@ -43,8 +45,10 @@ namespace OCC.Client.ViewModels
             // Default to Home (Dashboard)
             NavigateTo(Infrastructure.NavigationRoutes.Home);
 
-
             WeakReferenceMessenger.Default.RegisterAll(this); // Register for messages
+
+            // Check for updates in background
+            Task.Run(async () => await updateService.DownloadAndInstallUpdateAsync());
         }
 
         #endregion
