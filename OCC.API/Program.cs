@@ -103,6 +103,8 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseSerilogRequestLogging();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
