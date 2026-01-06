@@ -71,7 +71,6 @@ namespace OCC.API.Controllers
                 return string.Join(";", parts);
             }
             return connectionString;
-            return connectionString;
         }
 
         [HttpGet("log-check")]
@@ -117,4 +116,5 @@ namespace OCC.API.Controllers
 
             return Ok(diagnostics);
         }
+    }
 }
