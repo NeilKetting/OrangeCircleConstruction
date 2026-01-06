@@ -26,7 +26,7 @@ namespace OCC.Client.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/auth/login", new LoginRequest { Email = email, Password = password });
+                var response = await _httpClient.PostAsJsonAsync("api/Auth/login", new LoginRequest { Email = email, Password = password });
                 
                 if (response.IsSuccessStatusCode)
                 {
