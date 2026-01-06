@@ -1,11 +1,12 @@
 $ErrorActionPreference = "Stop"
+Set-Location $PSScriptRoot
 
 $version = "1.0.0"
 if ($args.Count -gt 0) {
     $version = $args[0]
 }
 
-Write-Host "Building OCC.Client for version $version..." -ForegroundColor Client
+Write-Host "Building OCC.Client for version $version..." -ForegroundColor Cyan
 
 # 1. Clean
 Write-Host "Cleaning..."
