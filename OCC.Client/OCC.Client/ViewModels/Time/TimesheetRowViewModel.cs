@@ -5,6 +5,8 @@ namespace OCC.Client.ViewModels.Time
 {
     public partial class TimesheetRowViewModel : ViewModelBase
     {
+        #region Observables
+
         [ObservableProperty]
         private string _projectName = string.Empty;
 
@@ -32,11 +34,19 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private double? _sundayHours;
 
+        #endregion
+
+        #region Properties
+
         public double TotalHours => (MondayHours ?? 0) + (TuesdayHours ?? 0) + (WednesdayHours ?? 0) +
                                     (ThursdayHours ?? 0) + (FridayHours ?? 0) + (SaturdayHours ?? 0) +
                                     (SundayHours ?? 0);
 
         public double CompletionPercentage => 0; // Placeholder for now
+
+        #endregion
+
+        #region Methods
 
         partial void OnMondayHoursChanged(double? value) => OnPropertyChanged(nameof(TotalHours));
         partial void OnTuesdayHoursChanged(double? value) => OnPropertyChanged(nameof(TotalHours));
@@ -45,5 +55,7 @@ namespace OCC.Client.ViewModels.Time
         partial void OnFridayHoursChanged(double? value) => OnPropertyChanged(nameof(TotalHours));
         partial void OnSaturdayHoursChanged(double? value) => OnPropertyChanged(nameof(TotalHours));
         partial void OnSundayHoursChanged(double? value) => OnPropertyChanged(nameof(TotalHours));
+
+        #endregion
     }
 }

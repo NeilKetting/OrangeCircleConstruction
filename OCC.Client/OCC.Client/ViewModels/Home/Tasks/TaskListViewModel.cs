@@ -6,18 +6,38 @@ using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.Services;
 using OCC.Shared.Models;
 using OCC.Client.ViewModels.Home.Shared;
-using OCC.Client.ViewModels; // Assuming ViewModelBase is here
+using OCC.Client.ViewModels;
 
 namespace OCC.Client.ViewModels.Home.Tasks
 {
     public partial class TaskListViewModel : ViewModelBase
     {
+        #region Private Members
+
+        private readonly IRepository<ProjectTask> _taskRepository;
+
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private ObservableCollection<HomeTaskItem> _tasks = new();
 
-        public event EventHandler<string>? TaskSelectionRequested;
+        #endregion
 
-        private readonly IRepository<ProjectTask> _taskRepository;
+        #region Events
+
+        public event EventHandler<string>? TaskSelectionRequested;
+        public event EventHandler? NewTaskRequested;
+
+        #endregion
+
+        #region Constructors
+
+        public TaskListViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
 
         public TaskListViewModel(IRepository<ProjectTask> taskRepository)
         {
@@ -25,12 +45,31 @@ namespace OCC.Client.ViewModels.Home.Tasks
             LoadTasks();
 
             // Subscribe to updates
-            CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Register<Messages.TaskUpdatedMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<Messages.TaskUpdatedMessage>(this, (r, m) =>
             {
-                // Simple refresh for now. Optimally, find and update the specific item.
                 LoadTasks();
             });
         }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private void SelectTask(Guid taskId)
+        {
+            TaskSelectionRequested?.Invoke(this, taskId.ToString());
+        }
+
+        [RelayCommand]
+        public void NewTask()
+        {
+            NewTaskRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Methods
 
         public async void LoadTasks()
         {
@@ -40,29 +79,17 @@ namespace OCC.Client.ViewModels.Home.Tasks
             {
                 Tasks.Add(new HomeTaskItem
                 {
-                    Id = task.Id, // Converting string Id to Guid for HomeTaskItem if needed, or update HomeTaskItem to string
+                    Id = task.Id, 
                     Title = task.Name,
                     Description = task.Description,
-                    DueDate = task.FinishDate, // Mapping FinishDate to DueDate
-                    Status = task.Status, // Using Status string
+                    DueDate = task.FinishDate, 
+                    Status = task.Status, 
                     Priority = task.Priority,
                     AssigneeInitials = task.AssignedTo.Substring(0, Math.Min(2, task.AssignedTo.Length)).ToUpper()
                 });
             }
         }
 
-        [RelayCommand]
-        private void SelectTask(Guid taskId)
-        {
-            TaskSelectionRequested?.Invoke(this, taskId.ToString());
-        }
-
-        public event EventHandler? NewTaskRequested;
-
-        [RelayCommand]
-        public void NewTask()
-        {
-            NewTaskRequested?.Invoke(this, EventArgs.Empty);
-        }
+        #endregion
     }
 }

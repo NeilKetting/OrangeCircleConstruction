@@ -7,6 +7,10 @@
 			 x:Class="OCC.Client.Views.LoginView"
 			 x:DataType="vm:LoginViewModel">
 
+	<Design.DataContext>
+		<vm:LoginViewModel/>
+	</Design.DataContext>
+
 	<Grid>
 		<!-- Background -->
 		<Panel>
@@ -15,21 +19,22 @@
 				<Rectangle Grid.Column="0" Fill="{DynamicResource LoginBackgroundDark}" />
 				<Image Grid.Column="1" Source="/Assets/Images/occ_bgi.jpg"
 					   Stretch="UniformToFill" />
-				<Rectangle Grid.Column="2" Fill="{DynamicResource AccentOrange}" />
 				<!-- Dark Overlay -->
-				<Rectangle Grid.Column="1" Fill="{DynamicResource LoginBackgroundDark}" Opacity="0.75" />
+				<Rectangle Grid.Column="1" Fill="{DynamicResource LoginBackgroundDark}" Opacity="0.50" />
+
+				<Rectangle Grid.Column="2" Fill="{DynamicResource AccentOrange}" />
 				<!-- logo -->
 				<StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Top" Margin="20">
 					<Border Classes="LogoContainer">
 						<Grid>
-                    <Ellipse Width="150" Height="150" Stroke="{DynamicResource AccentOrange}" StrokeThickness="8" Margin="0,0,0,0"/>
+							<Ellipse Width="150" Height="150" Stroke="{DynamicResource AccentOrange}" StrokeThickness="8" Margin="0,0,0,0"/>
 
-						<TextBlock Text="OCC"
-								   FontSize="48"
-								   FontWeight="Bold" Foreground="{DynamicResource AccentOrange}"
-								   HorizontalAlignment="Center"
-								   VerticalAlignment="Center"
-								   />
+							<TextBlock Text="OCC"
+									   FontSize="48"
+									   FontWeight="Bold" Foreground="{DynamicResource AccentOrange}"
+									   HorizontalAlignment="Center"
+									   VerticalAlignment="Center"
+									   />
 						</Grid>
 					</Border>
 					<TextBlock Classes="BrandName" Margin="15,0,0,0"><Span Foreground="{DynamicResource AccentOrange}">O</Span>range <Span Foreground="{DynamicResource AccentOrange}">C</Span>ircle <Span Foreground="{DynamicResource AccentOrange}">C</Span>onstruction</TextBlock>
@@ -54,17 +59,18 @@
 
 								<StackPanel Spacing="10">
 									<TextBox Text="{Binding Email}"
-											 Watermark="Email address"
-											 Classes="FormInput"/>
+											 VerticalContentAlignment="Center"
+											 Watermark="Email address"/>
 
 									<TextBox Text="{Binding Password}"
 											 Watermark="Password"
-											 PasswordChar="*"
-											 Classes="FormInput"/>
+											 VerticalContentAlignment="Center"
+											 PasswordChar="*"/>
 
 									<TextBlock Text="{Binding ErrorMessage}"
 											   Foreground="Red"
 											   FontSize="12"
+											   TextWrapping="Wrap"
 											   IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 								</StackPanel>
 
@@ -110,7 +116,12 @@
 								</StackPanel>
 
 								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,10,0,0">
-									<TextBlock Text="Don't have an account?" Foreground="{DynamicResource LoginTextLight}" FontSize="13"/>
+									<TextBlock Text="Use API Connection" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}" FontSize="12"/>
+									<ToggleSwitch IsChecked="{Binding UseApi}" OnContent="" OffContent="" />
+								</StackPanel>
+
+								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,10,0,0">
+									<TextBlock Text="Don't have an account?" Foreground="{DynamicResource LoginTextLight}" FontSize="13" VerticalAlignment="Center"/>
 									<Button Content="Register"
 											x:CompileBindings="False"
 											Command="{Binding $parent[Window].DataContext.NavigateToRegisterCommand}"

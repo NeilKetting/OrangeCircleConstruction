@@ -12,8 +12,14 @@ namespace OCC.Client.ViewModels
 {
     public partial class LoginViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IAuthService _authService;
         private readonly IServiceProvider _serviceProvider;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _email = string.Empty;
@@ -24,11 +30,47 @@ namespace OCC.Client.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        private bool _useApi;
+        public bool UseApi
+        {
+            get => _useApi;
+            set
+            {
+                if (SetProperty(ref _useApi, value))
+                {
+                    Services.ConnectionSettings.Instance.UseApi = value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        public LoginViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+
         public LoginViewModel(IAuthService authService, IServiceProvider serviceProvider)
         {
             _authService = authService;
             _serviceProvider = serviceProvider;
+            
+            // Sync with singleton
+            UseApi = Services.ConnectionSettings.Instance.UseApi;
+            Services.ConnectionSettings.Instance.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(Services.ConnectionSettings.UseApi))
+                {
+                    UseApi = Services.ConnectionSettings.Instance.UseApi;
+                }
+            };
         }
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private async Task LoginAsync()
@@ -39,10 +81,10 @@ namespace OCC.Client.ViewModels
                 return;
             }
 
-            var success = await _authService.LoginAsync(Email, Password);
+            var (success, errorMessage) = await _authService.LoginAsync(Email, Password);
             if (!success)
             {
-                ErrorMessage = "Invalid email or password.";
+                ErrorMessage = string.IsNullOrEmpty(errorMessage) ? "Invalid email or password." : errorMessage;
             }
             else
             {
@@ -51,5 +93,7 @@ namespace OCC.Client.ViewModels
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(shellViewModel));
             }
         }
+
+        #endregion
     }
 }

@@ -11,11 +11,11 @@ namespace OCC.Client.Services
     {
         private readonly List<Employee> _staff = new()
         {
-            new Employee { FirstName = "John", LastName = "Builder", Role = StaffRole.Builder, HourlyRate = 150 },
-            new Employee { FirstName = "Sarah", LastName = "Tiler", Role = StaffRole.Tiler, HourlyRate = 180 },
-            new Employee { FirstName = "Mike", LastName = "Painter", Role = StaffRole.Painter, HourlyRate = 130 },
-            new Employee { FirstName = "Dave", LastName = "Electrician", Role = StaffRole.Electrician, HourlyRate = 250 },
-            new Employee { FirstName = "Pete", LastName = "Plumber", Role = StaffRole.Plumber, HourlyRate = 220 }
+            new Employee { FirstName = "John", LastName = "Builder", Role = EmployeeRole.Builder, HourlyRate = 150 },
+            new Employee { FirstName = "Sarah", LastName = "Tiler", Role = EmployeeRole.Tiler, HourlyRate = 180 },
+            new Employee { FirstName = "Mike", LastName = "Painter", Role = EmployeeRole.Painter, HourlyRate = 130 },
+            new Employee { FirstName = "Dave", LastName = "Electrician", Role = EmployeeRole.Electrician, HourlyRate = 250 },
+            new Employee { FirstName = "Pete", LastName = "Plumber", Role = EmployeeRole.Plumber, HourlyRate = 220 }
         };
 
         public async Task<IEnumerable<Employee>> GetAllAsync()

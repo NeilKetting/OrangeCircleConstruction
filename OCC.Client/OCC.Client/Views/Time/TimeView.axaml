@@ -1,77 +1,39 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
-             xmlns:views="clr-namespace:OCC.Client.Views.Time"
-             xmlns:conv="clr-namespace:OCC.Client.Converters"
-             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
-             x:Class="OCC.Client.Views.Time.TimeView"
-             x:DataType="vm:TimeViewModel">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+			 xmlns:views="clr-namespace:OCC.Client.Views.Time"
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+			 x:Class="OCC.Client.Views.Time.TimeView"
+			 x:DataType="vm:TimeViewModel">
 
-	<UserControl.Styles>
-		<Style Selector="Button.ToolbarAction">
-			<Setter Property="Background" Value="#E2E8F0"/>
-			<Setter Property="Foreground" Value="{DynamicResource TextPrimaryDark}"/>
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="FontWeight" Value="SemiBold"/>
-			<Setter Property="Padding" Value="12,8"/>
-			<Setter Property="CornerRadius" Value="4"/>
-		</Style>
-		<Style Selector="TextBox.TimeEntryBox">
-			<Setter Property="Padding" Value="0"/>
-			<Setter Property="Height" Value="32"/>
-			<Setter Property="Width" Value="35"/>
-			<Setter Property="HorizontalContentAlignment" Value="Center"/>
-			<Setter Property="VerticalContentAlignment" Value="Center"/>
-			<Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
-			<Setter Property="BorderThickness" Value="1"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="FontSize" Value="13"/>
-			<Setter Property="FontWeight" Value="Bold"/>
-			<Setter Property="Margin" Value="2"/>
-		</Style>
-		<Style Selector="TextBlock.TotalText">
-			<Setter Property="FontSize" Value="12"/>
-			<Setter Property="Foreground" Value="{DynamicResource TextSecondaryGray}"/>
-			<Setter Property="HorizontalAlignment" Value="Center"/>
-			<Setter Property="VerticalAlignment" Value="Center"/>
-		</Style>
-	</UserControl.Styles>
+	<Design.DataContext>
+		<vm:TimeViewModel/>
+	</Design.DataContext>
 
 	<Grid>
-        <!-- Main Content -->
-        <Grid RowDefinitions="Auto, Auto, *, Auto" Margin="30">
-		    <!-- Toolbar / Header -->
-		    <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, Auto, Auto, 15, Auto, 10, Auto, *, Auto, Auto" Margin="0,0,0,30">
-			    <!-- Actions -->
-			    <Button Grid.Column="3" Content="Daily Roll-Call" Command="{Binding OpenRollCallCommand}" Classes="ToolbarAction" Background="{DynamicResource PrimaryTeal}" Foreground="White" Margin="10,0"/>
-			    <Border Grid.Column="4" Width="1" Background="{DynamicResource BorderGray}" Margin="10,5"/>
+		<!-- Main Content -->
+		<Grid RowDefinitions="Auto, Auto, *, Auto" Margin="30">
+			<!-- Toolbar / Header -->
+			<Grid Grid.Row="0" ColumnDefinitions="*" Margin="0,0,0,30">
+				<!-- Actions -->
+				<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+					<!-- Live view for roll-call -->
+					<Button Content="Live View" Command="{Binding OpenRollCallCommand}" Classes="Primary"/>
+					<!-- Daily roll-call -->
+					<Button Content="Daily Roll-Call" Command="{Binding OpenRollCallCommand}" Classes="Primary"/>
+				</StackPanel>
+		</Grid>
+		</Grid>
 
-			    <!-- User Selector -->
-			    <ComboBox Grid.Column="5" ItemsSource="{Binding AvailableUsers}" 
-					      SelectedItem="{Binding SelectedUserEmail}"
-					      Width="200" Classes="SeamlessComboBox"/>
-
-			    <!-- Week Selector -->
-			    <StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="5">
-				    <DatePicker SelectedDate="{Binding WeekStarting}" BorderThickness="0" Background="Transparent"/>
-			    </StackPanel>
-
-			    <!-- Icons -->
-			    <StackPanel Grid.Column="9" Orientation="Horizontal" Spacing="15">
-				    <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
-				    <PathIcon Data="{StaticResource IconShare}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
-			    </StackPanel>
-		    </Grid>		
-        </Grid>
-
-        <!-- Roll-Call Overlay -->
-        <Grid IsVisible="{Binding IsRollCallVisible}" Background="#80000000">
-             <views:RollCallView DataContext="{Binding CurrentRollCall}"
-                                  Width="700" Height="700"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
-        </Grid>
+		<!-- Roll-Call Overlay -->
+		<Grid IsVisible="{Binding IsRollCallVisible, FallbackValue=false}" Background="#80000000">
+			<views:RollCallView DataContext="{Binding CurrentRollCall}"
+								Width="700" Height="700"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center"/>
+		</Grid>
 	</Grid>
 </UserControl>

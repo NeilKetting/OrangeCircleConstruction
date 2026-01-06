@@ -7,16 +7,35 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 {
     public partial class PulseViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<Project> _projectRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private ObservableCollection<ProjectPulseItem> _projects = new();
+
+        #endregion
+
+        #region Constructors
+
+        public PulseViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
 
         public PulseViewModel(IRepository<Project> projectRepository)
         {
             _projectRepository = projectRepository;
             LoadProjects();
         }
+
+        #endregion
+
+        #region Methods
 
         private async void LoadProjects()
         {
@@ -33,6 +52,8 @@ namespace OCC.Client.ViewModels.Home.Dashboard
                 });
             }
         }
+
+        #endregion
     }
 
     public class ProjectPulseItem

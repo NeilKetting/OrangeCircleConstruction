@@ -11,6 +11,14 @@
 			 Focusable="True"
 			 PointerPressed="Sidebar_PointerPressed">
 
+	<Design.DataContext>
+		<vm:SidebarViewModel/>
+	</Design.DataContext>
+
+	<UserControl.Resources>
+		<conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
+	</UserControl.Resources>
+
 	<UserControl.KeyBindings>
 		<KeyBinding Gesture="T" Command="{Binding NewTaskCommand}"/>
 		<KeyBinding Gesture="M" Command="{Binding NewMeetingCommand}"/>
@@ -18,20 +26,13 @@
 		<KeyBinding Gesture="I" Command="{Binding InviteUserCommand}"/>
 	</UserControl.KeyBindings>
 
-	<!-- Main Sidebar Border -->
-	<!-- BoxShadow Format: OffsetX OffsetY BlurRadius Spread Color -->
-	<!-- Tweak 'BlurRadius' (3rd value) for softness. Tweak Color Alpha (first 2 hex digits) for intensity. -->
-	<Border Background="{DynamicResource AppBackgroundSlate}"
-			BorderBrush="{DynamicResource BorderGray}"
-			BorderThickness="0,0,1,0"
-			BoxShadow="4 0 15 0 #10000000"
+	<Border Background="{DynamicResource SurfaceLightGray}"			
 			Width="{Binding IsCollapsed, Converter={x:Static conv:SidebarConverters.CollapseWidth}}">
 		<Grid RowDefinitions="Auto,*,Auto">
 			<!-- Logo area -->
 			<StackPanel Grid.Row="0" Margin="20,25" Orientation="Horizontal" Spacing="10" Background="Transparent" DoubleTapped="Sidebar_DoubleTapped">
 				<Border Classes="LogoContainer" Width="32" Height="32">
-					<Ellipse Width="34" Height="34" Stroke="{DynamicResource AccentOrange}" StrokeThickness="3" Margin="0,0,10,0"/>
-
+					<Ellipse Width="35" Height="35" Stroke="{DynamicResource AccentOrange}" StrokeThickness="3"/>
 				</Border>
 				<StackPanel>
 					<TextBlock Text="Orange Circle" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
@@ -42,39 +43,39 @@
 
 			<!-- Navigation Links -->
 			<ScrollViewer Grid.Row="1">
-				<StackPanel>
-					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Home">
-						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-							<PathIcon Data="{StaticResource IconHome}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Home}"/>
-							<TextBlock Text="Home" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Home}"/>
+				<StackPanel Margin="-1">
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Home" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Home'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconHome}" Classes="IconStyle"/>
+							<TextBlock Text="Home" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
 
-					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Notifications">
-						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-							<PathIcon Data="{StaticResource IconNotifications}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Notifications}"/>
-							<TextBlock Text="Notifications" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Notifications}"/>
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Notifications" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Notifications'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle"/>
+							<TextBlock Text="Notifications" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
 
-					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Time">
-						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-							<PathIcon Data="{StaticResource IconTime}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Time}"/>
-							<TextBlock Text="Time &amp; Attendance" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Time}"/>
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Time" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Time'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconTime}" Classes="IconStyle"/>
+							<TextBlock Text="Time &amp; Attendance" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
 
-					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Team">
-						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-							<PathIcon Data="{StaticResource IconTeam}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Team}"/>
-							<TextBlock Text="Staff Management" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Team}"/>
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Team" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Team'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconTeam}" Classes="IconStyle"/>
+							<TextBlock Text="Employee Management" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
 
-					<Button Classes="SidebarButton" Command="{Binding ToggleProjectsCommand}">
-						<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-							<PathIcon Data="{StaticResource IconPortfolio}" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Portfolio}"/>
-							<TextBlock Text="Projects" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{Binding ActiveSection, Converter={x:Static conv:SidebarConverters.ActiveColor}, ConverterParameter=Portfolio}"/>
+					<Button Classes="SidebarButton" Command="{Binding ToggleProjectsCommand}" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Portfolio'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconPortfolio}" Classes="IconStyle"/>
+							<TextBlock Text="Projects" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
                             
                             <!-- Chevron that rotates -->
 							<PathIcon Data="{StaticResource IconChevronDown}" 
@@ -93,13 +94,14 @@
                     <StackPanel IsVisible="{Binding IsProjectsExpanded}" Margin="20,0,0,0">
                         
                         <!-- Search Bar -->
-                        <TextBox Classes="FormInput" 
+                        <TextBox Classes="3" 
                                  Watermark="Search..." 
                                  Text="{Binding ProjectSearchText}"
                                  Height="30"
                                  FontSize="12"
                                  Margin="10,0,10,5"
                                  Padding="8,5"
+								 VerticalContentAlignment="Center"
                                  IsVisible="{Binding !IsCollapsed}"/>
 
                         <!-- Projects List (Scrollable & Tree-like) -->

@@ -1,26 +1,23 @@
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.Services;
-using OCC.Shared.Models;
 using OCC.Client.ViewModels.Home.Dashboard;
-using OCC.Client.ViewModels.Home.Tasks;
-using OCC.Client.ViewModels.Home.Shared;
 using OCC.Client.ViewModels.Home.ProjectSummary;
-using OCC.Client.ViewModels.Time;
-// using OCC.Client.ViewModels.StaffManagement;
-using OCC.Client.ViewModels.Projects;
-using OCC.Client.ViewModels.Notifications;
-using OCC.Client.ViewModels.Shared;
+using OCC.Client.ViewModels.Home.Shared;
+using OCC.Client.ViewModels.Home.Tasks;
 using OCC.Client.ViewModels.Messages;
-using OCC.Client.ViewModels.Settings;
+using OCC.Client.ViewModels.Projects;
+using OCC.Shared.Models;
+using System;
 
 
 namespace OCC.Client.ViewModels.Home
 {
     public partial class HomeViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IAuthService _authService;
         private readonly ITimeService _timeService;
         private readonly IRepository<ProjectTask> _projectTaskRepository;
@@ -32,6 +29,10 @@ namespace OCC.Client.ViewModels.Home
         private readonly IRepository<TaskAssignment> _taskAssignmentRepository;
         private readonly IRepository<TaskComment> _commentRepository;
         private readonly IRepository<User> _userRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private TopBarViewModel _topBar;
@@ -50,8 +51,7 @@ namespace OCC.Client.ViewModels.Home
 
         [ObservableProperty]
         private TeamSummaryViewModel _teamSummary;
-        
-        // Dashboard Visibility Logic
+
         [ObservableProperty]
         private bool _isDashboardVisible = true;
 
@@ -70,11 +70,42 @@ namespace OCC.Client.ViewModels.Home
         [ObservableProperty]
         private string _currentDate = DateTime.Now.ToString("dd MMMM yyyy");
 
-        public bool IsTopBarVisible => true; // Always visible on Dashboard for now
+        [ObservableProperty]
+        private bool _isTaskDetailVisible = false;
 
-        public HomeViewModel(TopBarViewModel topBar, 
-                             SummaryViewModel mySummary, 
-                             TasksWidgetViewModel myTasks, 
+        [ObservableProperty]
+        private TaskDetailViewModel? _currentTaskDetail;
+
+        [ObservableProperty]
+        private bool _isNewTaskPopupVisible = false;
+
+        [ObservableProperty]
+        private NewTaskPopupViewModel? _newTaskPopup;
+
+        [ObservableProperty]
+        private bool _isCreateProjectVisible;
+
+        [ObservableProperty]
+        private CreateProjectViewModel? _createProjectVM;
+
+        #endregion
+
+        #region Properties
+
+        public bool IsTopBarVisible => true;
+
+        #endregion
+
+        #region Constructors
+
+        public HomeViewModel()
+        {
+            // Parameterless constructor for design-time support
+            Greeting = "Good day, User";
+        }
+        public HomeViewModel(TopBarViewModel topBar,
+                             SummaryViewModel mySummary,
+                             TasksWidgetViewModel myTasks,
                              PulseViewModel projectPulse,
                              ProjectSummaryViewModel projectSummary,
                              IAuthService authService,
@@ -115,6 +146,30 @@ namespace OCC.Client.ViewModels.Home
             Initialize();
         }
 
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private void OpenTaskDetail(Guid taskId)
+        {
+            CurrentTaskDetail = new TaskDetailViewModel(_projectTaskRepository, _staffRepository, _taskAssignmentRepository, _commentRepository);
+            CurrentTaskDetail.CloseRequested += (s, e) => CloseTaskDetail();
+            CurrentTaskDetail.LoadTaskById(taskId);
+            IsTaskDetailVisible = true;
+        }
+
+        [RelayCommand]
+        private void CloseTaskDetail()
+        {
+            IsTaskDetailVisible = false;
+            CurrentTaskDetail = null;
+        }
+
+        #endregion
+
+        #region Helper Methods
+
         private void Initialize()
         {
             var now = DateTime.Now;
@@ -140,7 +195,7 @@ namespace OCC.Client.ViewModels.Home
             // Only care about tabs relevant to Dashboard
             switch (TopBar.ActiveTab)
             {
-                case "Portfolio Summary": 
+                case "Portfolio Summary":
                 case "Project Summary":
                     IsProjectSummaryVisible = true;
                     break;
@@ -152,28 +207,6 @@ namespace OCC.Client.ViewModels.Home
                     IsMySummaryVisible = true;
                     break;
             }
-        }
-
-        [ObservableProperty]
-        private bool _isTaskDetailVisible = false;
-
-        [ObservableProperty]
-        private TaskDetailViewModel? _currentTaskDetail;
-
-        [RelayCommand]
-        private void OpenTaskDetail(Guid taskId)
-        {
-            CurrentTaskDetail = new TaskDetailViewModel(_projectTaskRepository, _staffRepository, _taskAssignmentRepository, _commentRepository);
-            CurrentTaskDetail.CloseRequested += (s, e) => CloseTaskDetail();
-            CurrentTaskDetail.LoadTaskById(taskId);
-            IsTaskDetailVisible = true;
-        }
-
-        [RelayCommand]
-        private void CloseTaskDetail()
-        {
-            IsTaskDetailVisible = false;
-            CurrentTaskDetail = null;
         }
 
         private async void CreateNewTask()
@@ -192,26 +225,18 @@ namespace OCC.Client.ViewModels.Home
         {
             string timeGreeting = time.Hour < 12 ? "Good morning" :
                                   time.Hour < 18 ? "Good afternoon" : "Good evening";
-            
+
             var userName = _authService.CurrentUser?.DisplayName ?? "User";
             return $"{timeGreeting}, {userName}";
         }
 
-
-        
-        [ObservableProperty]
-        private bool _isNewTaskPopupVisible = false;
-
-        [ObservableProperty]
-        private NewTaskPopupViewModel? _newTaskPopup;
-
         private void OpenNewTaskPopup()
         {
-           NewTaskPopup = new NewTaskPopupViewModel(_projectTaskRepository, _projectRepository, _authService);
-           _ = NewTaskPopup.LoadData();
-           
-           NewTaskPopup.CloseRequested += (s, e) => CloseNewTaskPopup();
-           IsNewTaskPopupVisible = true;
+            NewTaskPopup = new NewTaskPopupViewModel(_projectTaskRepository, _projectRepository, _authService);
+            _ = NewTaskPopup.LoadData();
+
+            NewTaskPopup.CloseRequested += (s, e) => CloseNewTaskPopup();
+            IsNewTaskPopupVisible = true;
         }
 
         private void CloseNewTaskPopup()
@@ -219,12 +244,6 @@ namespace OCC.Client.ViewModels.Home
             IsNewTaskPopupVisible = false;
             NewTaskPopup = null;
         }
-
-        [ObservableProperty]
-        private bool _isCreateProjectVisible;
-
-        [ObservableProperty]
-        private CreateProjectViewModel? _createProjectVM;
 
         private void OpenCreateProject()
         {
@@ -242,10 +261,10 @@ namespace OCC.Client.ViewModels.Home
 
         private void ProjectCreatedHandler(object? sender, Guid projectId)
         {
-            WeakReferenceMessenger.Default.Send(new ProjectCreatedMessage(new Project { Id = projectId })); // Sidebar listens to this
-            // We can't navigate to Projects tab from here anymore as we are decoupled.
-            // But we can send a message. Sidebar listens for 'ProjectCreatedMessage' but maybe we need a 'NavigateToProjectMessage'.
-             WeakReferenceMessenger.Default.Send(new ProjectSelectedMessage(new Project { Id = projectId })); // Or similar
+            WeakReferenceMessenger.Default.Send(new ProjectCreatedMessage(new Project { Id = projectId }));
+            WeakReferenceMessenger.Default.Send(new ProjectSelectedMessage(new Project { Id = projectId }));
         }
+
+        #endregion
     }
 }

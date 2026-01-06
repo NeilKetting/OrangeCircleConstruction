@@ -9,14 +9,14 @@ namespace OCC.Client.Data
     {
         public AppDbContext()
         {
-            Database.EnsureCreated();
-            SeedData();
+            // Database.EnsureCreated();
+            // SeedData();
         }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            Database.EnsureCreated();
-            SeedData();
+            // Database.EnsureCreated();
+            // SeedData();
         }
 
         private void SeedData()
@@ -43,7 +43,7 @@ namespace OCC.Client.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectTask> ProjectTasks { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Employee> StaffMembers { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
         public DbSet<TimeRecord> TimeRecords { get; set; }
         public DbSet<AppSetting> AppSettings { get; set; }
@@ -54,7 +54,7 @@ namespace OCC.Client.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=OCC_Rev5_DB_v2;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=OCC_Rev5_DB;Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
 

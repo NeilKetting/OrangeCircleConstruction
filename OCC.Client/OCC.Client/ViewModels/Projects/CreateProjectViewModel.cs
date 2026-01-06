@@ -7,7 +7,6 @@ using OCC.Shared.Models;
 using OCC.Client.Services;
 
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.ViewModels.Messages;
 using System.Linq;
 
@@ -15,8 +14,24 @@ namespace OCC.Client.ViewModels.Projects
 {
     public partial class CreateProjectViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<Customer> _customerRepository;
+        private readonly IRepository<ProjectTask> _taskRepository;
+        private readonly IRepository<AppSetting> _appSettingsRepository;
+        private readonly IRepository<Employee> _staffRepository;
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler? CloseRequested;
+        public event EventHandler<Guid>? ProjectCreated;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _projectName = string.Empty;
@@ -38,8 +53,6 @@ namespace OCC.Client.ViewModels.Projects
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ModalWidth))]
         private bool _isSettingsVisible;
-
-        public double ModalWidth => IsSettingsVisible ? 1000 : 700;
 
         // Extended Properties
         [ObservableProperty]
@@ -78,6 +91,12 @@ namespace OCC.Client.ViewModels.Projects
 
         private List<ProjectTask>? _importedTasks;
 
+        #endregion
+
+        #region Properties
+
+        public double ModalWidth => IsSettingsVisible ? 1000 : 700;
+        
         // Collections
         public string[] ProjectManagers { get; } = new[] { "Origize63@Gmail.Com (Owner)", "John Doe", "Jane Smith" };
 
@@ -86,13 +105,15 @@ namespace OCC.Client.ViewModels.Projects
         public string[] Statuses { get; } = new[] { "Planning", "In Progress", "On Hold", "Completed" };
         public string[] Priorities { get; } = new[] { "low", "Medium", "Important", "Critical" };
 
-        public event EventHandler? CloseRequested;
-        public event EventHandler<Guid>? ProjectCreated;
+        #endregion
 
-        private readonly IRepository<ProjectTask> _taskRepository;
-        private readonly IRepository<AppSetting> _appSettingsRepository;
-        private readonly IRepository<Employee> _staffRepository;
+        #region Constructors
 
+        public CreateProjectViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+        
         public CreateProjectViewModel(
             IRepository<Project> projectRepository, 
             IRepository<Customer> customerRepository, 
@@ -112,35 +133,9 @@ namespace OCC.Client.ViewModels.Projects
             LoadSiteManagers();
         }
 
-        private async void LoadSiteManagers()
-        {
-            try
-            {
-                var staff = await _staffRepository.GetAllAsync();
-                SiteManagers.Clear();
-                foreach (var s in staff)
-                {
-                    SiteManagers.Add(s);
-                }
-            }
-            catch (Exception) { }
-        }
+        #endregion
 
-        private async void LoadCustomers()
-        {
-            var customers = await _customerRepository.GetAllAsync();
-            Customers.Clear();
-            foreach (var c in customers)
-            {
-                Customers.Add(c);
-            }
-            
-            if (Customers.Count == 0)
-            {
-                Customers.Add(new Customer { Name = "Internal", Id = Guid.NewGuid() });
-                Customers.Add(new Customer { Name = "Acme Corp", Id = Guid.NewGuid() });
-            }
-        }
+        #region Commands
 
         [RelayCommand]
         private async Task CreateProject()
@@ -212,6 +207,116 @@ namespace OCC.Client.ViewModels.Projects
             WeakReferenceMessenger.Default.Send(new ProjectCreatedMessage(newProject));
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
+        
+        [RelayCommand]
+        private void ConfirmImportSave()
+        {
+            ShowImportComplete = false;
+            CreateProjectCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void CancelImportSave()
+        {
+            ShowImportComplete = false;
+            // Keep the data in the form but don't save yet
+        }
+
+        [RelayCommand]
+        private void StartTemplate()
+        {
+            // Placeholder
+        }
+
+        [RelayCommand]
+        private void ToggleSettings()
+        {
+             IsSettingsVisible = !IsSettingsVisible;
+        }
+
+        [RelayCommand]
+        private void Close()
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Methods
+
+        public async Task ImportProjectAsync(System.IO.Stream stream)
+        {
+            IsImporting = true;
+            ImportProgressMessage = "Starting import...";
+            ShowImportComplete = false;
+
+            try
+            {
+                var parser = new MSProjectXmlParser();
+                var progress = new Progress<string>(msg => ImportProgressMessage = msg);
+
+                var result = await parser.ParseAsync(stream, progress);
+                
+                if (!string.IsNullOrEmpty(result.ProjectName))
+                {
+                    ProjectName = result.ProjectName;
+                }
+
+                if (result.Tasks.Count > 0)
+                {
+                    // Logic to set dates from tasks if needed
+                }
+
+                _importedTasks = result.Tasks;
+                
+                ImportProgressMessage = "Import Complete!";
+                await Task.Delay(500); // UI delay
+                ShowImportComplete = true;
+            }
+            catch (Exception ex)
+            {
+                ImportProgressMessage = $"Error: {ex.Message}";
+                await Task.Delay(2000);
+            }
+            finally
+            {
+                IsImporting = false;
+            }
+        }
+
+        private async void LoadSiteManagers()
+        {
+            try
+            {
+                var staff = await _staffRepository.GetAllAsync();
+                SiteManagers.Clear();
+                foreach (var s in staff)
+                {
+                    SiteManagers.Add(s);
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private async void LoadCustomers()
+        {
+            var customers = await _customerRepository.GetAllAsync();
+            Customers.Clear();
+            foreach (var c in customers)
+            {
+                Customers.Add(c);
+            }
+            
+            if (Customers.Count == 0)
+            {
+                Customers.Add(new Customer { Name = "Internal", Id = Guid.NewGuid() });
+                Customers.Add(new Customer { Name = "Acme Corp", Id = Guid.NewGuid() });
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
 
         private void FlattenTasks(ProjectTask task, List<ProjectTask> flatList, int level)
         {
@@ -250,81 +355,6 @@ namespace OCC.Client.ViewModels.Projects
             }
         }
 
-        public async Task ImportProjectAsync(System.IO.Stream stream)
-        {
-            IsImporting = true;
-            ImportProgressMessage = "Starting import...";
-            ShowImportComplete = false;
-
-            try
-            {
-                var parser = new MSProjectXmlParser();
-                var progress = new Progress<string>(msg => ImportProgressMessage = msg);
-
-                var result = await parser.ParseAsync(stream, progress);
-                
-                if (!string.IsNullOrEmpty(result.ProjectName))
-                {
-                    ProjectName = result.ProjectName;
-                }
-
-                if (result.Tasks.Count > 0)
-                {
-                   // Try to deduce start/end dates from tasks if possible
-                   // But Project Metadata is better.
-                }
-
-                _importedTasks = result.Tasks;
-                
-                // Populate other fields if possible, or just notify user
-                ImportProgressMessage = "Import Complete!";
-                await Task.Delay(500); // UI delay
-                ShowImportComplete = true;
-            }
-            catch (Exception ex)
-            {
-                ImportProgressMessage = $"Error: {ex.Message}";
-                await Task.Delay(2000);
-            }
-            finally
-            {
-                IsImporting = false;
-            }
-        }
-
-        [RelayCommand]
-        private void ConfirmImportSave()
-        {
-            ShowImportComplete = false;
-            // Optionally auto-trigger CreateProject or just let user click "Create Project"
-            // The user asked: "asking if we should save the project to the repository"
-            // So this confirm button could trigger the save.
-            CreateProjectCommand.Execute(null);
-        }
-
-        [RelayCommand]
-        private void CancelImportSave()
-        {
-            ShowImportComplete = false;
-            // Keep the data in the form but don't save yet
-        }
-
-        [RelayCommand]
-        private void StartTemplate()
-        {
-            // Placeholder
-        }
-
-        [RelayCommand]
-        private void ToggleSettings()
-        {
-             IsSettingsVisible = !IsSettingsVisible;
-        }
-
-        [RelayCommand]
-        private void Close()
-        {
-            CloseRequested?.Invoke(this, EventArgs.Empty);
-        }
+        #endregion
     }
 }

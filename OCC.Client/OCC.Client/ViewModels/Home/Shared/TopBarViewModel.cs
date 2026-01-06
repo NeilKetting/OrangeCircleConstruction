@@ -7,17 +7,26 @@ namespace OCC.Client.ViewModels.Home.Shared
 {
     public partial class TopBarViewModel : ViewModelBase, IRecipient<SwitchTabMessage>
     {
+        #region Observables
+
         [ObservableProperty]
         private string _activeTab = "My Summary";
 
-
         [ObservableProperty]
         private string _userEmail = "origize63@gmail.com";
+
+        #endregion
+
+        #region Constructors
 
         public TopBarViewModel()
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
         }
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private void SetActiveTab(string tabName)
@@ -25,9 +34,21 @@ namespace OCC.Client.ViewModels.Home.Shared
             ActiveTab = tabName;
         }
 
+        [RelayCommand]
+        private void OpenNotifications()
+        {
+            WeakReferenceMessenger.Default.Send(new OpenNotificationsMessage());
+        }
+
+        #endregion
+
+        #region Methods
+
         public void Receive(SwitchTabMessage message)
         {
             ActiveTab = message.Value;
         }
+
+        #endregion
     }
 }

@@ -33,6 +33,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // SignalR
 builder.Services.AddSignalR();
 
+// Email Service (Mock/Local for Dev)
+builder.Services.AddSingleton<OCC.API.Services.IEmailService, OCC.API.Services.MockEmailService>();
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -77,6 +80,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-// app.MapHub<SyncHub>("/hubs/sync"); // Placeholder
+app.MapHub<OCC.API.Hubs.NotificationHub>("/hubs/notifications");
 
 app.Run();

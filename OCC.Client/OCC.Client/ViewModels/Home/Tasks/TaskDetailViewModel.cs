@@ -12,7 +12,27 @@ namespace OCC.Client.ViewModels.Home.Tasks
 {
     public partial class TaskDetailViewModel : ViewModelBase
     {
+        #region Private Members
 
+        private readonly IRepository<ProjectTask> _projectTaskRepository;
+        private readonly IRepository<Employee> _staffRepository;
+        private readonly IRepository<TaskAssignment> _assignmentRepository;
+        private readonly IRepository<TaskComment> _commentRepository;
+        
+        private readonly System.Threading.SemaphoreSlim _updateLock = new(1, 1);
+        private Guid _currentTaskId; 
+        private bool _isLoading = false;
+        private bool _isUpdatingDuration = false;
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler? CloseRequested;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _id = "T-1";
@@ -36,13 +56,6 @@ namespace OCC.Client.ViewModels.Home.Tasks
         [ObservableProperty]
         private string _newToDoContent = string.Empty;
 
-        public int SubtaskCount => ToDoList?.Count ?? 0;
-        public int CommentsCount => Comments?.Count ?? 0;
-        public int AttachmentsCount => 0; // Placeholder for now
-
-
-
-        // Data Fields
         [ObservableProperty]
         private DateTime? _plannedStartDate; 
 
@@ -50,7 +63,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
         private DateTime? _dueDate;
 
         [ObservableProperty]
-        private string _plannedDuration = "None"; // String to allow "3 days" text
+        private string _plannedDuration = "None"; 
 
         [ObservableProperty]
         private double? _plannedHours;
@@ -80,7 +93,6 @@ namespace OCC.Client.ViewModels.Home.Tasks
         [ObservableProperty]
         private string _newCommentContent = string.Empty;
 
-        // NEW: Status & Priority
         [ObservableProperty]
         private string _status = "Not Started";
 
@@ -93,109 +105,39 @@ namespace OCC.Client.ViewModels.Home.Tasks
         [ObservableProperty] 
         private string _priority = "Medium";
 
-        // Constants/Enums for Priority
+        [ObservableProperty]
+        private string _statusColor = "#CBD5E1"; 
+
+        [ObservableProperty]
+        private int _percentComplete;
+
+        [ObservableProperty]
+        private ObservableCollection<TaskAssignment> _assignments = new();
+
+        #endregion
+
+        #region Properties
+
+        public int SubtaskCount => ToDoList?.Count ?? 0;
+        public int CommentsCount => Comments?.Count ?? 0;
+        public int AttachmentsCount => 0; // Placeholder for now
+
         public ObservableCollection<string> PriorityLevels { get; } = new() 
         { 
             "Critical", "Very High", "High", "Medium", "Low", "Very Low" 
         };
-        
-        [ObservableProperty]
-        private string _statusColor = "#CBD5E1"; // Gray default
 
-        // Command to set status
-        [RelayCommand]
-        public void SetStatus(string status)
+        // Lists for selection
+        public ObservableCollection<Employee> AvailableStaff { get; } = new();
+
+        #endregion
+
+        #region Constructors
+
+        public TaskDetailViewModel()
         {
-            Status = status;
+            // Parameterless constructor for design-time support
         }
-
-        async partial void OnStatusChanged(string value)
-        {
-            // Auto-update progress
-            switch(value)
-            {
-                case "Not Started": 
-                    ProgressPercent = 0; 
-                    StatusColor = "#CBD5E1"; // Gray
-                    break;
-                case "Started": 
-                case "Halfway": 
-                case "Almost Done": 
-                    ProgressPercent = value == "Started" ? 25 : (value == "Halfway" ? 50 : 75); 
-                    StatusColor = "#EF4444"; // Red
-                    break;
-                case "Done": 
-                    ProgressPercent = 100; 
-                    IsCompleted = true; 
-                    StatusColor = "#EF4444"; // Red
-                    break;
-            }
-            if (value != "Done" && IsCompleted == true) IsCompleted = false;
-
-            if (IsOnHold) StatusColor = "#22C55E"; // Green
-
-            await UpdateTask();
-        }
-
-        [RelayCommand]
-        public void ToggleOnHold()
-        {
-            IsOnHold = !IsOnHold;
-        }
-
-        async partial void OnIsOnHoldChanged(bool value)
-        {
-             if (value) StatusColor = "#22C55E"; // Green
-             else 
-             {
-                 // Force re-eval of Status color
-                 // We can't just set Status = Status. 
-                 // Let's copy logic or extract method.
-                 // For now, simple re-assignment to trigger OnStatusChanged? 
-                 // No, that loops. 
-                 
-                 // Manual color reset:
-                 switch(Status)
-                 {
-                    case "Not Started": StatusColor = "#CBD5E1"; break;
-                    default: StatusColor = "#EF4444"; break;
-                 }
-             }
-             await UpdateTask();
-        }
-
-        [RelayCommand]
-        public void SetPriority(string priority)
-        {
-            Priority = priority;
-            // OnPriorityChanged handles update
-        }
-
-        private void RecalculateHours()
-        {
-            // Logic: (EndDate - StartDate) * WorkHoursPerDay - Lunch
-            // Using default 8 hours work day - 1 hour lunch = 7 working hours for now
-            // Ideally fetch from Project settings
-            double dailyWorkHours = 9 - 1; // 8am-5pm (9h) - 1h lunch = 8h? Or 8-17 is 9h span.
-            // Let's assume standard 8h for now. 
-            // Better: Get Project work hours. 
-            
-            if (PlannedStartDate.HasValue && DueDate.HasValue)
-            {
-                 var span = DueDate.Value - PlannedStartDate.Value;
-                 double days = span.TotalDays + 1; // Inclusive
-                 // Exclude weekends? User didn't specify but usually yes. 
-                 // Simple calculation for now:
-                 PlannedHours = Math.Round(days * 8, 1); 
-            }
-        }
-        
-        async partial void OnPriorityChanged(string value) => await UpdateTask();
-
-        private readonly IRepository<ProjectTask> _projectTaskRepository;
-        private readonly IRepository<Employee> _staffRepository;
-        private readonly IRepository<TaskAssignment> _assignmentRepository;
-        private readonly IRepository<TaskComment> _commentRepository;
 
         public TaskDetailViewModel(
             IRepository<ProjectTask> projectTaskRepository,
@@ -209,59 +151,27 @@ namespace OCC.Client.ViewModels.Home.Tasks
             _commentRepository = commentRepository;
         }
 
-        [ObservableProperty]
-        private ObservableCollection<TaskAssignment> _assignments = new();
-        
-        // Lists for selection
-        public ObservableCollection<Employee> AvailableStaff { get; } = new();
+        #endregion
 
+        #region Commands
 
-        private bool _isLoading = false;
-
-        private Guid _currentTaskId; 
-
-        public async void LoadTaskById(Guid taskId)
+        [RelayCommand]
+        public void SetStatus(string status)
         {
-            _currentTaskId = taskId;
-            var task = await _projectTaskRepository.GetByIdAsync(taskId);
-            if (task != null) LoadTask(task);
-            
-            await LoadAssignableResources();
-        }
-        
-        private async System.Threading.Tasks.Task LoadAssignableResources()
-        {
-            AvailableStaff.Clear();
-            var staff = await _staffRepository.GetAllAsync();
-            foreach(var s in staff) AvailableStaff.Add(s);
-            
-            await LoadComments();
-            await LoadAssignments();
+            Status = status;
         }
 
-        private async System.Threading.Tasks.Task LoadComments()
+        [RelayCommand]
+        public void ToggleOnHold()
         {
-             Comments.Clear();
-             // Explicitly load comments via repository (bypasses LazyLoading issues)
-             // Use AsNoTracking via FindAsync (if updated) or simple FindAsync
-             // FindAsync in SqlRepository is generic list.
-             var comments = await _commentRepository.FindAsync(c => c.TaskId == _currentTaskId);
-             
-             foreach (var comment in comments.OrderByDescending(c => c.CreatedAt))
-             {
-                 Comments.Add(comment);
-             }
-             OnPropertyChanged(nameof(CommentsCount));
+            IsOnHold = !IsOnHold;
         }
 
-        private async System.Threading.Tasks.Task LoadAssignments()
+        [RelayCommand]
+        public void SetPriority(string priority)
         {
-             Assignments.Clear();
-             var assignments = await _assignmentRepository.FindAsync(a => a.ProjectTaskId == _currentTaskId);
-             foreach(var assign in assignments)
-             {
-                 Assignments.Add(assign);
-             }
+            Priority = priority;
+            // OnPriorityChanged handles update
         }
 
         [RelayCommand]
@@ -306,6 +216,97 @@ namespace OCC.Client.ViewModels.Home.Tasks
             }
         }
 
+        [RelayCommand]
+        public void CommitDurations()
+        {
+            FormatPlannedDuration(PlannedDuration);
+            FormatActualDuration(ActualDuration);
+        }
+
+        [RelayCommand]
+        private void AddToDo()
+        {
+            if (!string.IsNullOrWhiteSpace(NewToDoContent))
+            {
+                ToDoList.Add(new ChecklistItem(NewToDoContent));
+                NewToDoContent = string.Empty;
+                OnPropertyChanged(nameof(SubtaskCount));
+            }
+        }
+
+        [RelayCommand]
+        private void AddComment()
+        {
+            if (!string.IsNullOrWhiteSpace(NewCommentContent))
+            {
+                var newComment = new TaskComment
+                {
+                    AuthorName = "Current User", // In real app, get from AuthService
+                    AuthorEmail = "user@occ.com",
+                    Content = NewCommentContent,
+                    CreatedAt = DateTime.Now
+                };
+
+                Comments.Insert(0, newComment);
+                NewCommentContent = string.Empty;
+                OnPropertyChanged(nameof(CommentsCount));
+
+                // Save to Task
+                SaveCommentToTask(newComment);
+            }
+        }
+
+        [RelayCommand]
+        private void Close()
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Methods
+
+        public async void LoadTaskById(Guid taskId)
+        {
+            _currentTaskId = taskId;
+            var task = await _projectTaskRepository.GetByIdAsync(taskId);
+            if (task != null) LoadTask(task);
+            
+            await LoadAssignableResources();
+        }
+
+        private async System.Threading.Tasks.Task LoadAssignableResources()
+        {
+            AvailableStaff.Clear();
+            var staff = await _staffRepository.GetAllAsync();
+            foreach(var s in staff) AvailableStaff.Add(s);
+            
+            await LoadComments();
+            await LoadAssignments();
+        }
+
+        private async System.Threading.Tasks.Task LoadComments()
+        {
+             Comments.Clear();
+             var comments = await _commentRepository.FindAsync(c => c.TaskId == _currentTaskId);
+             
+             foreach (var comment in comments.OrderByDescending(c => c.CreatedAt))
+             {
+                 Comments.Add(comment);
+             }
+             OnPropertyChanged(nameof(CommentsCount));
+        }
+
+        private async System.Threading.Tasks.Task LoadAssignments()
+        {
+             Assignments.Clear();
+             var assignments = await _assignmentRepository.FindAsync(a => a.ProjectTaskId == _currentTaskId);
+             foreach(var assign in assignments)
+             {
+                 Assignments.Add(assign);
+             }
+        }
+
         private void LoadTask(ProjectTask task)
         {
             _isLoading = true;
@@ -334,13 +335,80 @@ namespace OCC.Client.ViewModels.Home.Tasks
                 UpdatePlannedDuration();
                 UpdateActualDuration();
 
-        OnPropertyChanged(nameof(SubtaskCount));
-    }
-    finally
-    {
-        _isLoading = false;
-    }
-}
+                OnPropertyChanged(nameof(SubtaskCount));
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async void UpdateTask()
+        {
+            if (_isLoading) return;
+            if (_currentTaskId == Guid.Empty) return;
+
+            // Wait for lock to prevent threading issues on DbContext
+            await _updateLock.WaitAsync();
+            try
+            {
+                var task = await _projectTaskRepository.GetByIdAsync(_currentTaskId);
+                if (task == null) return;
+
+                // Update fields from properties
+                task.Name = Title;
+                task.Description = Description;
+                
+                task.StartDate = PlannedStartDate ?? DateTime.Now; 
+                task.FinishDate = DueDate ?? DateTime.Now;
+                task.ActualStartDate = ActualStartDate;
+                task.ActualCompleteDate = DoneDate;
+                
+                task.Status = Status;
+                task.PercentComplete = (int)ProgressPercent;
+                task.IsOnHold = IsOnHold;
+                task.Priority = Priority;
+
+                if (PlannedHours.HasValue)
+                    task.PlanedDurationHours = TimeSpan.FromHours(PlannedHours.Value);
+                else
+                    task.PlanedDurationHours = null;
+
+                if (ActualHours.HasValue)
+                    task.ActualDuration = TimeSpan.FromHours(ActualHours.Value);
+                else
+                    task.ActualDuration = null;
+
+                await _projectTaskRepository.UpdateAsync(task);
+                
+                // Notify listeners
+                CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new OCC.Client.ViewModels.Messages.TaskUpdatedMessage(_currentTaskId));
+            }
+            finally
+            {
+                _updateLock.Release();
+            }
+        }
+
+        private async void SaveCommentToTask(TaskComment comment)
+        {
+            if (_currentTaskId == Guid.Empty) return;
+
+            await _updateLock.WaitAsync();
+            try
+            {
+                comment.TaskId = _currentTaskId;
+                await _commentRepository.AddAsync(comment);
+            }
+            finally
+            {
+                _updateLock.Release();
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
 
         private double CalculatePlannedHours(ProjectTask task)
         {
@@ -349,16 +417,56 @@ namespace OCC.Client.ViewModels.Home.Tasks
              return Math.Round(days * 8, 1);
         }
 
-        [ObservableProperty]
-        private int _percentComplete;
+        async partial void OnStatusChanged(string value)
+        {
+            // Auto-update progress
+            switch(value)
+            {
+                case "Not Started": 
+                    ProgressPercent = 0; 
+                    StatusColor = "#CBD5E1"; // Gray
+                    break;
+                case "Started": 
+                case "Halfway": 
+                case "Almost Done": 
+                    ProgressPercent = value == "Started" ? 25 : (value == "Halfway" ? 50 : 75); 
+                    StatusColor = "#EF4444"; // Red
+                    break;
+                case "Done": 
+                    ProgressPercent = 100; 
+                    IsCompleted = true; 
+                    StatusColor = "#EF4444"; // Red
+                    break;
+            }
+            if (value != "Done" && IsCompleted == true) IsCompleted = false;
 
-         // Auto-save triggers
+            if (IsOnHold) StatusColor = "#22C55E"; // Green
+
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        }
+
+        async partial void OnIsOnHoldChanged(bool value)
+        {
+             if (value) StatusColor = "#22C55E"; // Green
+             else 
+             {
+                 switch(Status)
+                 {
+                    case "Not Started": StatusColor = "#CBD5E1"; break;
+                    default: StatusColor = "#EF4444"; break;
+                 }
+             }
+             await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        }
+
+        async partial void OnPriorityChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
+
         async partial void OnPlannedStartDateChanged(DateTime? value) 
         {
             if (PlannedStartDate.HasValue && DueDate.HasValue)
                  PlannedHours = CalculatePlannedHours(new ProjectTask { StartDate = PlannedStartDate.Value, FinishDate = DueDate.Value });
             UpdatePlannedDuration();
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         async partial void OnDueDateChanged(DateTime? value) 
@@ -366,7 +474,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
             if (PlannedStartDate.HasValue && DueDate.HasValue)
                  PlannedHours = CalculatePlannedHours(new ProjectTask { StartDate = PlannedStartDate.Value, FinishDate = DueDate.Value });
             UpdatePlannedDuration();
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         async partial void OnPlannedHoursChanged(double? value) 
@@ -382,22 +490,20 @@ namespace OCC.Client.ViewModels.Home.Tasks
                 _isUpdatingDuration = false;
             }
             
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         async partial void OnActualStartDateChanged(DateTime? value) 
         {
             UpdateActualDuration();
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         async partial void OnDoneDateChanged(DateTime? value) 
         {
             UpdateActualDuration();
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
-
-        private bool _isUpdatingDuration = false;
 
         async partial void OnPlannedDurationChanged(string value)
         {
@@ -406,13 +512,13 @@ namespace OCC.Client.ViewModels.Home.Tasks
              // Try parse days
              FormatPlannedDuration(value);
 
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         async partial void OnActualDurationChanged(string value)
         {
             if (_isUpdatingDuration) return;
-            await UpdateTask();
+            await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
         private void FormatPlannedDuration(string value)
@@ -491,130 +597,18 @@ namespace OCC.Client.ViewModels.Home.Tasks
             }
         }
 
-        [RelayCommand]
-        public void CommitDurations()
-        {
-            FormatPlannedDuration(PlannedDuration);
-            FormatActualDuration(ActualDuration);
-        }
-
-
-        async partial void OnActualHoursChanged(double? value) => await UpdateTask();
-        async partial void OnDescriptionChanged(string value) => await UpdateTask();
-        async partial void OnTitleChanged(string value) => await UpdateTask();
+        async partial void OnActualHoursChanged(double? value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        async partial void OnDescriptionChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        async partial void OnTitleChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
         async partial void OnIsCompletedChanged(bool? value) 
         {
              // Special handling for Done Checkbox (could set DoneDate automatically)
              if(value == true && DoneDate == null) DoneDate = DateTime.Now;
              if(value == false) DoneDate = null;
              
-             await UpdateTask();
+             await System.Threading.Tasks.Task.Run(() => UpdateTask());
         }
 
-        private readonly System.Threading.SemaphoreSlim _updateLock = new(1, 1);
-
-        private async System.Threading.Tasks.Task UpdateTask()
-        {
-            if (_isLoading) return;
-            if (_currentTaskId == Guid.Empty) return;
-
-            // Wait for lock to prevent threading issues on DbContext
-            await _updateLock.WaitAsync();
-            try
-            {
-                var task = await _projectTaskRepository.GetByIdAsync(_currentTaskId);
-                if (task == null) return;
-
-                // Update fields from properties
-                task.Name = Title;
-                task.Description = Description;
-                
-                task.StartDate = PlannedStartDate ?? DateTime.Now; 
-                task.FinishDate = DueDate ?? DateTime.Now;
-                task.ActualStartDate = ActualStartDate;
-                task.ActualCompleteDate = DoneDate;
-                
-                task.Status = Status;
-                task.PercentComplete = (int)ProgressPercent;
-                task.IsOnHold = IsOnHold;
-                task.Priority = Priority;
-
-                if (PlannedHours.HasValue)
-                    task.PlanedDurationHours = TimeSpan.FromHours(PlannedHours.Value);
-                else
-                    task.PlanedDurationHours = null;
-
-                if (ActualHours.HasValue)
-                    task.ActualDuration = TimeSpan.FromHours(ActualHours.Value);
-                else
-                    task.ActualDuration = null;
-
-                await _projectTaskRepository.UpdateAsync(task);
-                
-                // Notify listeners
-                CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new OCC.Client.ViewModels.Messages.TaskUpdatedMessage(_currentTaskId));
-            }
-            finally
-            {
-                _updateLock.Release();
-            }
-        }
-
-        [RelayCommand]
-        private void AddToDo()
-        {
-            if (!string.IsNullOrWhiteSpace(NewToDoContent))
-            {
-                ToDoList.Add(new ChecklistItem(NewToDoContent));
-                NewToDoContent = string.Empty;
-                OnPropertyChanged(nameof(SubtaskCount));
-            }
-        }
-
-        [RelayCommand]
-        private void AddComment()
-        {
-            if (!string.IsNullOrWhiteSpace(NewCommentContent))
-            {
-                var newComment = new TaskComment
-                {
-                    AuthorName = "Current User", // In real app, get from AuthService
-                    AuthorEmail = "user@occ.com",
-                    Content = NewCommentContent,
-                    CreatedAt = DateTime.Now
-                };
-
-                Comments.Insert(0, newComment);
-                NewCommentContent = string.Empty;
-                OnPropertyChanged(nameof(CommentsCount));
-
-                // Save to Task
-                SaveCommentToTask(newComment);
-            }
-        }
-
-        private async void SaveCommentToTask(TaskComment comment)
-        {
-            if (_currentTaskId == Guid.Empty) return;
-
-            await _updateLock.WaitAsync();
-            try
-            {
-                comment.TaskId = _currentTaskId;
-                await _commentRepository.AddAsync(comment);
-            }
-            finally
-            {
-                _updateLock.Release();
-            }
-        }
-
-        public event EventHandler? CloseRequested;
-
-        [RelayCommand]
-        private void Close()
-        {
-            CloseRequested?.Invoke(this, EventArgs.Empty);
-        }
+        #endregion
     }
 }

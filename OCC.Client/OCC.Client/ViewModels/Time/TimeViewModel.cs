@@ -13,8 +13,14 @@ namespace OCC.Client.ViewModels.Time
 {
     public partial class TimeViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly ITimeService _timeService;
         private readonly IAuthService _authService;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private DateTimeOffset? _weekStarting;
@@ -41,6 +47,21 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private string _lastUpdatedText = "Updated on " + DateTime.Now.ToString("dd MMMM yyyy HH:mmtt").ToLower();
 
+        [ObservableProperty]
+        private bool _isRollCallVisible = false;
+
+        [ObservableProperty]
+        private RollCallViewModel? _currentRollCall;
+
+        #endregion
+
+        #region Constructors
+
+        public TimeViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+
         public TimeViewModel(ITimeService timeService, IAuthService authService)
         {
             _timeService = timeService;
@@ -53,6 +74,10 @@ namespace OCC.Client.ViewModels.Time
             InitializeCommand.Execute(null);
         }
 
+        #endregion
+
+        #region Commands
+
         [RelayCommand]
         private async Task Initialize()
         {
@@ -63,6 +88,37 @@ namespace OCC.Client.ViewModels.Time
 
             await LoadWeeklyData();
         }
+
+        [RelayCommand]
+        private void PreviousWeek()
+        {
+            WeekStarting = WeekStarting?.AddDays(-7);
+        }
+
+        [RelayCommand]
+        private void NextWeek()
+        {
+            WeekStarting = WeekStarting?.AddDays(7);
+        }
+
+        [RelayCommand]
+        private void OpenRollCall()
+        {
+            CurrentRollCall = new RollCallViewModel(_timeService);
+            CurrentRollCall.CloseRequested += (s, e) => CloseRollCall();
+            IsRollCallVisible = true;
+        }
+
+        [RelayCommand]
+        private void CloseRollCall()
+        {
+            IsRollCallVisible = false;
+            CurrentRollCall = null;
+        }
+
+        #endregion
+
+        #region Methods
 
         private async Task LoadWeeklyData()
         {
@@ -95,43 +151,12 @@ namespace OCC.Client.ViewModels.Time
             SundayTotal = Rows.Sum(r => r.SundayHours ?? 0);
             GrandTotal = MondayTotal + TuesdayTotal + WednesdayTotal + ThursdayTotal + FridayTotal + SaturdayTotal + SundayTotal;
         }
-
-        [RelayCommand]
-        private void PreviousWeek()
-        {
-            WeekStarting = WeekStarting?.AddDays(-7);
-        }
-
-        [RelayCommand]
-        private void NextWeek()
-        {
-            WeekStarting = WeekStarting?.AddDays(7);
-        }
-
-        [ObservableProperty]
-        private bool _isRollCallVisible = false;
-
-        [ObservableProperty]
-        private RollCallViewModel? _currentRollCall;
-
-        [RelayCommand]
-        private void OpenRollCall()
-        {
-            CurrentRollCall = new RollCallViewModel(_timeService);
-            CurrentRollCall.CloseRequested += (s, e) => CloseRollCall();
-            IsRollCallVisible = true;
-        }
-
-        [RelayCommand]
-        private void CloseRollCall()
-        {
-            IsRollCallVisible = false;
-            CurrentRollCall = null;
-        }
-
+        
         partial void OnWeekStartingChanged(DateTimeOffset? value)
         {
             _ = LoadWeeklyData();
         }
+
+        #endregion
     }
 }

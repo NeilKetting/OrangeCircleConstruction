@@ -5,18 +5,32 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using OCC.Client.ViewModels.Home.Shared;
 using System;
-
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace OCC.Client.ViewModels.Home.Dashboard
 {
     public partial class TasksWidgetViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<ProjectTask> _taskRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private ObservableCollection<HomeTaskItem> _tasks = new();
 
+        #endregion
+
+        #region Constructors
+
+        public TasksWidgetViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+        
         public TasksWidgetViewModel(IRepository<ProjectTask> taskRepository)
         {
             _taskRepository = taskRepository;
@@ -25,6 +39,10 @@ namespace OCC.Client.ViewModels.Home.Dashboard
             // Subscribe to updates
             WeakReferenceMessenger.Default.Register<Messages.TaskUpdatedMessage>(this, (r, m) => LoadTasks());
         }
+
+        #endregion
+
+        #region Methods
 
         private async void LoadTasks()
         {
@@ -46,5 +64,7 @@ namespace OCC.Client.ViewModels.Home.Dashboard
                 });
             }
         }
+
+        #endregion
     }
 }

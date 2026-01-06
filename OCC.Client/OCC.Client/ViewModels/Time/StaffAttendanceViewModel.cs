@@ -6,14 +6,16 @@ namespace OCC.Client.ViewModels.Time
 {
     public partial class StaffAttendanceViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly Employee _staff;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private Guid _id;
-
-        public Guid EmployeeId => _staff.Id;
-        public string Name => _staff.DisplayName;
-        public string Role => _staff.Role.ToString();
 
         [ObservableProperty]
         private AttendanceStatus _status = AttendanceStatus.Present;
@@ -24,9 +26,23 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private string? _doctorsNotePath;
 
+        #endregion
+
+        #region Properties
+
+        public Guid EmployeeId => _staff.Id;
+        public string Name => _staff.DisplayName;
+        public string Role => _staff.Role.ToString();
+
+        #endregion
+
+        #region Constructors
+
         public StaffAttendanceViewModel(Employee staff)
         {
             _staff = staff;
         }
+
+        #endregion
     }
 }

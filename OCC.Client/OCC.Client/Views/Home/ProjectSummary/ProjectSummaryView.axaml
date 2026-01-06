@@ -13,20 +13,22 @@
 		<conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
 	</UserControl.Resources>
 
-	<Grid ColumnDefinitions="2*, 1*" ColumnSpacing="20">
-		<!-- Left Column -->
-		<Grid ColumnDefinitions="*, *" RowDefinitions="Auto,Auto" ColumnSpacing="20" RowSpacing="20">
-				<!-- Project Summary Section (Pipeline & Cost/Budget) -->
-				<local:ProjectSummarySectionView/>
+	<WrapPanel Orientation="Horizontal">
+		<!-- Left Column Group -->
+		<StackPanel MinWidth="650" Margin="0,0,20,20">
+			<!-- Project Summary Section (Pipeline & Cost/Budget) -->
+			<!-- Using a Grid to simulate the original 50% width constraint if desired, or let it stretch -->
+			<!-- The view itself handles internal columns, so stretching is fine (it will use 50% internally) -->
+			<local:ProjectSummarySectionView Margin="0,0,0,20"/>
 
-				<!-- Project Breakdown -->
-				<local:ProjectBreakdownView Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"/>
-		</Grid>
+			<!-- Project Breakdown -->
+			<local:ProjectBreakdownView/>
+		</StackPanel>
 
-		<!-- Right Column -->
-		<StackPanel Grid.Column="1" Spacing="20">
+		<!-- Right Column Group -->
+		<StackPanel MinWidth="350" Margin="0,0,20,20">
 			<!-- Team Pulse -->
 			<local:ProjectPulseView/>
 		</StackPanel>
-	</Grid>
+	</WrapPanel>
 </UserControl>

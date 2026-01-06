@@ -89,9 +89,6 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 
-
-
-
 								<TextBlock Text="{Binding ErrorMessage}"
 										   Foreground="Red"
 										   FontSize="12"
@@ -102,7 +99,7 @@
 										Classes="Primary Large" />
 
 								<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
-									<TextBlock Text="Already have an account?" Foreground="{DynamicResource LoginTextLight}" FontSize="11"/>
+									<TextBlock Text="Already have an account?" Foreground="{DynamicResource LoginTextLight}" FontSize="11" VerticalAlignment="Center"/>
 									<Button Content="Login"
 											x:CompileBindings="False"
 											Command="{Binding $parent[Window].DataContext.NavigateToLoginCommand}"

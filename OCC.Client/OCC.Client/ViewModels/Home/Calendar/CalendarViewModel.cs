@@ -10,9 +10,15 @@ namespace OCC.Client.ViewModels.Home.Calendar
 {
     public partial class CalendarViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<ProjectTask> _taskRepository;
         private readonly IRepository<Project> _projectRepository;
         private readonly IAuthService _authService;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private DateTime _currentMonth;
@@ -41,22 +47,22 @@ namespace OCC.Client.ViewModels.Home.Calendar
         [ObservableProperty] 
         private bool _isBusy;
 
-        // Using ProjectTask now
         [ObservableProperty]
         private ObservableCollection<ProjectTask> _dayTasks = new();
+
+        #endregion
+
+        #region Constructors
 
         public CalendarViewModel()
         {
             _taskRepository = new MockProjectTaskRepository();
-            // In a real app we'd inject these too, but for now we retain existing constructor signature 
-            // and instantiate mocks if needed, or better, we update the constructor
             _projectRepository = new MockProjectRepository();
-            _authService = new MockAuthService(new MockUserRepository()); // Fallback
+            _authService = new MockAuthService(new MockUserRepository()); 
             CurrentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             GenerateCalendar();
         }
         
-        // Proper constructor for DI
         public CalendarViewModel(IRepository<ProjectTask> taskRepository, IRepository<Project> projectRepository, IAuthService authService)
         {
              _taskRepository = taskRepository;
@@ -65,6 +71,10 @@ namespace OCC.Client.ViewModels.Home.Calendar
              CurrentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
              GenerateCalendar();
         }
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private void NextMonth()
@@ -96,6 +106,10 @@ namespace OCC.Client.ViewModels.Home.Calendar
              IsCreatePopupVisible = false;
              CreateTaskPopup = null;
         }
+
+        #endregion
+
+        #region Methods
 
         private async void GenerateCalendar()
         {
@@ -217,6 +231,10 @@ namespace OCC.Client.ViewModels.Home.Calendar
             }
         }
 
+        #endregion
+
+        #region Helper Methods
+
         private string GetTaskColor(Guid taskId)
         {
             string[] palette = 
@@ -238,5 +256,7 @@ namespace OCC.Client.ViewModels.Home.Calendar
 
         private DateTime GetTaskStart(ProjectTask t) => t.StartDate.Date;
         private DateTime GetTaskEnd(ProjectTask t) => t.FinishDate.Date;
+
+        #endregion
     }
 }

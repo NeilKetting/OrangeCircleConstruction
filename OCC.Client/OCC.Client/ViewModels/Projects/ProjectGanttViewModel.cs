@@ -10,7 +10,13 @@ namespace OCC.Client.ViewModels.Projects
 {
     public partial class ProjectGanttViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<ProjectTask> _taskRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private ObservableCollection<GanttTaskWrapper> _ganttTasks = new();
@@ -24,9 +30,6 @@ namespace OCC.Client.ViewModels.Projects
         [ObservableProperty]
         private double _pixelsPerDay = 50.0; // Adjustable zoom
 
-        public ObservableCollection<GanttDateHeader> DateHeaders { get; } = new();
-        public ObservableCollection<GanttDependencyLine> Dependencies { get; } = new();
-
         [ObservableProperty]
         private double _rowHeight = 24.0;
 
@@ -36,10 +39,30 @@ namespace OCC.Client.ViewModels.Projects
         [ObservableProperty]
         private double _canvasHeight = 600;
 
+        #endregion
+
+        #region Properties
+
+        public ObservableCollection<GanttDateHeader> DateHeaders { get; } = new();
+        public ObservableCollection<GanttDependencyLine> Dependencies { get; } = new();
+
+        #endregion
+
+        #region Constructors
+
+        public ProjectGanttViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+
         public ProjectGanttViewModel(IRepository<ProjectTask> taskRepository)
         {
             _taskRepository = taskRepository;
         }
+
+        #endregion
+
+        #region Methods
 
         public async void LoadTasks(Guid projectId)
         {
@@ -102,7 +125,11 @@ namespace OCC.Client.ViewModels.Projects
             // regardless of database values or XML anomalies.
             HarmonizeVisualDates(GanttTasks.ToList());
         }
-        
+
+        #endregion
+
+        #region Helper Methods
+
         private void HarmonizeVisualDates(List<GanttTaskWrapper> wrappers)
         {
             // 1. Build Visual Hierarchy
@@ -207,6 +234,8 @@ namespace OCC.Client.ViewModels.Projects
                 index++;
             }
         }
+
+        #endregion
     }
 
     public class GanttDependencyLine

@@ -10,9 +10,22 @@ namespace OCC.Client.ViewModels.Shared
 {
     public partial class ProfileViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IAuthService _authService;
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<User> _userRepository;
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler? CloseRequested;
+        public event EventHandler? ChangeEmailRequested;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _firstName = string.Empty;
@@ -35,7 +48,15 @@ namespace OCC.Client.ViewModels.Shared
         [ObservableProperty]
         private UserRole _selectedRole;
 
+        #endregion
+
+        #region Properties
+
         public ObservableCollection<UserRole> Roles { get; } = new(Enum.GetValues<UserRole>());
+
+        #endregion
+
+        #region Constructors
 
         public ProfileViewModel(IAuthService authService, IRepository<Project> projectRepository)
         {
@@ -45,23 +66,9 @@ namespace OCC.Client.ViewModels.Shared
             LoadUserData();
         }
 
-        private void LoadUserData()
-        {
-            var user = _authService.CurrentUser;
-            if (user != null)
-            {
-                FirstName = user.FirstName;
-                LastName = user.LastName;
-                Email = user.Email;
-                Initials = GetInitials(user.DisplayName);
-                Phone = user.Phone ?? "";
-                Location = user.Location ?? "";
-                SelectedRole = user.UserRole;
-            }
-        }
+        #endregion
 
-        public event EventHandler? CloseRequested;
-        public event EventHandler? ChangeEmailRequested;
+        #region Commands
 
         [RelayCommand]
         private void EditEmail() 
@@ -90,6 +97,30 @@ namespace OCC.Client.ViewModels.Shared
             }
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
+
+        #endregion
+
+        #region Methods
+
+        private void LoadUserData()
+        {
+            var user = _authService.CurrentUser;
+            if (user != null)
+            {
+                FirstName = user.FirstName;
+                LastName = user.LastName;
+                Email = user.Email;
+                Initials = GetInitials(user.DisplayName);
+                Phone = user.Phone ?? "";
+                Location = user.Location ?? "";
+                SelectedRole = user.UserRole;
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
+
         private string GetInitials(string? displayName)
         {
             if (string.IsNullOrWhiteSpace(displayName)) return "U";
@@ -97,5 +128,7 @@ namespace OCC.Client.ViewModels.Shared
             if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
             return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpper();
         }
+
+        #endregion
     }
 }

@@ -8,8 +8,14 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 {
     public partial class SummaryViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<ProjectTask> _taskRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _totalProjects = "0";
@@ -20,7 +26,6 @@ namespace OCC.Client.ViewModels.Home.Dashboard
         [ObservableProperty]
         private string _projectsCompleted = "0";
 
-        // Task Graph Properties
         [ObservableProperty]
         private int _notStartedCount;
 
@@ -35,17 +40,43 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 
         [ObservableProperty]
         private double _notStartedAngle;       
+
         [ObservableProperty]
         private double _inProgressAngle;      
+
         [ObservableProperty]
         private double _completedAngle;
 
         [ObservableProperty]
         private double _notStartedStartAngle;
+
         [ObservableProperty]
         private double _inProgressStartAngle;
+
         [ObservableProperty]
         private double _completedStartAngle;
+
+        [ObservableProperty]
+        private double _totalActualHours;
+
+        [ObservableProperty]
+        private double _totalPlannedHours;
+
+        [ObservableProperty]
+        private double _timeChartAngle;
+
+        [ObservableProperty]
+        private double _timeChartStartAngle = -90;
+
+        [ObservableProperty]
+        private string _timeChartColor = "#22C55E"; // Green by default
+
+        [ObservableProperty]
+        private double _timeEfficiencyPercentage;
+
+        #endregion
+
+        #region Constructors
 
         public SummaryViewModel(IRepository<Project> projectRepository, IRepository<ProjectTask> taskRepository)
         {
@@ -54,8 +85,11 @@ namespace OCC.Client.ViewModels.Home.Dashboard
             LoadData();
         }
 
-        // Design-time ctor
         public SummaryViewModel() : this(new MockProjectRepository(), new MockProjectTaskRepository()) { }
+
+        #endregion
+
+        #region Methods
 
         private async void LoadData()
         {
@@ -89,6 +123,10 @@ namespace OCC.Client.ViewModels.Home.Dashboard
             CalculateChartAngles();
         }
 
+        #endregion
+
+        #region Helper Methods
+
         private void CalculateChartAngles()
         {
             if (TotalTaskCount == 0) return;
@@ -105,25 +143,6 @@ namespace OCC.Client.ViewModels.Home.Dashboard
             InProgressStartAngle = NotStartedStartAngle + NotStartedAngle;
             CompletedStartAngle = InProgressStartAngle + InProgressAngle;
         }
-
-        // Time Chart Properties
-        [ObservableProperty]
-        private double _totalActualHours;
-
-        [ObservableProperty]
-        private double _totalPlannedHours;
-
-        [ObservableProperty]
-        private double _timeChartAngle;
-
-        [ObservableProperty]
-        private double _timeChartStartAngle = -90;
-
-        [ObservableProperty]
-        private string _timeChartColor = "#22C55E"; // Green by default
-
-        [ObservableProperty]
-        private double _timeEfficiencyPercentage;
 
         private void CalculateTimeStatistics(System.Collections.Generic.List<ProjectTask> allTasks)
         {
@@ -168,5 +187,7 @@ namespace OCC.Client.ViewModels.Home.Dashboard
                 TimeEfficiencyPercentage = 0;
             }
         }
+
+        #endregion
     }
 }

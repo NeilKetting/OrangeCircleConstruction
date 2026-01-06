@@ -10,12 +10,23 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 {
     public partial class EmployeeDetailViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<Employee> _staffRepository;
+        private Guid? _existingStaffId;
+        private DateTime _calculatedDoB = DateTime.Now.AddYears(-30);
+
+        #endregion
+
+        #region Events
 
         public event EventHandler? CloseRequested;
         public event EventHandler? EmployeeAdded;
 
-        // Form Properties matching View
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private string _employeeNumber = string.Empty;
 
@@ -32,19 +43,17 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         private IdType _selectedIdType = IdType.RSAId;
 
         [ObservableProperty]
-        private string _phone = string.Empty; // Not in Model yet, but in View
+        private string _phone = string.Empty; 
 
         [ObservableProperty]
         private string _email = string.Empty;
 
         [ObservableProperty]
-        private StaffRole _selectedSkill = StaffRole.GeneralWorker;
+        private EmployeeRole _selectedSkill = EmployeeRole.GeneralWorker;
 
         [ObservableProperty]
         private double _hourlyRate;
 
-        // Employment Date (Not in model explicitly, using as placeholder or maybe DoB? No, DoB is calculated)
-        // We will store it but it won't persist to StaffMember unless we add a field later.
         [ObservableProperty]
         private DateTimeOffset _employmentDate = DateTimeOffset.Now;
 
@@ -52,9 +61,18 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         private EmploymentType _selectedEmploymentType = EmploymentType.Permanent;
 
         [ObservableProperty]
-        private string _contractDuration = string.Empty; // For UI binding
+        private string _contractDuration = string.Empty;
 
-        // Helper boolean properties for RadioButtons
+        [ObservableProperty]
+        private string _title = "Add Employee";
+
+        [ObservableProperty]
+        private string _saveButtonText = "Add Employee";
+
+        #endregion
+
+        #region Properties
+
         public bool IsRsaId
         {
             get => SelectedIdType == IdType.RSAId;
@@ -103,84 +121,38 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 
         public bool IsContractVisible => IsContract;
 
-        // Calculated DoB
-        private DateTime _calculatedDoB = DateTime.Now.AddYears(-30);
+        // Exposed Enum Values for ComboBox
+        public EmployeeRole[] EmployeeRoles { get; } = Enum.GetValues<EmployeeRole>();
+
+        public string DisplayName
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(FirstName) && string.IsNullOrWhiteSpace(LastName))
+                {
+                    return _existingStaffId.HasValue ? "Edit Employee" : "New Employee";
+                }
+                return $"{FirstName}, {LastName}".Trim();
+            }
+        }
+
+        #endregion
+
+        #region Constructors
 
         public EmployeeDetailViewModel(IRepository<Employee> staffRepository)
         {
             _staffRepository = staffRepository;
         }
 
-        // Parameterless constructor for design-time or empty init
         public EmployeeDetailViewModel() 
         {
             // _staffRepository will be null, handle in Save
         }
 
-        partial void OnIdNumberChanged(string value)
-        {
-            if (SelectedIdType == IdType.RSAId && value.Length >= 6)
-            {
-                CalculateDoBFromRsaId(value);
-            }
-        }
+        #endregion
 
-        partial void OnSelectedIdTypeChanged(IdType value)
-        {
-            // Re-validate/calc if needed
-             if (value == IdType.RSAId && IdNumber.Length >= 6)
-            {
-                CalculateDoBFromRsaId(IdNumber);
-            }
-        }
-
-        private void CalculateDoBFromRsaId(string id)
-        {
-            // YYMMDD
-            if (id.Length < 6) return;
-            string datePart = id.Substring(0, 6);
-            
-            // Try parse using yyMMdd
-            if (DateTime.TryParseExact(datePart, "yyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dob))
-            {
-                _calculatedDoB = dob;
-            }
-        }
-
-        private Guid? _existingStaffId;
-
-        [ObservableProperty]
-        private string _title = "Add Employee";
-
-        [ObservableProperty]
-        private string _saveButtonText = "Add Employee";
-
-        public void Load(Employee staff)
-        {
-            if (staff == null) return;
-
-            _existingStaffId = staff.Id;
-            Title = "Edit Employee";
-            SaveButtonText = "Save Changes";
-
-            EmployeeNumber = staff.EmployeeNumber;
-            FirstName = staff.FirstName;
-            LastName = staff.LastName;
-            IdNumber = staff.IdNumber;
-            SelectedIdType = staff.IdType;
-            Email = staff.Email;
-            SelectedSkill = staff.Role;
-            HourlyRate = staff.HourlyRate;
-            SelectedEmploymentType = staff.EmploymentType;
-            // EmploymentDate and Phone are not on model yet
-            
-            // Trigger property change notifications for radio buttons
-            OnPropertyChanged(nameof(IsRsaId));
-            OnPropertyChanged(nameof(IsPassport));
-            OnPropertyChanged(nameof(IsPermanent));
-            OnPropertyChanged(nameof(IsContract));
-            OnPropertyChanged(nameof(IsContractVisible));
-        }
+        #region Commands
 
         [RelayCommand]
         private async Task Save()
@@ -209,10 +181,13 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             staff.IdNumber = IdNumber;
             staff.IdType = SelectedIdType;
             staff.Email = Email;
+            staff.Phone = Phone;
             staff.Role = SelectedSkill;
             staff.HourlyRate = HourlyRate;
             staff.EmploymentType = SelectedEmploymentType;
             staff.DoB = _calculatedDoB;
+            staff.EmploymentDate = EmploymentDate.DateTime;
+            staff.ContractDuration = ContractDuration;
 
             if (_staffRepository != null)
             {
@@ -235,5 +210,73 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         {
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
+
+        #endregion
+
+        #region Methods
+
+        public void Load(Employee staff)
+        {
+            if (staff == null) return;
+
+            _existingStaffId = staff.Id;
+            Title = "Edit Employee";
+            SaveButtonText = "Save Changes";
+
+            EmployeeNumber = staff.EmployeeNumber;
+            FirstName = staff.FirstName;
+            LastName = staff.LastName;
+            IdNumber = staff.IdNumber;
+            SelectedIdType = staff.IdType;
+            Email = staff.Email;
+            Phone = staff.Phone ?? string.Empty;
+            SelectedSkill = staff.Role;
+            HourlyRate = staff.HourlyRate;
+            SelectedEmploymentType = staff.EmploymentType;
+            EmploymentDate = staff.EmploymentDate;
+            ContractDuration = staff.ContractDuration ?? string.Empty;
+            
+            OnPropertyChanged(nameof(IsRsaId));
+            OnPropertyChanged(nameof(IsPassport));
+            OnPropertyChanged(nameof(IsPermanent));
+            OnPropertyChanged(nameof(IsContract));
+            OnPropertyChanged(nameof(IsContractVisible));
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        partial void OnIdNumberChanged(string value)
+        {
+            if (SelectedIdType == IdType.RSAId && value.Length >= 6)
+            {
+                CalculateDoBFromRsaId(value);
+            }
+        }
+
+        partial void OnSelectedIdTypeChanged(IdType value)
+        {
+             if (value == IdType.RSAId && IdNumber.Length >= 6)
+            {
+                CalculateDoBFromRsaId(IdNumber);
+            }
+        }
+
+        partial void OnFirstNameChanged(string value) => OnPropertyChanged(nameof(DisplayName));
+        partial void OnLastNameChanged(string value) => OnPropertyChanged(nameof(DisplayName));
+
+        private void CalculateDoBFromRsaId(string id)
+        {
+            if (id.Length < 6) return;
+            string datePart = id.Substring(0, 6);
+            
+            if (DateTime.TryParseExact(datePart, "yyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dob))
+            {
+                _calculatedDoB = dob;
+            }
+        }
+
+        #endregion
     }
 }

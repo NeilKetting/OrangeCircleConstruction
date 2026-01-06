@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace OCC.Client.Views.Notifications
 {
-    public partial class NotificationsView : UserControl
+    public partial class NotificationView : UserControl
     {
-        public NotificationsView()
+        public NotificationView()
         {
             InitializeComponent();
         }

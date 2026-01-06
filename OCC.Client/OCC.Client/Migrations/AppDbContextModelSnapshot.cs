@@ -122,6 +122,9 @@ namespace OCC.Client.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ContractDuration")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DoB")
                         .HasColumnType("datetime2");
 
@@ -132,6 +135,9 @@ namespace OCC.Client.Migrations
                     b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EmploymentDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("EmploymentType")
                         .HasColumnType("int");
@@ -154,12 +160,16 @@ namespace OCC.Client.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("StaffMembers");
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("OCC.Shared.Models.Project", b =>

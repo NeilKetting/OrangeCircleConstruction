@@ -2,16 +2,27 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using OCC.Shared.Models;
 using OCC.Client.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using OCC.Shared.Models;
 
 namespace OCC.Client.ViewModels.Shared
 {
     public partial class WorkHoursPopupViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly AppDbContext _context;
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler? CloseRequested;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private TimeSpan _startTime = new TimeSpan(8, 0, 0);
@@ -22,13 +33,39 @@ namespace OCC.Client.ViewModels.Shared
         [ObservableProperty]
         private int _lunchDurationMinutes = 60;
 
-        public event EventHandler? CloseRequested;
+        #endregion
+
+        #region Constructors
 
         public WorkHoursPopupViewModel(AppDbContext context)
         {
             _context = context;
             LoadSettings();
         }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private async Task Save()
+        {
+            await SaveSetting("WorkStartTime", StartTime.ToString());
+            await SaveSetting("WorkEndTime", EndTime.ToString());
+            await SaveSetting("LunchDurationMinutes", LunchDurationMinutes.ToString());
+
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        [RelayCommand]
+        private void Cancel()
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Methods
 
         private async void LoadSettings()
         {
@@ -48,16 +85,6 @@ namespace OCC.Client.ViewModels.Shared
             }
         }
 
-        [RelayCommand]
-        private async Task Save()
-        {
-            await SaveSetting("WorkStartTime", StartTime.ToString());
-            await SaveSetting("WorkEndTime", EndTime.ToString());
-            await SaveSetting("LunchDurationMinutes", LunchDurationMinutes.ToString());
-
-            CloseRequested?.Invoke(this, EventArgs.Empty);
-        }
-
         private async Task SaveSetting(string key, string value)
         {
             var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == key);
@@ -73,10 +100,6 @@ namespace OCC.Client.ViewModels.Shared
             await _context.SaveChangesAsync();
         }
 
-        [RelayCommand]
-        private void Cancel()
-        {
-            CloseRequested?.Invoke(this, EventArgs.Empty);
-        }
+        #endregion
     }
 }

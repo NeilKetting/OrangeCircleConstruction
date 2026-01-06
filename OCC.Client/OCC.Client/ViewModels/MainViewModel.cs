@@ -13,32 +13,16 @@ namespace OCC.Client.ViewModels
 {
     public partial class MainViewModel : ViewModelBase, IRecipient<NavigationMessage>, IRecipient<OpenProfileMessage>
     {
+        #region Private Members
+
         private readonly IServiceProvider _serviceProvider;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private ViewModelBase _currentViewModel;
-
-        public MainViewModel(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-            _currentViewModel = _serviceProvider.GetRequiredService<LoginViewModel>();
-
-            WeakReferenceMessenger.Default.RegisterAll(this);
-        }
-
-        public void Receive(NavigationMessage message)
-        {
-            CurrentViewModel = message.Value;
-        }
-
-        [RelayCommand]
-        public void NavigateToLogin() => CurrentViewModel = _serviceProvider.GetRequiredService<LoginViewModel>();
-
-        [RelayCommand]
-        public void NavigateToRegister() => CurrentViewModel = _serviceProvider.GetRequiredService<RegisterViewModel>();
-
-        [RelayCommand]
-        public void NavigateToHome() => CurrentViewModel = _serviceProvider.GetRequiredService<ShellViewModel>();
 
         [ObservableProperty]
         private bool _isProfileVisible;
@@ -51,6 +35,47 @@ namespace OCC.Client.ViewModels
 
         [ObservableProperty]
         private ViewModels.Shared.ChangeEmailPopupViewModel? _changeEmailPopup;
+
+        #endregion
+
+        #region Constructors
+
+        public MainViewModel()
+        {
+            // Parameterless constructor for design-time support                
+
+            WeakReferenceMessenger.Default.RegisterAll(this);
+        }
+
+        public MainViewModel(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+            _currentViewModel = _serviceProvider.GetRequiredService<LoginViewModel>();
+
+            WeakReferenceMessenger.Default.RegisterAll(this);
+        }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        public void NavigateToLogin() => CurrentViewModel = _serviceProvider.GetRequiredService<LoginViewModel>();
+
+        [RelayCommand]
+        public void NavigateToRegister() => CurrentViewModel = _serviceProvider.GetRequiredService<RegisterViewModel>();
+
+        [RelayCommand]
+        public void NavigateToHome() => CurrentViewModel = _serviceProvider.GetRequiredService<ShellViewModel>();
+
+        #endregion
+
+        #region Methods
+
+        public void Receive(NavigationMessage message)
+        {
+            CurrentViewModel = message.Value;
+        }
 
         public void Receive(OpenProfileMessage message)
         {
@@ -66,6 +91,10 @@ namespace OCC.Client.ViewModels
             CurrentProfile.ChangeEmailRequested += (s, e) => OpenChangeEmailPopup();
             IsProfileVisible = true;
         }
+
+        #endregion
+
+        #region Helper Methods
 
         private void OpenChangeEmailPopup()
         {
@@ -87,5 +116,7 @@ namespace OCC.Client.ViewModels
              };
              IsChangeEmailVisible = true;
         }
+
+        #endregion
     }
 }

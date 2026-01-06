@@ -4,101 +4,105 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home"
 			 xmlns:homeComp="clr-namespace:OCC.Client.Views.Home"
-             xmlns:homeDash="clr-namespace:OCC.Client.Views.Home.Dashboard"
-             xmlns:ps="clr-namespace:OCC.Client.Views.Home.ProjectSummary"
-             xmlns:homeTasks="clr-namespace:OCC.Client.Views.Home.Tasks"
-			xmlns:homeShared="clr-namespace:OCC.Client.Views.Home.Shared"
+			 xmlns:homeDash="clr-namespace:OCC.Client.Views.Home.Dashboard"
+			 xmlns:ps="clr-namespace:OCC.Client.Views.Home.ProjectSummary"
+			 xmlns:homeTasks="clr-namespace:OCC.Client.Views.Home.Tasks"
+			 xmlns:homeShared="clr-namespace:OCC.Client.Views.Home.Shared"
+			 xmlns:homeCal="clr-namespace:OCC.Client.Views.Home.Calendar"
+			 xmlns:homeTime="clr-namespace:OCC.Client.Views.Time"
+			 xmlns:homeProjects="clr-namespace:OCC.Client.Views.Projects"
+			 xmlns:settings="clr-namespace:OCC.Client.Views.Settings"
+			 xmlns:notifications="clr-namespace:OCC.Client.Views.Notifications"
+			 xmlns:globalComp="clr-namespace:OCC.Client.Views.Shared"
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 mc:Ignorable="d" d:DesignWidth="1024"
+			 x:Class="OCC.Client.Views.Home.HomeView"
+			 x:DataType="vm:HomeViewModel">
 
-			xmlns:homeCal="clr-namespace:OCC.Client.Views.Home.Calendar"
-			xmlns:homeTime="clr-namespace:OCC.Client.Views.Time"
 
-			xmlns:homeProjects="clr-namespace:OCC.Client.Views.Projects"
-            xmlns:settings="clr-namespace:OCC.Client.Views.Settings"
-			xmlns:notifications="clr-namespace:OCC.Client.Views.Notifications"
-			xmlns:globalComp="clr-namespace:OCC.Client.Views.Shared"
-			xmlns:conv="clr-namespace:OCC.Client.Converters"
-			mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
-			x:Class="OCC.Client.Views.Home.HomeView"
-			x:DataType="vm:HomeViewModel">
-
+	<Design.DataContext>
+		<vm:HomeViewModel/>
+	</Design.DataContext>
 
 	<Grid>
-        <!-- Dashboard Content -->
-        <Grid Background="{DynamicResource AppBackgroundSlate}" RowDefinitions="Auto, *">
-            <!-- Top Bar -->
-            <homeShared:TopBarView Grid.Row="0" DataContext="{Binding TopBar}"/>
+		<!-- Dashboard Content -->
+		<Grid Background="{DynamicResource AppBackgroundSlate}" RowDefinitions="50, *">
+			<!-- Top Bar -->
+			<homeShared:TopBarView Grid.Row="0" DataContext="{Binding TopBar}"/>
 
-            <!-- Dashboard View -->
-            <ScrollViewer Grid.Row="1" IsVisible="{Binding IsDashboardVisible}">
-                <Grid RowDefinitions="Auto, *" RowSpacing="25" Margin="30">
-                    <!-- Greeting Area -->
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="{Binding Greeting}"
-                                   FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
-                        <TextBlock Text="{Binding CurrentDate}" Foreground="{DynamicResource TextSecondaryGray}" FontSize="14"/>
-                    </StackPanel>
+			<!-- Dashboard View -->
+			<ScrollViewer Grid.Row="1" IsVisible="{Binding IsDashboardVisible}">
+				<Grid RowDefinitions="Auto, *" RowSpacing="25">
+					<!-- Greeting Area -->
+					<Border Classes="TopHeader" Background="{DynamicResource OrangeBackgroundBrush}">
+						<StackPanel Spacing="5">
+							<TextBlock Text="{Binding Greeting, FallbackValue=Hello Neil}"
+									   FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+							<TextBlock Text="{Binding CurrentDate, FallbackValue=5th Jan 2026}" Foreground="{DynamicResource TextPrimaryDark}" FontSize="14"/>
+						</StackPanel>
+					</Border>
 
-                    <!-- Widgets Content -->
-                    <Panel Grid.Row="1">
-                        <!-- My Summary (Original Dashboard) -->
-                        <Grid ColumnDefinitions="1.5*, 1*, *" RowDefinitions="*, *" IsVisible="{Binding IsMySummaryVisible}">
-                            <!-- My Summary Widget -->
-                            <homeDash:SummaryView Grid.Column="0" MinWidth="450" DataContext="{Binding MySummary}"/>
+					<!-- Widgets Content -->
+					<Panel Grid.Row="1">
+						<!-- My Summary (Original Dashboard) -->
+						<WrapPanel Orientation="Horizontal" IsVisible="{Binding IsMySummaryVisible, FallbackValue=false}">
+							<!-- My Summary Widget -->
+							<homeDash:SummaryView MinWidth="450" Margin="0,0,25,25" DataContext="{Binding MySummary}"/>
 
-                            <!-- Project Pulse Widget -->
-                            <homeDash:PulseView Grid.Column="1" MinWidth="450" DataContext="{Binding ProjectPulse}"/>
+							<!-- Project Pulse Widget -->
+							<homeDash:PulseView MinWidth="450" Margin="0,0,25,25" DataContext="{Binding ProjectPulse}"/>
 
-                            <!-- My Tasks Widget -->
-                            <homeDash:TasksWidgetView Grid.Column="0" Grid.Row="1" DataContext="{Binding MyTasks}"/>
-                        </Grid>
+							<!-- My Tasks Widget -->
+							<homeDash:TasksWidgetView MinWidth="450" Margin="0,0,25,25" DataContext="{Binding MyTasks}"/>
+						</WrapPanel>
 
-                        <!-- Project Summary View -->
-                        <Border Grid.Row="1" Grid.Column="2" IsVisible="{Binding IsProjectSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
-                            <ps:ProjectSummaryView DataContext="{Binding ProjectSummary}"/>
-                        </Border>
+						<!-- Project Summary View -->
+						<Border Grid.Row="1" Grid.Column="2" IsVisible="{Binding IsProjectSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
+							<ps:ProjectSummaryView DataContext="{Binding ProjectSummary}"/>
+						</Border>
 
-                        <!-- Team Summary View -->
-                        <Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
-                            <homeDash:TeamSummaryView DataContext="{Binding TeamSummary}"/>
-                        </Border>
-                    </Panel>
-                </Grid>
-            </ScrollViewer>
-        </Grid>
-        
-        <!-- Overlay Layer (Task Detail, Create Project, New Task Popup) - Keep these as they are related to Dashboard/Home interactions? -->
-        <!-- Or should these be Global? TaskDetail is likely Global. -->
-        <!-- The user wants "StaffManagement" separate. -->
-        <!-- I will keep the overlays here for now if they are triggered from Dashboard widgets. -->
-        
-        <Grid 
-              IsVisible="{Binding IsTaskDetailVisible, FallbackValue=false}"
-              Background="#40000000"
-              ClipToBounds="False"
-              Name="OverlayGrid"
-              PointerPressed="OnOverlayPointerPressed">
-            <homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail, FallbackValue=false}"
-                                     Width="1000"
-                                     HorizontalAlignment="Right"/>
-        </Grid>
+						<!-- Team Summary View -->
+						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
+							<homeDash:TeamSummaryView DataContext="{Binding TeamSummary}"/>
+						</Border>
+					</Panel>
+				</Grid>
+			</ScrollViewer>
+		</Grid>
+
+		<!-- Overlay Layer (Task Detail, Create Project, New Task Popup) - Keep these as they are related to Dashboard/Home interactions? -->
+		<!-- Or should these be Global? TaskDetail is likely Global. -->
+		<!-- The user wants "StaffManagement" separate. -->
+		<!-- I will keep the overlays here for now if they are triggered from Dashboard widgets. -->
+
+		<Grid
+		IsVisible="{Binding IsTaskDetailVisible, FallbackValue=false}"
+		Background="#40000000"
+		ClipToBounds="False"
+		Name="OverlayGrid"
+		PointerPressed="OnOverlayPointerPressed">
+			<homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail, FallbackValue=false}"
+									  Width="1000"
+									  HorizontalAlignment="Right"/>
+		</Grid>
 
 
-        <!-- Create Project Overlay -->
-        <Grid 
-              IsVisible="{Binding IsCreateProjectVisible, FallbackValue=false}"
-              Background="#40000000">
-            <homeProjects:CreateProjectView DataContext="{Binding CreateProjectVM}"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
-        </Grid>
-        <!-- New Task Popup Overlay -->
-        <Grid 
-              IsVisible="{Binding IsNewTaskPopupVisible, FallbackValue=false}"
-              Background="#40000000">
-            <homeTasks:NewTaskPopupView DataContext="{Binding NewTaskPopup}"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
-        </Grid>
+		<!-- Create Project Overlay -->
+		<Grid
+		IsVisible="{Binding IsCreateProjectVisible, FallbackValue=false}"
+		Background="#40000000">
+			<homeProjects:CreateProjectView DataContext="{Binding CreateProjectVM}"
+											HorizontalAlignment="Center"
+											VerticalAlignment="Center"/>
+		</Grid>
+		<!-- New Task Popup Overlay -->
+		<Grid
+		IsVisible="{Binding IsNewTaskPopupVisible, FallbackValue=false}"
+		Background="#40000000">
+			<homeTasks:NewTaskPopupView DataContext="{Binding NewTaskPopup}"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"/>
+		</Grid>
 
 	</Grid>
 </UserControl>

@@ -11,8 +11,21 @@ namespace OCC.Client.ViewModels.Time
 {
     public partial class RollCallViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly ITimeService _timeService;
-        
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler? CloseRequested;
+        public event EventHandler? SaveCompleted;
+
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private DateTime _date = DateTime.Today;
 
@@ -22,8 +35,9 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private bool _isSaving;
 
-        public event EventHandler? CloseRequested;
-        public event EventHandler? SaveCompleted;
+        #endregion
+
+        #region Constructors
 
         public RollCallViewModel(ITimeService timeService)
         {
@@ -31,26 +45,9 @@ namespace OCC.Client.ViewModels.Time
             _ = LoadStaff();
         }
 
-        private async Task LoadStaff()
-        {
-            var staff = await _timeService.GetAllStaffAsync();
-            var existingRecords = (await _timeService.GetDailyAttendanceAsync(Date)).ToList();
-            
-            StaffList.Clear();
-            foreach (var s in staff)
-            {
-                var vm = new StaffAttendanceViewModel(s);
-                var existing = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id);
-                if (existing != null)
-                {
-                    vm.Id = existing.Id;
-                    vm.Status = existing.Status;
-                    vm.LeaveReason = existing.LeaveReason;
-                    vm.DoctorsNotePath = existing.DoctorsNoteImagePath;
-                }
-                StaffList.Add(vm);
-            }
-        }
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private async Task Save()
@@ -85,5 +82,32 @@ namespace OCC.Client.ViewModels.Time
         {
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
+
+        #endregion
+
+        #region Methods
+
+        private async Task LoadStaff()
+        {
+            var staff = await _timeService.GetAllStaffAsync();
+            var existingRecords = (await _timeService.GetDailyAttendanceAsync(Date)).ToList();
+            
+            StaffList.Clear();
+            foreach (var s in staff)
+            {
+                var vm = new StaffAttendanceViewModel(s);
+                var existing = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id);
+                if (existing != null)
+                {
+                    vm.Id = existing.Id;
+                    vm.Status = existing.Status;
+                    vm.LeaveReason = existing.LeaveReason;
+                    vm.DoctorsNotePath = existing.DoctorsNoteImagePath;
+                }
+                StaffList.Add(vm);
+            }
+        }
+
+        #endregion
     }
 }

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using OCC.Client.Services;
 using OCC.Shared.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,18 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 {
     public partial class EmployeeManagementViewModel : ViewModelBase
     {
-        private readonly IRepository<Employee> _staffRepository;
+        #region Private Members
+
+        private readonly IRepository<Employee> _employeeRepository;
+        
+        /// <summary>
+        /// Cache for all loaded employees to support filtering without database calls
+        /// </summary>
+        private List<Employee> _allEmployees = new();
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _activeTab = "Manage Staff";
@@ -28,30 +40,136 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         [ObservableProperty]
         private string _searchQuery = string.Empty;
 
-        partial void OnSearchQueryChanged(string value)
-        {
-            FilterStaff();
-        }
-
-        // Cache for all loaded members
-        private System.Collections.Generic.List<Employee> _allStaffMembers = new();
-
         [ObservableProperty]
-        private ObservableCollection<Employee> _staffMembers = new();
+        private ObservableCollection<Employee> _employees = new();
 
         [ObservableProperty]
         private int _selectedFilterIndex = 0;
 
-        partial void OnSelectedFilterIndexChanged(int value)
+        [ObservableProperty]
+        private bool _isAddEmployeePopupVisible;
+
+        [ObservableProperty]
+        private EmployeeDetailViewModel? _addEmployeePopup;
+
+        [ObservableProperty]
+        private Employee? _selectedEmployee;
+
+        [ObservableProperty]
+        private int _totalCount;
+
+        #endregion
+
+        #region Constructors
+
+        public EmployeeManagementViewModel()
         {
-            FilterStaff();
+            // Designer constructor
         }
 
-        private void FilterStaff()
+        public EmployeeManagementViewModel(IRepository<Employee> employeeRepository)
         {
-            if (_allStaffMembers == null) return;
+            _employeeRepository = employeeRepository;
+            LoadData();
+        }
 
-            var filtered = _allStaffMembers.AsEnumerable();
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private void AddEmployee()
+        {
+            AddEmployeePopup = new EmployeeDetailViewModel(_employeeRepository);
+            AddEmployeePopup.CloseRequested += (s, e) => IsAddEmployeePopupVisible = false;
+            AddEmployeePopup.EmployeeAdded += (s, e) => 
+            {
+                IsAddEmployeePopupVisible = false;
+                LoadData();
+            };
+            IsAddEmployeePopupVisible = true;
+        }
+
+        [RelayCommand]
+        public void EditEmployee(Employee employee)
+        {
+            if (employee == null) return;
+
+            AddEmployeePopup = new EmployeeDetailViewModel(_employeeRepository);
+            AddEmployeePopup.Load(employee);
+            AddEmployeePopup.CloseRequested += (s, e) => IsAddEmployeePopupVisible = false;
+            AddEmployeePopup.EmployeeAdded += (s, e) => 
+            {
+                IsAddEmployeePopupVisible = false;
+                LoadData(); 
+            };
+            IsAddEmployeePopupVisible = true;
+        }
+
+        [RelayCommand]
+        public async Task DeleteEmployee(Employee employee)
+        {
+            if (employee == null) return;
+
+            // Optional: Confirm dialog could go here
+            await _employeeRepository.DeleteAsync(employee.Id);
+            LoadData();
+        }
+
+        [RelayCommand]
+        private void SwitchTab(string tabName)
+        {
+            ActiveTab = tabName;
+        }
+
+        #endregion
+
+        #region Methods
+
+        public async void LoadData()
+        {
+            try 
+            {
+                var employees = await _employeeRepository.GetAllAsync();
+                
+                _allEmployees = employees.ToList(); // Cache full list
+                FilterEmployees();
+                
+                TotalStaff = _allEmployees.Count;
+                TotalCount = _allEmployees.Count;
+                PermanentCount = _allEmployees.Count(s => s.EmploymentType == EmploymentType.Permanent);
+                ContractCount = _allEmployees.Count(s => s.EmploymentType == EmploymentType.Contract);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading employees: {ex.Message}");
+            }
+        }
+
+        partial void OnSearchQueryChanged(string value)
+        {
+            FilterEmployees();
+        }
+
+        partial void OnSelectedFilterIndexChanged(int value)
+        {
+            FilterEmployees();
+        }
+
+        partial void OnSelectedEmployeeChanged(Employee? value)
+        {
+            // Selection logic only, double-click handles edit now
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private void FilterEmployees()
+        {
+            if (_allEmployees == null) return;
+
+            var filtered = _allEmployees.AsEnumerable();
 
             // 1. Text Search
             if (!string.IsNullOrWhiteSpace(SearchQuery))
@@ -72,87 +190,9 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 _ => filtered
             };
 
-            StaffMembers = new ObservableCollection<Employee>(filtered);
+            Employees = new ObservableCollection<Employee>(filtered);
         }
 
-        public EmployeeManagementViewModel(IRepository<Employee> staffRepository)
-        {
-            _staffRepository = staffRepository;
-            LoadData(); 
-        }
-
-        public async void LoadData()
-        {
-            try 
-            {
-                var staff = await _staffRepository.GetAllAsync();
-                
-                _allStaffMembers = staff.ToList(); // Cache full list
-                FilterStaff();
-                
-                TotalStaff = _allStaffMembers.Count;
-                PermanentCount = _allStaffMembers.Count(s => s.EmploymentType == EmploymentType.Permanent);
-                ContractCount = _allStaffMembers.Count(s => s.EmploymentType == EmploymentType.Contract);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error loading staff: {ex.Message}");
-            }
-        }
-
-        [ObservableProperty]
-        private bool _isInvitePopupVisible;
-
-        [ObservableProperty]
-        private EmployeeDetailViewModel? _invitePopup;
-
-        [ObservableProperty]
-        private Employee? _selectedStaffMember;
-
-        partial void OnSelectedStaffMemberChanged(Employee? value)
-        {
-            if (value != null)
-            {
-                EditEmployee(value);
-                SelectedStaffMember = null; // Reset selection so we can click again if needed
-            }
-        }
-
-        [RelayCommand]
-        private void InvitePeople()
-        {
-            InvitePopup = new EmployeeDetailViewModel(_staffRepository);
-            InvitePopup.CloseRequested += (s, e) => IsInvitePopupVisible = false;
-            InvitePopup.EmployeeAdded += (s, e) => LoadData(); 
-            IsInvitePopupVisible = true;
-        }
-
-        [RelayCommand]
-        public void EditEmployee(Employee staff)
-        {
-            if (staff == null) return;
-
-            InvitePopup = new EmployeeDetailViewModel(_staffRepository);
-            InvitePopup.Load(staff);
-            InvitePopup.CloseRequested += (s, e) => IsInvitePopupVisible = false;
-            InvitePopup.EmployeeAdded += (s, e) => LoadData(); // Refresh list on save
-            IsInvitePopupVisible = true;
-        }
-
-        [RelayCommand]
-        public async Task DeleteEmployee(Employee staff)
-        {
-            if (staff == null) return;
-
-            // Optional: Confirm dialog could go here
-            await _staffRepository.DeleteAsync(staff.Id);
-            LoadData();
-        }
-
-        [RelayCommand]
-        private void SwitchTab(string tabName)
-        {
-            ActiveTab = tabName;
-        }
+        #endregion
     }
 }

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="using:OCC.Client.Views"
-        mc:Ignorable="d" MinWidth="1200" MinHeight="900"
+        mc:Ignorable="d" MinWidth="1024" MinHeight="768"
         x:Class="OCC.Client.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         WindowStartupLocation="CenterScreen"

@@ -1,7 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OCC.Client.Services;
+using OCC.Client.ViewModels.Messages;
 using OCC.Shared.Models;
+using Microsoft.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,7 +13,14 @@ namespace OCC.Client.ViewModels
 {
     public partial class RegisterViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IAuthService _authService;
+        private readonly IServiceProvider _serviceProvider;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _firstName = string.Empty;
@@ -36,13 +46,31 @@ namespace OCC.Client.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        #endregion
+
+        #region Properties
+
         public IEnumerable<UserRole> AvailableRoles => Enum.GetValues<UserRole>();
 
-        public RegisterViewModel(IAuthService authService)
+        #endregion
+
+        #region Constructors
+
+        public RegisterViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+
+        public RegisterViewModel(IAuthService authService, IServiceProvider serviceProvider)
         {
             _authService = authService;
+            _serviceProvider = serviceProvider;
             UserRole = UserRole.Guest; // Default role
         }
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private async Task RegisterAsync()
@@ -70,9 +98,15 @@ namespace OCC.Client.ViewModels
             }
             else
             {
-                ErrorMessage = null;
-                // Navigation to Main logic would go here
+                // Registration successful, but account is pending approval.
+                // Reset password for security
+                Password = string.Empty;
+                ErrorMessage = "Registration successful! Your account is pending administrator approval. Please check your email.";
+                
+                // Do NOT navigate to Login. Stay here so user can read message.
             }
         }
+
+        #endregion
     }
 }

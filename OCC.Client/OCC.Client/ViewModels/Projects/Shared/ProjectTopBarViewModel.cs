@@ -5,6 +5,18 @@ namespace OCC.Client.ViewModels.Projects.Shared
 {
     public partial class ProjectTopBarViewModel : ViewModelBase
     {
+        #region Private Members
+
+        #endregion
+
+        #region Events
+
+        public event System.EventHandler? DeleteProjectRequested;
+
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private string _activeTab = "List";
 
@@ -16,6 +28,13 @@ namespace OCC.Client.ViewModels.Projects.Shared
 
         [ObservableProperty]
         private int _trialDaysLeft = 25;
+
+        [ObservableProperty]
+        private System.Guid _projectId;
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private void SetActiveTab(string tabName)
@@ -35,15 +54,12 @@ namespace OCC.Client.ViewModels.Projects.Shared
              // TODO: Navigate to settings
         }
 
-        [ObservableProperty]
-        private System.Guid _projectId;
-
-        public event System.EventHandler? DeleteProjectRequested;
-
         [RelayCommand]
         private void DeleteProject()
         {
             DeleteProjectRequested?.Invoke(this, System.EventArgs.Empty);
         }
+
+        #endregion
     }
 }

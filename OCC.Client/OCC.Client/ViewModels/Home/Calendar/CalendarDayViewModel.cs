@@ -7,6 +7,8 @@ namespace OCC.Client.ViewModels.Home.Calendar
 {
     public partial class CalendarDayViewModel : ViewModelBase
     {
+        #region Observables
+
         [ObservableProperty]
         private DateTime _date;
 
@@ -19,9 +21,17 @@ namespace OCC.Client.ViewModels.Home.Calendar
         [ObservableProperty]
         private bool _isToday;
 
+        #endregion
+
+        #region Properties
+
         public double Opacity => IsCurrentMonth ? 1.0 : 0.3;
 
         public ObservableCollection<CalendarTaskViewModel> Tasks { get; } = new();
+
+        #endregion
+
+        #region Constructors
 
         public CalendarDayViewModel(DateTime date, bool isCurrentMonth)
         {
@@ -30,6 +40,8 @@ namespace OCC.Client.ViewModels.Home.Calendar
             IsCurrentMonth = isCurrentMonth;
             IsToday = date.Date == DateTime.Today;
         }
+
+        #endregion
     }
 
     public enum CalendarTaskSpanType
@@ -42,10 +54,8 @@ namespace OCC.Client.ViewModels.Home.Calendar
 
     public partial class CalendarTaskViewModel : ViewModelBase
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Color { get; set; } = "#3B82F6"; 
-        
+        #region Observables
+
         [ObservableProperty]
         private int _visualSlotIndex;
         
@@ -53,6 +63,14 @@ namespace OCC.Client.ViewModels.Home.Calendar
         [NotifyPropertyChangedFor(nameof(CornerRadius))]
         [NotifyPropertyChangedFor(nameof(Margin))]
         private CalendarTaskSpanType _spanType;
+
+        #endregion
+
+        #region Properties
+
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Color { get; set; } = "#3B82F6"; 
 
         public bool IsCompleted { get; set; }
         public DateTime Start { get; set; }
@@ -69,5 +87,7 @@ namespace OCC.Client.ViewModels.Home.Calendar
             CalendarTaskSpanType.End => new Avalonia.CornerRadius(0, 4, 4, 0),
             _ => new Avalonia.CornerRadius(4)
         };
+
+        #endregion
     }
 }

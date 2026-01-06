@@ -3,34 +3,161 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:OCC.Client.ViewModels.EmployeeManagement"
-             xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
 			 mc:Ignorable="d"
 			 x:Class="OCC.Client.Views.EmployeeManagement.EmployeeDetailView"
 			 x:DataType="vm:EmployeeDetailViewModel">
 
-	<Border Background="{DynamicResource SurfaceWhite}" CornerRadius="8" BoxShadow="0 10 30 0 #33000000"
-			VerticalAlignment="Center" HorizontalAlignment="Center">
-		<Grid RowDefinitions="Auto, Auto, Auto, Auto">
+	<Design.DataContext>
+		<vm:EmployeeDetailViewModel/>
+	</Design.DataContext>
+
+	<UserControl.Resources>
+		<conv:FriendlyEnumConverter x:Key="FriendlyEnumConverter"/>
+	</UserControl.Resources>
+
+	<Border Background="{DynamicResource SurfaceWhite}"
+			CornerRadius="0"
+			MinHeight="550"
+			MinWidth="900"
+			BoxShadow="0 2 15 5 #292828"
+			VerticalAlignment="Center"
+			HorizontalAlignment="Center">
+		<Grid RowDefinitions="Auto, *, Auto, Auto">
 
 			<!-- Header -->
-			<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="20,15">
-				<TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-				<Button Grid.Column="1" Classes="Close" Command="{Binding CancelCommand}">
-					<PathIcon Data="{StaticResource IconClose}" Width="14" Height="14"/>
-				</Button>
+			<Border Grid.Row="0"
+					Background="White"
+					BorderThickness="0,0,0,2"
+					BorderBrush="{DynamicResource PrimaryTeal}"
+					Padding="20,0">
+				<Grid Grid.Row="0"
+					  ColumnDefinitions="*, Auto"
+					  Margin="25">
+					<StackPanel Spacing="5">
+						<TextBlock Text="{Binding DisplayName}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+						<TextBlock Text="Employee Details." FontSize="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+					</StackPanel>
+					<Button Grid.Column="1" Classes="IconButton" Command="{Binding CancelCommand}" VerticalAlignment="Top"
+							ToolTip.Tip="Close details without saving">
+						<PathIcon Data="{StaticResource IconClose}" Width="16" Height="16"/>
+					</Button>
+				</Grid>
+			</Border>
+
+			<!-- Scrollable Content -->
+			<ScrollViewer Grid.Row="1" Padding="25,10,25,25">
+				<StackPanel Spacing="20">
+					<!-- Personal Details -->
+					<Grid ColumnDefinitions="*, 30, *, 30, *">
+
+						<!-- Left Column -->
+						<StackPanel Grid.Column="0" Spacing="10">
+							<!---->
+							<StackPanel>
+								<TextBlock Text="Employee Number" Classes="FormLabel"/>
+								<TextBox Text="{Binding EmployeeNumber}" Classes="FormInput" Watermark="e.g. EMP001"
+										 ToolTip.Tip="Unique employee identifier (e.g., EMP001)"/>
+							</StackPanel>
+							<!-- First Name -->
+							<StackPanel>
+								<TextBlock Text="First Name" Classes="FormLabel"/>
+								<TextBox Text="{Binding FirstName}" Classes="FormInput" Watermark="e.g. John"
+										 ToolTip.Tip="Employee's first name"/>
+							</StackPanel>
+							<!-- Last Name -->
+							<StackPanel>
+								<TextBlock Text="Last Name" Classes="FormLabel"/>
+								<TextBox Text="{Binding LastName}" Classes="FormInput" Watermark="e.g. Doe"
+										 ToolTip.Tip="Employee's last name"/>
+							</StackPanel>
+							<!-- Phone Number -->
+							<StackPanel>
+								<TextBlock Text="Phone Number" Classes="FormLabel"/>
+								<TextBox Text="{Binding Phone}" Classes="FormInput" Watermark="+27 ..."
+										 ToolTip.Tip="Contact phone number"/>
+							</StackPanel>
+						</StackPanel>
+
+						<!-- Middle Column -->
+						<StackPanel Grid.Column="2" Spacing="10">
+							<!-- Email Address -->
+							<StackPanel>
+								<TextBlock Text="Email Address" Classes="FormLabel"/>
+								<TextBox Text="{Binding Email}" Classes="FormInput" Watermark="john@example.com"
+										 ToolTip.Tip="Work or personal email address"/>
+							</StackPanel>
+							<!-- ID and Passport -->
+							<StackPanel>
+								<TextBlock Text="Identification" Classes="FormLabel"/>
+								<StackPanel Orientation="Horizontal" Spacing="20" Margin="0,0,0,5">
+									<RadioButton Content="RSA ID" IsChecked="{Binding IsRsaId}" FontSize="{DynamicResource FontSizeSmall}"
+												 ToolTip.Tip="Select for South African ID"/>
+									<RadioButton Content="Passport" IsChecked="{Binding IsPassport}"
+												 ToolTip.Tip="Select for International Passport"/>
+								</StackPanel>
+								<TextBox Text="{Binding IdNumber}" Classes="FormInput" Watermark="Enter RSA ID or Passport Number"
+										 ToolTip.Tip="Enter the 13-digit RSA ID or Passport Number"/>
+							</StackPanel>
+						</StackPanel>
+
+						<!-- Right Column -->
+						<StackPanel Grid.Column="4" Spacing="10">
+							<!-- Employment Date -->
+							<StackPanel>
+								<TextBlock Text="Employment Date" Classes="FormLabel"/>
+								<DatePicker SelectedDate="{Binding EmploymentDate}" HorizontalAlignment="Left" Width="300" Height="50"
+											ToolTip.Tip="Date when employment started"/>
+							</StackPanel>
+							<!-- Employment Type Section -->
+							<StackPanel>
+								<TextBlock Text="Employment Type" Classes="FormLabel"/>
+								<StackPanel Orientation="Horizontal">
+									<RadioButton Grid.Column="0" Content="Permanent" IsChecked="{Binding IsPermanent}" Margin="10,5"
+												 ToolTip.Tip="Permanent employment contract"/>
+									<RadioButton Grid.Column="1" Content="Contract" IsChecked="{Binding IsContract}" Margin="10,5"
+												 ToolTip.Tip="Fixed-term contract"/>
+								</StackPanel>
+							</StackPanel>
+							<!-- Contract Details (Conditional) -->
+							<StackPanel IsVisible="{Binding IsContractVisible}">
+								<TextBlock Text="Contract Duration" Classes="FormLabel"/>
+								<TextBox Text="{Binding ContractDuration}" Classes="FormInput" Watermark="e.g. 6 Months"
+										 ToolTip.Tip="Duration of the contract (e.g., 6 Months)"/>
+							</StackPanel>
+							<!-- Skills -->
+							<StackPanel>
+								<TextBlock Text="Skills" Classes="FormLabel"/>
+								<ComboBox SelectedItem="{Binding SelectedSkill}" ItemsSource="{Binding EmployeeRoles}" HorizontalAlignment="Stretch"
+										  ToolTip.Tip="Primary skill or role of the employee">
+									<ComboBox.ItemTemplate>
+										<DataTemplate>
+											<TextBlock Text="{Binding Converter={StaticResource FriendlyEnumConverter}}"/>
+										</DataTemplate>
+									</ComboBox.ItemTemplate>
+								</ComboBox>
+							</StackPanel>
+							<!-- Hourly Rate -->
+							<StackPanel>
+								<TextBlock Text="Hourly Rate (R)" Classes="FormLabel"/>
+								<TextBox Text="{Binding HourlyRate}" Watermark="0.00"
+										 ToolTip.Tip="Hourly pay rate in ZAR"/>
+							</StackPanel>
+						</StackPanel>
+					</Grid>
+
+
+				</StackPanel>
+			</ScrollViewer>
+			<!-- Footer Separator -->
+			<Grid Grid.Row="2" Height="2" Background="{DynamicResource PrimaryTeal}">
 			</Grid>
-
-			<Separator Grid.Row="1" Background="{DynamicResource BorderGray}" Height="1" Margin="0"/>
-            <!-- ... -->
-			<!-- Button Footer -->
-			<StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10" Margin="0,20,0,0">
-				<Button Classes="Primary" Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}"
-						Width="120" Background="{DynamicResource ButtonLimeGreenBackground}" Foreground="Black" FontWeight="Bold"
-						CornerRadius="0"/>
-
-				<Button Classes="Primary" Content="Cancel" Command="{Binding CancelCommand}" Width="100" Background="#D1D5DB"
-						Foreground="Black" HorizontalContentAlignment="Center"
-						VerticalContentAlignment="Center" CornerRadius="0" FontWeight="SemiBold"/>
+			<!-- Action Buttons -->
+			<StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="10" Margin="20,15" HorizontalAlignment="Left">
+				<Button Content="{Binding SaveButtonText}" Command="{Binding SaveCommand}" Classes="Primary"
+						ToolTip.Tip="Save employee details to database"/>
+				<Button Content="Cancel" Command="{Binding CancelCommand}" Classes="Cancel"
+						ToolTip.Tip="Discard changes and close"/>
 			</StackPanel>
 		</Grid>
 	</Border>

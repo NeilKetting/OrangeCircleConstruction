@@ -19,11 +19,13 @@
 
             <!-- Background & Surface Colors -->
             <SolidColorBrush x:Key="AppBackgroundSlate">#f8fafc</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceLightGray">#e9ebee</SolidColorBrush>
             <SolidColorBrush x:Key="SurfaceWhite">#FFFFFF</SolidColorBrush>
             <SolidColorBrush x:Key="BorderGray">#e2e8f0</SolidColorBrush>
+            <SolidColorBrush x:Key="LimeGreen">#A3E635</SolidColorBrush>            
 
             <!-- Text Colors -->
-            <SolidColorBrush x:Key="TextPrimaryDark">#181c24</SolidColorBrush>
+            <SolidColorBrush x:Key="TextPrimaryDark">#000000</SolidColorBrush>
             <SolidColorBrush x:Key="TextSecondaryDark">#475569</SolidColorBrush>
             <SolidColorBrush x:Key="TextSecondaryGray">#64748b</SolidColorBrush>
             <SolidColorBrush x:Key="TextTertiarySlate">#94a3b8</SolidColorBrush>
@@ -34,8 +36,18 @@
             <SolidColorBrush x:Key="LoginTextDark">#1e293b</SolidColorBrush>
             <SolidColorBrush x:Key="LoginTextLight">#64748b</SolidColorBrush>
 
-            <!-- Button Colors -->
-            <SolidColorBrush x:Key="ButtonLimeGreenBackground">#A3E635</SolidColorBrush>
+            <!-- Button Top Bar and Top Header Colors -->
+            <SolidColorBrush x:Key="SelectedBackground">#ced1d6</SolidColorBrush>
+            <SolidColorBrush x:Key="HoverButtonBackground">#c5c5c5</SolidColorBrush>
+            <SolidColorBrush x:Key="GreenButtonBackground">#B6F500</SolidColorBrush>
+            <SolidColorBrush x:Key="CancelGrayButtonBackground">#D7DEE7</SolidColorBrush>
+            
+            <!-- Font Sizes -->
+            <x:Double x:Key="FontSizeXS">10</x:Double>
+            <x:Double x:Key="FontSizeSmall">12</x:Double>
+            <x:Double x:Key="FontSizeMedium">14</x:Double>
+            <x:Double x:Key="FontSizeLarge">18</x:Double>
+            <x:Double x:Key="FontSizeXL">22</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 

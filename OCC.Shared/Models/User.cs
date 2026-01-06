@@ -12,6 +12,8 @@
         public decimal? HourlyRate { get; set; }
         public string? Language { get; set; } = "English";
         public Guid? ApproverId { get; set; }
+        public bool IsApproved { get; set; } = false;
+        public bool IsEmailVerified { get; set; } = false;
         
         // Simplified for now, in a real app these might be navigation properties
         public UserRole UserRole { get; set; } = UserRole.Guest;

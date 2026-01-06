@@ -1,11 +1,25 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
+using CommunityToolkit.Mvvm.Input;
 
 namespace OCC.Client.ViewModels.Projects
 {
     public partial class ProjectsViewModel : ViewModelBase
     {
+        #region Private Members
+
+        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.Project> _projectRepository;
+        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.ProjectTask> _taskRepository;
+        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.Employee> _staffRepository;
+
+        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.TaskAssignment> _assignmentRepository;
+        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.TaskComment> _commentRepository;
+
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private Shared.ProjectTopBarViewModel _topBar;
 
@@ -27,12 +41,14 @@ namespace OCC.Client.ViewModels.Projects
         [ObservableProperty]
         private Home.Tasks.TaskDetailViewModel? _currentTaskDetail;
 
-        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.Project> _projectRepository;
-        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.ProjectTask> _taskRepository;
-        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.Employee> _staffRepository;
+        #endregion
 
-        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.TaskAssignment> _assignmentRepository;
-        private readonly OCC.Client.Services.IRepository<OCC.Shared.Models.TaskComment> _commentRepository;
+        #region Constructors
+
+        public ProjectsViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
 
         public ProjectsViewModel(
             ProjectListViewModel listVM, 
@@ -54,16 +70,11 @@ namespace OCC.Client.ViewModels.Projects
             
             // Default view
             _currentView = _listVM;
-
-            _listVM = listVM;
-            _ganttVM = ganttVM;
             
             // Subscribe to task selection
             _listVM.TaskSelectionRequested += (s, id) => OpenTaskDetail(id);
             _listVM.NewTaskRequested += (s, e) => CreateNewTask();
 
-            // Default view
-            _currentView = _listVM;
             _topBar.DeleteProjectRequested += OnDeleteProjectRequested;
             _topBar.PropertyChanged += TopBar_PropertyChanged;
 
@@ -77,12 +88,27 @@ namespace OCC.Client.ViewModels.Projects
                _listVM.LoadTasks(CurrentProjectId);
                _ganttVM.LoadTasks(CurrentProjectId);
                
-               // Ensure List view is active if we support switching views or keep current tab?
-               // Let's reset to List as default when selecting a new project, or keep current if user prefers.
-               // For now, defaulting to List is safe.
                TopBar.ActiveTab = "List";
             });
         }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private void CloseTaskDetail()
+        {
+            IsTaskDetailVisible = false;
+            CurrentTaskDetail = null;
+            
+            // Refresh list
+            ListVM.LoadTasks(CurrentProjectId);
+        }
+
+        #endregion
+
+        #region Methods
 
         private async void OnDeleteProjectRequested(object? sender, EventArgs e)
         {
@@ -99,14 +125,6 @@ namespace OCC.Client.ViewModels.Projects
              }
         }
         
-        private string GetInitials(string? name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return "P";
-            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
-            return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpper();
-        }
-
         private void TopBar_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
              if (e.PropertyName == nameof(Shared.ProjectTopBarViewModel.ActiveTab))
@@ -118,8 +136,6 @@ namespace OCC.Client.ViewModels.Projects
                         break;
                      case "Gantt":
                         CurrentView = GanttVM;
-                        // Determine if we need to load tasks? Logic is in Message Handler.
-                        // If we switch tabs, tasks should already be loaded for the CurrentProjectId.
                         if (CurrentProjectId != Guid.Empty)
                         {
                             // Optional: Refresh if needed
@@ -139,16 +155,6 @@ namespace OCC.Client.ViewModels.Projects
             CurrentTaskDetail.LoadTaskById(taskId);
             CurrentTaskDetail.CloseRequested += (s, e) => CloseTaskDetail();
             IsTaskDetailVisible = true;
-        }
-
-        [CommunityToolkit.Mvvm.Input.RelayCommand]
-        private void CloseTaskDetail()
-        {
-            IsTaskDetailVisible = false;
-            CurrentTaskDetail = null;
-            
-            // Refresh list
-            ListVM.LoadTasks(CurrentProjectId);
         }
 
         private async void CreateNewTask()
@@ -172,5 +178,19 @@ namespace OCC.Client.ViewModels.Projects
             // Open Details
             OpenTaskDetail(newTask.Id);
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        private string GetInitials(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "P";
+            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpper();
+        }
+
+        #endregion
     }
 }

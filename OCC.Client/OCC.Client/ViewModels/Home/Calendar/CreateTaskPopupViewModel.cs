@@ -10,12 +10,22 @@ namespace OCC.Client.ViewModels.Home.Calendar
 {
     public partial class CreateTaskPopupViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<ProjectTask> _taskRepository;
         private readonly IRepository<Project> _projectRepository;
         private readonly IAuthService _authService;
 
+        #endregion
+
+        #region Events
+
         public event EventHandler? CloseRequested;
         public event EventHandler? TaskCreated;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private TaskType _selectedType = TaskType.Task;
@@ -32,8 +42,16 @@ namespace OCC.Client.ViewModels.Home.Calendar
         [ObservableProperty]
         private DateTime _dueDate;
 
+        #endregion
+
+        #region Properties
+
         public ObservableCollection<TaskType> TaskTypes { get; } = new ObservableCollection<TaskType>(Enum.GetValues<TaskType>());
         public ObservableCollection<Project> Projects { get; } = new();
+
+        #endregion
+
+        #region Constructors
 
         public CreateTaskPopupViewModel(
             IRepository<ProjectTask> taskRepository,
@@ -46,10 +64,11 @@ namespace OCC.Client.ViewModels.Home.Calendar
             CurrentUser = _authService.CurrentUser;
             
             CurrentUser = _authService.CurrentUser;
-            // LoadProjects should be called by the parent/caller to avoid async void constructor issues
-            // and concurrent EF Core usage.
-            // _ = LoadProjects(); 
         }
+
+        #endregion
+
+        #region Methods
 
         public async Task LoadProjects()
         {
@@ -65,6 +84,10 @@ namespace OCC.Client.ViewModels.Home.Calendar
         {
             DueDate = date;
         }
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private async Task Create()
@@ -90,5 +113,7 @@ namespace OCC.Client.ViewModels.Home.Calendar
         {
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
+
+        #endregion
     }
 }

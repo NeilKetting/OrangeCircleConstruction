@@ -17,11 +17,17 @@ namespace OCC.Client.Services
         public User? CurrentUser => _currentUser;
         public bool IsAuthenticated => _currentUser != null;
 
-        public async Task<bool> LoginAsync(string email, string password)
+        public async Task<(bool Success, string ErrorMessage)> LoginAsync(string email, string password)
         {
             var users = await _userRepository.FindAsync(u => u.Email == email && u.Password == password);
             _currentUser = users.FirstOrDefault();
-            return IsAuthenticated;
+            
+            if (_currentUser != null)
+            {
+                return (true, string.Empty);
+            }
+            
+            return (false, "Invalid credentials (Mock).");
         }
 
         public async Task<bool> RegisterAsync(User user)

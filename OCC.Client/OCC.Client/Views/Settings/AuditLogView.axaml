@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Settings"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OCC.Client.Views.Settings.AuditLogView"
+             x:DataType="vm:AuditLogViewModel">
+
+	<Grid RowDefinitions="Auto, *">
+		<TextBlock Text="Audit Logs" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,20" Foreground="{DynamicResource TextPrimary}"/>
+
+		<!-- DataGrid -->
+		<DataGrid Grid.Row="1" ItemsSource="{Binding Logs}" IsReadOnly="True" GridLinesVisibility="Horizontal"
+				  HeadersVisibility="Column" Background="Transparent" RowBackground="Transparent">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="Auto" />
+				<DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="Auto" />
+				<DataGridTextColumn Header="User" Binding="{Binding UserId}" Width="Auto" />
+				<DataGridTextColumn Header="Table" Binding="{Binding TableName}" Width="Auto" />
+				<DataGridTextColumn Header="Record ID" Binding="{Binding RecordId}" Width="Auto" />
+				<DataGridTextColumn Header="Changes" Binding="{Binding NewValues}" Width="*" />
+			</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
+</UserControl>

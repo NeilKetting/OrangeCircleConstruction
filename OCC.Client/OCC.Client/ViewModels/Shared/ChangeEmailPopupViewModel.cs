@@ -6,11 +6,21 @@ namespace OCC.Client.ViewModels.Shared
 {
     public partial class ChangeEmailPopupViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private string _newEmail = string.Empty;
+        #region Events
 
         public event EventHandler? CloseRequested;
         public event EventHandler<string>? EmailChanged;
+
+        #endregion
+
+        #region Observables
+
+        [ObservableProperty]
+        private string _newEmail = string.Empty;
+
+        #endregion
+
+        #region Commands
 
         [RelayCommand]
         private void Cancel()
@@ -27,5 +37,7 @@ namespace OCC.Client.ViewModels.Shared
                 CloseRequested?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        #endregion
     }
 }

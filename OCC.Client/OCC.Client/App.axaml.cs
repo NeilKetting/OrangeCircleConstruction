@@ -75,7 +75,10 @@ namespace OCC.Client
             // Or let's use a real AuthService if we had one? The user only mentioned repositories.
             // Let's swap the repositories first.
             
-            services.AddSingleton<IAuthService, MockAuthService>(); // Keep this for now unless we have a real one ready.
+            // Auth Services
+            services.AddSingleton<MockAuthService>();
+            services.AddSingleton<ApiAuthService>();
+            services.AddSingleton<IAuthService, HybridAuthService>();
             
             // Re-register specific repositories if they have specific interfaces or we want to force the generic one?
             // The generic registration `typeof(IRepository<>), typeof(SqlRepository<>)` handles any `IRepository<T>` request.
@@ -96,6 +99,7 @@ namespace OCC.Client
              services.AddSingleton<ITimeService, TimeService>();
             services.AddSingleton<INotificationService, MockNotificationService>();
             services.AddSingleton<IUpdateService, UpdateService>();
+            services.AddSingleton<SignalRNotificationService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();
@@ -108,6 +112,7 @@ namespace OCC.Client
             services.AddTransient<SummaryViewModel>();
             services.AddTransient<TasksWidgetViewModel>();
             services.AddTransient<PulseViewModel>();
+            services.AddTransient<NotificationViewModel>();
             services.AddTransient<ProjectSummaryViewModel>();
             services.AddTransient<TaskListViewModel>();
             services.AddTransient<ProjectsViewModel>();
@@ -115,6 +120,7 @@ namespace OCC.Client
             services.AddTransient<ProjectListViewModel>();
             services.AddTransient<ProjectGanttViewModel>();
             services.AddTransient<ViewModels.Settings.ManageUsersViewModel>();
+            services.AddTransient<ViewModels.Settings.AuditLogViewModel>();
             services.AddTransient<TaskDetailViewModel>(); // If needed
             services.AddTransient<EmployeeManagementViewModel>();
             services.AddTransient<ViewModels.Time.TimeViewModel>();

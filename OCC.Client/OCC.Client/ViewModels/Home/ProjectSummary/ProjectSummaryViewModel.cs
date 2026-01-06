@@ -9,6 +9,14 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
 {
     public partial class ProjectSummaryViewModel : ViewModelBase
     {
+        #region Private Members
+
+        private readonly IRepository<ProjectTask> _taskRepository;
+
+        #endregion
+
+        #region Observables
+
         [ObservableProperty]
         private double _pipelinePlanning = 1;
 
@@ -17,7 +25,6 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
 
         [ObservableProperty]
         private double _totalCost = 0;
-        private readonly IRepository<ProjectTask> _taskRepository;
 
         [ObservableProperty]
         private int _notStartedCount;
@@ -50,10 +57,16 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
         [ObservableProperty]
         private double _completedStartAngle;
         
+        #endregion
 
-        
+        #region Properties
+
         public ObservableCollection<PortfolioProjectItem> Projects { get; } = new();
         public ObservableCollection<TeamPulseItem> TeamPulse { get; } = new();
+
+        #endregion
+
+        #region Constructors
 
         public ProjectSummaryViewModel(IRepository<ProjectTask> taskRepository)
         {
@@ -80,6 +93,10 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
 
         // Temporary zero-argument constructor for XAML preview/design time
         public ProjectSummaryViewModel() : this(new MockProjectTaskRepository()) { }
+
+        #endregion
+
+        #region Methods
 
         private async void LoadTaskStatistics()
         {
@@ -110,19 +127,18 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
             CalculateChartAngles();
         }
 
+        #endregion
+
+        #region Helper Methods
+
         private void CalculateChartAngles()
         {
             if (TotalTaskCount == 0) return;
 
             // Calculate sweep angles (proportions of 360)
-            // Leave a small gap (e.g. 2 degrees) between segments if desired, but for now we do full circles.
-            
             double notStartedSweep = (double)NotStartedCount / TotalTaskCount * 360;
             double inProgressSweep = (double)InProgressCount / TotalTaskCount * 360;
             double completedSweep = (double)CompletedCount / TotalTaskCount * 360;
-
-            // Adjust slightly to ensure sum is 360 if there are rounding errors, 
-            // but for display this is usually fine.
 
             NotStartedAngle = notStartedSweep;
             InProgressAngle = inProgressSweep;
@@ -136,6 +152,8 @@ namespace OCC.Client.ViewModels.Home.ProjectSummary
             InProgressStartAngle = NotStartedStartAngle + NotStartedAngle;
             CompletedStartAngle = InProgressStartAngle + InProgressAngle;
         }
+
+        #endregion
     }
 
     public class PortfolioProjectItem

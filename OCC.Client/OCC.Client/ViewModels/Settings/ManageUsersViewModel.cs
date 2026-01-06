@@ -11,7 +11,13 @@ namespace OCC.Client.ViewModels.Settings
 {
     public partial class ManageUsersViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IRepository<User> _userRepository;
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private string _activeTab = "Manage Users";
@@ -34,11 +40,40 @@ namespace OCC.Client.ViewModels.Settings
         [ObservableProperty]
         private ObservableCollection<User> _users = new();
 
+        #endregion
+
+        #region Constructors
+
+        public ManageUsersViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
+
         public ManageUsersViewModel(IRepository<User> userRepository)
         {
             _userRepository = userRepository;
-            LoadData(); // In real app, might want to delay this until view shown but OK for now.
+            LoadData(); 
         }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private void InvitePeople()
+        {
+            // Placeholder for invite functionality
+        }
+        
+        [RelayCommand]
+        private void SwitchTab(string tabName)
+        {
+            ActiveTab = tabName;
+        }
+
+        #endregion
+
+        #region Methods
 
         public async void LoadData()
         {
@@ -52,16 +87,6 @@ namespace OCC.Client.ViewModels.Settings
              if (AvailableLicenses < 0) AvailableLicenses = 0;
         }
 
-        [RelayCommand]
-        private void InvitePeople()
-        {
-            // Placeholder for invite functionality
-        }
-        
-        [RelayCommand]
-        private void SwitchTab(string tabName)
-        {
-            ActiveTab = tabName;
-        }
+        #endregion
     }
 }

@@ -3,8 +3,8 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Home.Shared"
-             xmlns:conv="clr-namespace:OCC.Client.Converters"
-			 mc:Ignorable="d" 
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 mc:Ignorable="d"
 			 x:Class="OCC.Client.Views.Home.Shared.TopBarView"
 			 x:DataType="vm:TopBarViewModel">
 
@@ -12,42 +12,46 @@
 		<Grid ColumnDefinitions="*,Auto, *, Auto">
 
 			<!-- Tabs Area -->
-			<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Left">
-                <StackPanel.Resources>
-                    <conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
-                </StackPanel.Resources>
+			<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+				<StackPanel.Resources>
+					<conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
+				</StackPanel.Resources>
 				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="My Summary" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='My Summary'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource IconSummary}" Classes="IconStyle" Width="16" Height="16"/>
-					    <TextBlock Text="MY SUMMARY" VerticalAlignment="Center"/>
-                    </StackPanel>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconSummary}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="MY SUMMARY" VerticalAlignment="Center"/>
+					</StackPanel>
 				</Button>
-				
+
 				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Project Summary" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Project Summary'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource IconPortfolio}" Classes="IconStyle" Width="16" Height="16"/>
-					    <TextBlock Text="PROJECT SUMMARY" VerticalAlignment="Center"/>
-                    </StackPanel>
-				</Button>                
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconPortfolio}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="PROJECT SUMMARY" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
 
 				<Separator Background="{DynamicResource BorderGray}" Width="1" Height="24" VerticalAlignment="Center" Margin="5,0"/>
 
 				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="List" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='List'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource IconList}" Classes="IconStyle" Width="16" Height="16"/>
-					    <TextBlock Text="LIST" VerticalAlignment="Center"/>
-                    </StackPanel>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconList}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="LIST" VerticalAlignment="Center"/>
+					</StackPanel>
 				</Button>
 				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Calendar" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Calendar'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource IconCalendar}" Classes="IconStyle" Width="16" Height="16"/>
-					    <TextBlock Text="CALENDAR" VerticalAlignment="Center"/>
-                    </StackPanel>
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconCalendar}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="CALENDAR" VerticalAlignment="Center"/>
+					</StackPanel>
 				</Button>
 			</StackPanel>
 
 			<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center" Margin="20,0">
-				<TextBox Width="150" Classes="FormInput" Watermark="Search..."/>
+				<Button Classes="IconButton" Command="{Binding OpenNotificationsCommand}" ToolTip.Tip="Notifications">
+					<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle" Width="20" Height="20"/>
+				</Button>
+				
+				<TextBox Width="200" Classes="FormInput" Watermark="Search..."/>
 				<PathIcon Data="{StaticResource IconSearch}" Classes="IconStyle" Width="18" Height="18"/>
 			</StackPanel>
 		</Grid>

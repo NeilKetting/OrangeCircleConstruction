@@ -15,15 +15,23 @@ namespace OCC.Client.ViewModels.Shared
 {
     public partial class SidebarViewModel : ViewModelBase
     {
+        #region Private Members
+
         private readonly IAuthService _authService;
         private readonly IUpdateService _updateService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IRepository<Project> _projectRepository;
+        private List<Project> _allProjects = new();
+
+        #endregion
+
+        #region Observables
 
         [ObservableProperty]
         private bool _isCollapsed;
 
         [ObservableProperty]
-        private string _activeSection = "Home";
+        private string _activeSection = Infrastructure.NavigationRoutes.Home;
 
         [ObservableProperty]
         private string _userEmail = string.Empty;
@@ -43,18 +51,23 @@ namespace OCC.Client.ViewModels.Shared
         [ObservableProperty]
         private bool _isSettingsOpen;
 
-        private readonly IRepository<Project> _projectRepository;
-
         [ObservableProperty]
         private System.Collections.ObjectModel.ObservableCollection<Project> _projects = new();
-
-        private List<Project> _allProjects = new();
 
         [ObservableProperty]
         private string _projectSearchText = string.Empty;
 
         [ObservableProperty]
         private bool _isProjectsExpanded = true;
+
+        #endregion
+
+        #region Constructors
+
+        public SidebarViewModel()
+        {
+            // Parameterless constructor for design-time support
+        }
 
         public SidebarViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IRepository<Project> projectRepository)
         {
@@ -78,7 +91,6 @@ namespace OCC.Client.ViewModels.Shared
                 FilterProjects();
                 
                 // Auto-navigate to the new project
-                // Auto-navigate to the new project
                 NavigateToProject(m.Value);
             });
 
@@ -93,9 +105,9 @@ namespace OCC.Client.ViewModels.Shared
                 }
                 
                 // If we were on Portfolio, switch to Home
-                if (ActiveSection == "Portfolio")
+                if (ActiveSection == Infrastructure.NavigationRoutes.Projects)
                 {
-                    Navigate("Home");
+                    Navigate(Infrastructure.NavigationRoutes.Home);
                 }
             });
             
@@ -108,30 +120,9 @@ namespace OCC.Client.ViewModels.Shared
             LoadProjects();
         }
 
-        private async void LoadProjects()
-        {
-            var projects = await _projectRepository.GetAllAsync();
-            _allProjects = projects.ToList();
-            FilterProjects();
-        }
+        #endregion
 
-        partial void OnProjectSearchTextChanged(string value)
-        {
-            FilterProjects();
-        }
-
-        private void FilterProjects()
-        {
-            Projects.Clear();
-            var filtered = string.IsNullOrWhiteSpace(ProjectSearchText)
-                ? _allProjects
-                : _allProjects.Where(p => p.Name.Contains(ProjectSearchText, StringComparison.OrdinalIgnoreCase));
-
-            foreach (var p in filtered)
-            {
-                Projects.Add(p);
-            }
-        }
+        #region Commands
 
         [RelayCommand]
         public void ToggleProjects()
@@ -169,19 +160,19 @@ namespace OCC.Client.ViewModels.Shared
             // Sync with TopBar tabs
             switch (section)
             {
-                case "Home":
+                case Infrastructure.NavigationRoutes.Home:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("My Summary"));
                     break;
-                case "Time":
+                case Infrastructure.NavigationRoutes.Time:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Time"));
                     break;
-                case "Portfolio":
+                case Infrastructure.NavigationRoutes.Projects:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Projects"));
                     break;
-                case "Team":
+                case Infrastructure.NavigationRoutes.StaffManagement:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Team"));
                     break;
-                case "Notifications":
+                case Infrastructure.NavigationRoutes.Notifications:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Notifications"));
                     break;
             }
@@ -287,10 +278,43 @@ namespace OCC.Client.ViewModels.Shared
         [RelayCommand]
         private void NavigateToProject(Project project)
         {
-            Navigate("Portfolio");
+            Navigate(Infrastructure.NavigationRoutes.Projects);
             WeakReferenceMessenger.Default.Send(new ProjectSelectedMessage(project));
             LastActionMessage = $"Navigated to Project: {project.Name}";
         }
+
+        #endregion
+
+        #region Methods
+
+        private async void LoadProjects()
+        {
+            var projects = await _projectRepository.GetAllAsync();
+            _allProjects = projects.ToList();
+            FilterProjects();
+        }
+
+        partial void OnProjectSearchTextChanged(string value)
+        {
+            FilterProjects();
+        }
+
+        private void FilterProjects()
+        {
+            Projects.Clear();
+            var filtered = string.IsNullOrWhiteSpace(ProjectSearchText)
+                ? _allProjects
+                : _allProjects.Where(p => p.Name.Contains(ProjectSearchText, StringComparison.OrdinalIgnoreCase));
+
+            foreach (var p in filtered)
+            {
+                Projects.Add(p);
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
 
         private string GetInitials(string? displayName)
         {
@@ -299,5 +323,7 @@ namespace OCC.Client.ViewModels.Shared
             if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
             return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpper();
         }
+
+        #endregion
     }
 }
