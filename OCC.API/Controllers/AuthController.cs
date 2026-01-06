@@ -24,20 +24,24 @@ namespace OCC.API.Controllers
         private readonly AppDbContext _context;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IConfiguration configuration, AppDbContext context, IHubContext<NotificationHub> hubContext, IEmailService emailService)
+        public AuthController(IConfiguration configuration, AppDbContext context, IHubContext<NotificationHub> hubContext, IEmailService emailService, ILogger<AuthController> logger)
         {
             _configuration = configuration;
             _context = context;
             _hubContext = hubContext;
             _emailService = emailService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            _logger.LogInformation("Login attempt for email: {Email}", request?.Email);
             if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             {
+                _logger.LogWarning("Login failed: Invalid client request for email: {Email}", request?.Email);
                 return BadRequest("Invalid client request");
             }
 
@@ -47,6 +51,7 @@ namespace OCC.API.Controllers
             // In a real app, hash password verification here
             if (user == null || user.Password != request.Password) 
             {
+                _logger.LogWarning("Login failed: Invalid credentials for user {Email}. User found: {UserFound}", request.Email, user != null);
                 // Log Failed Login
                 _context.AuditLogs.Add(new AuditLog
                 {
@@ -65,6 +70,7 @@ namespace OCC.API.Controllers
             // Verify Approval
             if (!user.IsApproved)
             {
+                _logger.LogWarning("Login failed: User {Email} is not approved.", request.Email);
                 // Log Blocked Login
                 _context.AuditLogs.Add(new AuditLog
                 {
@@ -82,6 +88,7 @@ namespace OCC.API.Controllers
 
             var tokenString = GenerateJwtToken(user);
             
+            _logger.LogInformation("Login successful for user {Email} ({Id})", user.Email, user.Id);
             // Log Login Action
             _context.AuditLogs.Add(new AuditLog
             {
@@ -100,14 +107,17 @@ namespace OCC.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
+            _logger.LogInformation("Registration attempt for email: {Email}", user?.Email);
             if (user == null)
             {
+                _logger.LogWarning("Registration failed: Invalid user data.");
                 return BadRequest();
             }
 
             // Check if user exists
             if (await _context.Users.AnyAsync(u => u.Email == user.Email))
             {
+                _logger.LogWarning("Registration failed: User {Email} already exists.", user.Email);
                 return Conflict("User already exists");
             }
 
@@ -118,6 +128,8 @@ namespace OCC.API.Controllers
             // In real app, hash password here
              _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("Registration successful for user {Email} ({Id}). Waiting for approval.", user.Email, user.Id);
             
             // Notify Admins
             await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"New user registered: {user.FirstName} {user.LastName} ({user.Email}) is waiting for approval.");
