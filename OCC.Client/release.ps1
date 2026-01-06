@@ -24,7 +24,7 @@ Write-Host "Packing with Velopack..."
 # We need to ensure the ID of the app matches what Velopack expects.
 # The executable is "OCC.Client.Desktop.exe"
 # We'll call the release "OrangeCircleConstruction"
-vpk pack -u "OrangeCircleConstruction" -v $version -p publish -e "OCC.Client.Desktop.exe"
+vpk pack -u "OrangeCircleConstruction" -v $version -p publish -e "OCC.Client.Desktop.exe" -i "OCC.Client.Desktop\Assets\app.ico"
 
 if ($LASTEXITCODE -ne 0) { 
     Write-Host "Packing Failed!" -ForegroundColor Red
