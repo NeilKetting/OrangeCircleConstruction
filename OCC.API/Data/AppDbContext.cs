@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using OCC.Shared.Models;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace OCC.API.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor = null!) : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<Project> Projects { get; set; }
@@ -42,7 +47,10 @@ namespace OCC.API.Data
 
                 var auditEntry = new AuditEntry(entry);
                 auditEntry.TableName = entry.Entity.GetType().Name; // Simply use class name for now
-                auditEntry.UserId = "System"; // TODO: Inject IHttpContextAccessor to get real User ID
+                
+                // Get User ID from Claims
+                var userId = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
+                auditEntry.UserId = userId ?? "System"; 
 
                 auditEntries.Add(auditEntry);
 

@@ -20,6 +20,7 @@ namespace OCC.Client.Services
         }
 
         public User? CurrentUser => _currentUser;
+        public string? AuthToken => _authToken;
         public bool IsAuthenticated => _currentUser != null;
 
         public async Task<(bool Success, string ErrorMessage)> LoginAsync(string email, string password)

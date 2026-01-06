@@ -9,6 +9,7 @@ namespace OCC.Client.Services
         Task<bool> RegisterAsync(User user);
         Task LogoutAsync();
         User? CurrentUser { get; }
+        string? AuthToken { get; }
         bool IsAuthenticated { get; }
     }
 }

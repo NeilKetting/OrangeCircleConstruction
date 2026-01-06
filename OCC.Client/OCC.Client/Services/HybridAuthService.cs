@@ -17,6 +17,7 @@ namespace OCC.Client.Services
         private IAuthService CurrentService => ConnectionSettings.Instance.UseApi ? _apiAuthService : _sqlAuthService;
 
         public User? CurrentUser => CurrentService.CurrentUser;
+        public string? AuthToken => CurrentService.AuthToken;
         public bool IsAuthenticated => CurrentService.IsAuthenticated;
 
         public Task<(bool Success, string ErrorMessage)> LoginAsync(string email, string password)

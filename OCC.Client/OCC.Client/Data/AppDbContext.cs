@@ -30,9 +30,7 @@ namespace OCC.Client.Data
                     FirstName = "Neil",
                     LastName = "Ketting",
                     UserRole = UserRole.Admin,
-                    Location = "South Africa",
-                    HourlyRate = 550,
-                    Language = "English"
+                    Location = "South Africa"
                 });
                 SaveChanges();
             }

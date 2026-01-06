@@ -58,38 +58,38 @@ namespace OCC.Client.Services
             }
         }
 
-        public async Task<bool> CheckForUpdatesAsync()
+        public async Task<UpdateInfo?> CheckForUpdatesAsync()
         {
-            if (_mgr == null) return false;
-            if (!_mgr.IsInstalled) return false;
+            if (_mgr == null || !_mgr.IsInstalled) return null;
 
             try
             {
-                var newVersion = await _mgr.CheckForUpdatesAsync();
-                return newVersion != null;
+                return await _mgr.CheckForUpdatesAsync();
             }
             catch
             {
-                return false;
+                return null;
             }
         }
 
-        public async Task DownloadAndInstallUpdateAsync()
+        public async Task DownloadUpdatesAsync(UpdateInfo newVersion, Action<int> progress)
         {
-             if (_mgr == null) return;
+            if (_mgr == null) return;
              
-             try 
-             {
-                 var newVersion = await _mgr.CheckForUpdatesAsync();
-                 if (newVersion == null) return;
+            try 
+            {
+                await _mgr.DownloadUpdatesAsync(newVersion, progress);
+            }
+            catch
+            {
+                // Handle download error
+                throw;
+            }
+        }
 
-                 await _mgr.DownloadUpdatesAsync(newVersion);
-                 _mgr.ApplyUpdatesAndExit(newVersion);
-             }
-             catch
-             {
-                 // Handle update error (log it etc)
-             }
+        public void ApplyUpdatesAndExit(UpdateInfo newVersion)
+        {
+            _mgr?.ApplyUpdatesAndExit(newVersion);
         }
     }
 }

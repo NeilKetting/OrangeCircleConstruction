@@ -26,8 +26,7 @@ namespace OCC.API.Data
                     LastName = "Admin",
                     UserRole = UserRole.Admin,
                     IsApproved = true,
-                    IsEmailVerified = true,
-                    Language = "English"
+                    IsEmailVerified = true
                 }
             };
 

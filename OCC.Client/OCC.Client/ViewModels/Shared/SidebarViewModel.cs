@@ -21,6 +21,7 @@ namespace OCC.Client.ViewModels.Shared
         private readonly IUpdateService _updateService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IRepository<Project> _projectRepository;
+        private readonly IPermissionService _permissionService;
         private List<Project> _allProjects = new();
 
         #endregion
@@ -60,6 +61,9 @@ namespace OCC.Client.ViewModels.Shared
         [ObservableProperty]
         private bool _isProjectsExpanded = true;
 
+        public bool CanManageUsers => _permissionService.CanAccess("UserManagement");
+        public bool CanViewStaff => _permissionService.CanAccess(Infrastructure.NavigationRoutes.StaffManagement);
+
         #endregion
 
         #region Constructors
@@ -69,12 +73,13 @@ namespace OCC.Client.ViewModels.Shared
             // Parameterless constructor for design-time support
         }
 
-        public SidebarViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IRepository<Project> projectRepository)
+        public SidebarViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IRepository<Project> projectRepository, IPermissionService permissionService)
         {
             _authService = authService;
             _updateService = updateService;
             _serviceProvider = serviceProvider;
             _projectRepository = projectRepository;
+            _permissionService = permissionService;
 
             AppVersion = $"v{_updateService.CurrentVersion}";
 
@@ -134,11 +139,23 @@ namespace OCC.Client.ViewModels.Shared
         public async System.Threading.Tasks.Task CheckForUpdates()
         {
             LastActionMessage = "Checking for updates...";
-            var hasUpdate = await _updateService.CheckForUpdatesAsync();
-            if (hasUpdate)
+            var updateInfo = await _updateService.CheckForUpdatesAsync();
+            
+            if (updateInfo != null)
             {
-                LastActionMessage = "Update available! Installing...";
-                await _updateService.DownloadAndInstallUpdateAsync();
+                LastActionMessage = "Update available!";
+                
+                // Show the update dialog on the UI thread
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+                {
+                    var dialog = new Views.Shared.UpdateDialogView();
+                    dialog.DataContext = new ViewModels.Shared.UpdateDialogViewModel(_updateService, updateInfo, () => dialog.Close());
+                    
+                    if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null) 
+                    {
+                        dialog.ShowDialog(desktop.MainWindow);
+                    }
+                });
             }
             else
             {
@@ -200,7 +217,7 @@ namespace OCC.Client.ViewModels.Shared
         {
              IsQuickActionsOpen = false;
              IsSettingsOpen = false;
-             WeakReferenceMessenger.Default.Send(new OpenManageUsersMessage());
+             ActiveSection = "UserManagement";
              LastActionMessage = "Navigating to Manage Users";
         }
 
@@ -224,7 +241,7 @@ namespace OCC.Client.ViewModels.Shared
         { 
              IsQuickActionsOpen = false; 
              IsSettingsOpen = false;
-             WeakReferenceMessenger.Default.Send(new OpenProfileMessage());
+             ActiveSection = "MyProfile";
         }
 
         [RelayCommand]

@@ -16,6 +16,7 @@ using OCC.Client.ViewModels.Shared;
 using OCC.Client.Views;
 using System;
 using System.Linq;
+using OCC.Shared.Models;
 
 namespace OCC.Client
 {
@@ -61,8 +62,12 @@ namespace OCC.Client
             // services.AddDbContext<Data.AppDbContext>(); // Removed duplicate, we configure it below with Transient lifetime
 
             // Repositories
+            // repositories
             services.AddScoped(typeof(IRepository<>), typeof(Data.SqlRepository<>));
-            // services.AddSingleton<IRepository<User>, MockUserRepository>(); // Keep mock/specific if SqlRepository generic isn't enough OR use generic
+            
+            // Specific API Repositories (Override SqlRepository)
+            services.AddTransient<IRepository<User>, ApiUserRepository>();
+            services.AddTransient<IRepository<Employee>, ApiEmployeeRepository>();
 
             // Services
             // For AuthService, we might need a real implementation that uses the SqlRepository, or update the mock to use it?
@@ -99,6 +104,7 @@ namespace OCC.Client
             services.AddSingleton<INotificationService, MockNotificationService>();
             services.AddSingleton<IUpdateService, UpdateService>();
             services.AddSingleton<SignalRNotificationService>();
+            services.AddSingleton<IPermissionService, PermissionService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();
@@ -118,6 +124,7 @@ namespace OCC.Client
             services.AddTransient<ProjectListViewModel>();
 
             services.AddTransient<ProjectGanttViewModel>();
+            services.AddTransient<ViewModels.Settings.UserManagementViewModel>();
             services.AddTransient<ViewModels.Settings.ManageUsersViewModel>();
             services.AddTransient<ViewModels.Settings.AuditLogViewModel>();
             services.AddTransient<TaskDetailViewModel>(); // If needed

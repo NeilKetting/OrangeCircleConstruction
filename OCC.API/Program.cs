@@ -17,7 +17,9 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
+// Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -47,6 +49,8 @@ builder.Services.AddSignalR();
 
 // Email Service (Mock/Local for Dev)
 builder.Services.AddSingleton<OCC.API.Services.IEmailService, OCC.API.Services.MockEmailService>();
+// Security
+builder.Services.AddScoped<OCC.API.Services.PasswordHasher>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

@@ -56,11 +56,19 @@ namespace OCC.Client.ViewModels.Home.Calendar
 
         public CalendarViewModel()
         {
-            _taskRepository = new MockProjectTaskRepository();
-            _projectRepository = new MockProjectRepository();
-            _authService = new MockAuthService(new MockUserRepository()); 
+            // Designer mode or fallback
+            // _taskRepository = new MockProjectTaskRepository();
+            // _projectRepository = new MockProjectRepository();
+            // _authService = new MockAuthService(null!); 
+            
+            // To allow build, we can just leave these null or uninitialized if this ctor is strictly for designer.
+            // But better:
+            // _taskRepository = ...
+            // Since we deleted MockUserRepository, we can't use it.
+            
             CurrentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            GenerateCalendar();
+            // GenerateCalendar(); // This calls LoadTasks which needs repos. 
+            // If designer needs data, we need a Mock implementation that exists.
         }
         
         public CalendarViewModel(IRepository<ProjectTask> taskRepository, IRepository<Project> projectRepository, IAuthService authService)

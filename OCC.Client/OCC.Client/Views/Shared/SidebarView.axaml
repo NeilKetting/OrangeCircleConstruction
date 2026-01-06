@@ -65,7 +65,7 @@
 						</StackPanel>
 					</Button>
 
-					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Team" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Team'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+					<Button Classes="SidebarButton" Command="{Binding NavigateCommand}" CommandParameter="Team" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Team'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" IsVisible="{Binding CanViewStaff}">
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconTeam}" Classes="IconStyle"/>
 							<TextBlock Text="Employee Management" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>

@@ -14,7 +14,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # 2. Publish
 Write-Host "Publishing..."
-dotnet publish OCC.Client.Desktop/OCC.Client.Desktop.csproj -c Release -o publish
+dotnet publish OCC.Client.Desktop/OCC.Client.Desktop.csproj -c Release -o publish -r win-x64 --self-contained true
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # 3. Pack with Velopack
@@ -24,7 +24,7 @@ Write-Host "Packing with Velopack..."
 # We need to ensure the ID of the app matches what Velopack expects.
 # The executable is "OCC.Client.Desktop.exe"
 # We'll call the release "OrangeCircleConstruction"
-vpk pack -u "OrangeCircleConstruction" -v $version -p publish -e "OCC.Client.Desktop.exe" -i "OCC.Client.Desktop\Assets\app.ico"
+vpk pack -u "OrangeCircleConstruction" -v $version -p publish -e "OCC.Client.Desktop.exe" -i "OCC.Client.Desktop\Assets\app.ico" --packTitle "Orange Circle Construction"
 
 if ($LASTEXITCODE -ne 0) { 
     Write-Host "Packing Failed!" -ForegroundColor Red

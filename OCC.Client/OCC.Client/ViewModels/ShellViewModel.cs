@@ -9,6 +9,9 @@ using OCC.Client.ViewModels.Messages;
 using OCC.Client.Services;
 using System;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Threading;
+using OCC.Client.ViewModels.Settings;
 
 namespace OCC.Client.ViewModels
 {
@@ -17,6 +20,7 @@ namespace OCC.Client.ViewModels
         #region Private Members
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly IPermissionService _permissionService;
 
         #endregion
 
@@ -37,18 +41,36 @@ namespace OCC.Client.ViewModels
             // Parameterless constructor for design-time support
         }
 
-        public ShellViewModel(IServiceProvider serviceProvider, SidebarViewModel sidebar, IUpdateService updateService)
+        public ShellViewModel(IServiceProvider serviceProvider, SidebarViewModel sidebar, IUpdateService updateService, IPermissionService permissionService)
         {
             _serviceProvider = serviceProvider;
+            _permissionService = permissionService;
             Sidebar = sidebar;
+            Sidebar.PropertyChanged += Sidebar_PropertyChanged;
 
             // Default to Home (Dashboard)
             NavigateTo(Infrastructure.NavigationRoutes.Home);
 
             WeakReferenceMessenger.Default.RegisterAll(this); // Register for messages
 
-            // Check for updates in background
-            Task.Run(async () => await updateService.DownloadAndInstallUpdateAsync());
+            // Check for updates in background, but show UI if found
+            Task.Run(async () => 
+            {
+                var updateInfo = await updateService.CheckForUpdatesAsync();
+                if (updateInfo != null)
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+                    {
+                        var dialog = new Views.Shared.UpdateDialogView();
+                        dialog.DataContext = new ViewModels.Shared.UpdateDialogViewModel(updateService, updateInfo, () => dialog.Close());
+                        
+                        if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop) 
+                        {
+                            dialog.ShowDialog(desktop.MainWindow);
+                        }
+                    });
+                }
+            });
         }
 
         #endregion
@@ -65,6 +87,18 @@ namespace OCC.Client.ViewModels
 
         private void NavigateTo(string section)
         {
+            if (!_permissionService.CanAccess(section))
+            {
+                // Access Denied - maybe show a notification or just stay put
+                // For now, let's redirect to Home if trying to access something forbidden
+                if (section != Infrastructure.NavigationRoutes.Home)
+                {
+                    // Optionally notify user
+                    NavigateTo(Infrastructure.NavigationRoutes.Home);
+                }
+                return;
+            }
+
             switch (section)
             {
                 case Infrastructure.NavigationRoutes.Home:
@@ -86,6 +120,12 @@ namespace OCC.Client.ViewModels
                 case Infrastructure.NavigationRoutes.Notifications:
                     CurrentPage = _serviceProvider.GetRequiredService<NotificationViewModel>();
                     break;
+                case "UserManagement":
+                    CurrentPage = _serviceProvider.GetRequiredService<UserManagementViewModel>();
+                    break;
+                case "MyProfile":
+                    CurrentPage = _serviceProvider.GetRequiredService<ProfileViewModel>();
+                    break;
                  default:
                     CurrentPage = _serviceProvider.GetRequiredService<HomeViewModel>();
                     break;
@@ -96,6 +136,8 @@ namespace OCC.Client.ViewModels
         {
             NavigateTo(Infrastructure.NavigationRoutes.Notifications);
         }
+
+
 
         #endregion
     }

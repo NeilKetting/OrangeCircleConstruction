@@ -11,40 +11,29 @@
             Padding="0,5"
             Margin="15"
             BoxShadow="0 2 15 5 #292828">
-        <StackPanel Background="Transparent" Margin="0,5">
+        <StackPanel Background="Transparent" Margin="5,5">
             <!-- Company Settings Group -->
-            <TextBlock Text="COMPANY SETTINGS" Classes="LabelSmall" Margin="25,10,20,5"/>
+            <TextBlock Text="SETTINGS" Classes="LabelSmall" Margin="25,10,20,5"/>
             
-            <Button Classes="SidebarButton" Command="{Binding UsersTeamsCommand}">
+            <Button Classes="SidebarButton" Command="{Binding UsersTeamsCommand}" IsVisible="{Binding CanManageUsers}">
                 <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
                     <PathIcon Data="{StaticResource IconUserManagement}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
-                    <TextBlock Text="Users &amp; Teams" VerticalAlignment="Center" FontSize="14"/>
-                </StackPanel>
-            </Button>
-            
-            <Button Classes="SidebarButton" Command="{Binding SecurityCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
-                    <TextBlock Text="Security" VerticalAlignment="Center" FontSize="14"/>
+                    <TextBlock Text="Users" VerticalAlignment="Center" FontSize="14"/>
                 </StackPanel>
             </Button>
             
             <Button Classes="SidebarButton" Command="{Binding AlertsCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="{StaticResource IconAlert}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
                     <TextBlock Text="Alerts" VerticalAlignment="Center" FontSize="14"/>
-                </StackPanel>
-            </Button>
-
-            <Button Classes="SidebarButton" Command="{Binding OpenWorkHoursCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
-                    <TextBlock Text="Work Hours" VerticalAlignment="Center" FontSize="14"/>
                 </StackPanel>
             </Button>
             
             <Button Classes="SidebarButton" Command="{Binding AuditLogCommand}" Height="50">
-                <Grid ColumnDefinitions="*, Auto" Classes="SidebarItem">
-                    <TextBlock Text="Audit Log" VerticalAlignment="Center" FontSize="14"/>
-                    <PathIcon Grid.Column="1" Data="{StaticResource IconUpgrade}" Width="14" Height="14" Foreground="#0EA5E9" Margin="10,0,0,0"/>
-                </Grid>
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
+                     <PathIcon Data="{StaticResource IconAudit}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+                     <TextBlock Text="Audit Log" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
             </Button>
             
             <Separator Classes="MenuSeparator" Margin="15,10"/>
@@ -53,19 +42,22 @@
             <TextBlock Text="PERSONAL PREFERENCES" Classes="LabelSmall" Margin="25,10,20,5"/>
             
             <Button Classes="SidebarButton" Command="{Binding ToggleThemeCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="{StaticResource IconDarkModel}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
                     <TextBlock Text="Enable Dark Mode" VerticalAlignment="Center" FontSize="14"/>
                 </StackPanel>
             </Button>
             
             <Button Classes="SidebarButton" Command="{Binding MyProfileCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
+                     <PathIcon Data="{StaticResource IconProfile}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
                     <TextBlock Text="My Profile" VerticalAlignment="Center" FontSize="14"/>
                 </StackPanel>
             </Button>
             
             <Button Classes="SidebarButton" Command="{Binding LogoutCommand}">
-                <StackPanel Classes="SidebarItem" Orientation="Horizontal">
+                <StackPanel Classes="SidebarItem" Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="{StaticResource IconLogout}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
                     <TextBlock Text="Logout" VerticalAlignment="Center" FontSize="14"/>
                 </StackPanel>
             </Button>
