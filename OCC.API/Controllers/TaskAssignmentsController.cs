@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OCC.API.Data;
+using OCC.API.Hubs;
 using OCC.Shared.Models;
 
 namespace OCC.API.Controllers
@@ -12,11 +14,13 @@ namespace OCC.API.Controllers
     public class TaskAssignmentsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<TaskAssignmentsController> _logger;
 
-        public TaskAssignmentsController(AppDbContext context, ILogger<TaskAssignmentsController> logger)
+        public TaskAssignmentsController(AppDbContext context, IHubContext<NotificationHub> hubContext, ILogger<TaskAssignmentsController> logger)
         {
             _context = context;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -39,9 +43,17 @@ namespace OCC.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskAssignment>> GetTaskAssignment(Guid id)
         {
-            var assignment = await _context.TaskAssignments.FindAsync(id);
-            if (assignment == null) return NotFound();
-            return assignment;
+            try
+            {
+                var assignment = await _context.TaskAssignments.FindAsync(id);
+                if (assignment == null) return NotFound();
+                return assignment;
+            }
+            catch (Exception ex)
+            {
+                 _logger.LogError(ex, "Error retrieving assignment {Id}", id);
+                 return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
@@ -52,6 +64,9 @@ namespace OCC.API.Controllers
                 if (assignment.Id == Guid.Empty) assignment.Id = Guid.NewGuid();
                 _context.TaskAssignments.Add(assignment);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "TaskAssignment", "Create", assignment.Id);
+
                 return CreatedAtAction("GetTaskAssignment", new { id = assignment.Id }, assignment);
             }
             catch (Exception ex)
@@ -70,6 +85,9 @@ namespace OCC.API.Controllers
                 if (assignment == null) return NotFound();
                 _context.TaskAssignments.Remove(assignment);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "TaskAssignment", "Delete", id);
+
                 return NoContent();
             }
             catch (Exception ex)

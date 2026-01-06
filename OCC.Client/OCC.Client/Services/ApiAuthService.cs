@@ -70,12 +70,25 @@ namespace OCC.Client.Services
             }
         }
 
-        public Task LogoutAsync()
+        public async Task LogoutAsync()
         {
-            _currentUser = null;
-            _authToken = null;
-            _httpClient.DefaultRequestHeaders.Authorization = null;
-            return Task.CompletedTask;
+            try
+            {
+                if (IsAuthenticated)
+                {
+                    await _httpClient.PostAsync("api/Auth/logout", null);
+                }
+            }
+            catch
+            {
+                // Ignore network errors during logout, we just want to clear local state
+            }
+            finally
+            {
+                _currentUser = null;
+                _authToken = null;
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+            }
         }
 
         private class LoginResponse

@@ -70,6 +70,9 @@ namespace OCC.Client
             services.AddTransient<IRepository<Customer>, ApiCustomerRepository>();
             services.AddTransient<IRepository<TaskAssignment>, ApiTaskAssignmentRepository>();
             services.AddTransient<IRepository<TaskComment>, ApiTaskCommentRepository>();
+            services.AddTransient<IRepository<TimeRecord>, ApiTimeRecordRepository>();
+            services.AddTransient<IRepository<AttendanceRecord>, ApiAttendanceRecordRepository>();
+            services.AddTransient<IRepository<AppSetting>, ApiAppSettingRepository>();
 
             // Fallback for any other type not explicitly mapped (e.g. TimeRecord) - though unlikely to be used if we covered main ones
             // services.AddTransient(typeof(IRepository<>), typeof(SqlRepository<>));

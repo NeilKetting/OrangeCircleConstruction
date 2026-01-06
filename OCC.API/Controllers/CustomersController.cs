@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OCC.API.Data;
+using OCC.API.Hubs;
 using OCC.Shared.Models;
 
 namespace OCC.API.Controllers
@@ -12,11 +14,13 @@ namespace OCC.API.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<CustomersController> _logger;
 
-        public CustomersController(AppDbContext context, ILogger<CustomersController> logger)
+        public CustomersController(AppDbContext context, IHubContext<NotificationHub> hubContext, ILogger<CustomersController> logger)
         {
             _context = context;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -61,6 +65,9 @@ namespace OCC.API.Controllers
                 if (customer.Id == Guid.Empty) customer.Id = Guid.NewGuid();
                 _context.Customers.Add(customer);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Customer", "Create", customer.Id);
+
                 return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
             }
             catch (Exception ex)
@@ -80,6 +87,7 @@ namespace OCC.API.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Customer", "Update", id);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -104,6 +112,9 @@ namespace OCC.API.Controllers
                 if (customer == null) return NotFound();
                 _context.Customers.Remove(customer);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Customer", "Delete", id);
+
                 return NoContent();
             }
             catch (Exception ex)

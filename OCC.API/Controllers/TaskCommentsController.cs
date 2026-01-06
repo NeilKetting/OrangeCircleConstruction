@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OCC.API.Data;
+using OCC.API.Hubs;
 using OCC.Shared.Models;
 
 namespace OCC.API.Controllers
@@ -12,11 +14,13 @@ namespace OCC.API.Controllers
     public class TaskCommentsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<TaskCommentsController> _logger;
 
-        public TaskCommentsController(AppDbContext context, ILogger<TaskCommentsController> logger)
+        public TaskCommentsController(AppDbContext context, IHubContext<NotificationHub> hubContext, ILogger<TaskCommentsController> logger)
         {
             _context = context;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -39,9 +43,17 @@ namespace OCC.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskComment>> GetTaskComment(Guid id)
         {
-            var comment = await _context.TaskComments.FindAsync(id);
-            if (comment == null) return NotFound();
-            return comment;
+            try
+            {
+                var comment = await _context.TaskComments.FindAsync(id);
+                if (comment == null) return NotFound();
+                return comment;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving comment {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
@@ -53,6 +65,9 @@ namespace OCC.API.Controllers
                 comment.CreatedAt = DateTime.UtcNow; 
                 _context.TaskComments.Add(comment);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "TaskComment", "Create", comment.Id);
+
                 return CreatedAtAction("GetTaskComment", new { id = comment.Id }, comment);
             }
             catch (Exception ex)
@@ -71,6 +86,9 @@ namespace OCC.API.Controllers
                 if (comment == null) return NotFound();
                 _context.TaskComments.Remove(comment);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "TaskComment", "Delete", id);
+
                 return NoContent();
             }
             catch (Exception ex)

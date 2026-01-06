@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using OCC.Shared.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -138,6 +139,28 @@ namespace OCC.API.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { Token = tokenString, User = user });
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (userId != null)
+            {
+                _logger.LogInformation("Logout for user {UserId}", userId);
+                 _context.AuditLogs.Add(new AuditLog
+                {
+                    UserId = userId,
+                    TableName = "Users",
+                    RecordId = userId,
+                    Action = "Logout",
+                    Timestamp = DateTime.UtcNow,
+                    NewValues = "{ \"Action\": \"User Logged Out\" }"
+                });
+                await _context.SaveChangesAsync();
+            }
+            return Ok();
         }
 
         [HttpPost("register")]

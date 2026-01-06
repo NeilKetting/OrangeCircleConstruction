@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OCC.API.Data;
+using OCC.API.Hubs;
 using OCC.Shared.Models;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace OCC.API.Controllers
 {
@@ -14,11 +14,13 @@ namespace OCC.API.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<ProjectsController> _logger;
 
-        public ProjectsController(AppDbContext context, ILogger<ProjectsController> logger)
+        public ProjectsController(AppDbContext context, IHubContext<NotificationHub> hubContext, ILogger<ProjectsController> logger)
         {
             _context = context;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -28,7 +30,6 @@ namespace OCC.API.Controllers
         {
             try
             {
-                // Including related data might be heavy, be careful
                 return await _context.Projects
                     .Include(p => p.Tasks)
                     .AsNoTracking()
@@ -55,11 +56,7 @@ namespace OCC.API.Controllers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.Id == id);
 
-                if (project == null)
-                {
-                    return NotFound();
-                }
-
+                if (project == null) return NotFound();
                 return project;
             }
             catch (Exception ex)
@@ -76,13 +73,10 @@ namespace OCC.API.Controllers
             try
             {
                 if (project.Id == Guid.Empty) project.Id = Guid.NewGuid();
-
                 _context.Projects.Add(project);
-
-                // Audit Log handled by DbContext, but we can add specific info if needed
-                // _context.AuditLogs.Add(...) 
-
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Project", "Create", project.Id);
 
                 return CreatedAtAction("GetProject", new { id = project.Id }, project);
             }
@@ -97,34 +91,24 @@ namespace OCC.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProject(Guid id, Project project)
         {
-            if (id != project.Id)
-            {
-                return BadRequest();
-            }
-
+            if (id != project.Id) return BadRequest();
             _context.Entry(project).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Project", "Update", id);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProjectExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!ProjectExists(id)) return NotFound();
+                else throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating project {Id}", id);
                 return StatusCode(500, "Internal server error");
             }
-
             return NoContent();
         }
 
@@ -135,13 +119,11 @@ namespace OCC.API.Controllers
             try
             {
                 var project = await _context.Projects.FindAsync(id);
-                if (project == null)
-                {
-                    return NotFound();
-                }
-
+                if (project == null) return NotFound();
                 _context.Projects.Remove(project);
                 await _context.SaveChangesAsync();
+                
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "Project", "Delete", id);
 
                 return NoContent();
             }
@@ -152,9 +134,6 @@ namespace OCC.API.Controllers
             }
         }
 
-        private bool ProjectExists(Guid id)
-        {
-            return _context.Projects.Any(e => e.Id == id);
-        }
+        private bool ProjectExists(Guid id) => _context.Projects.Any(e => e.Id == id);
     }
 }

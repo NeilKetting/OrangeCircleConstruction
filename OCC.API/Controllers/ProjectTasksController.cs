@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OCC.API.Data;
+using OCC.API.Hubs;
 using OCC.Shared.Models;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace OCC.API.Controllers
 {
@@ -14,11 +14,13 @@ namespace OCC.API.Controllers
     public class ProjectTasksController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<ProjectTasksController> _logger;
 
-        public ProjectTasksController(AppDbContext context, ILogger<ProjectTasksController> logger)
+        public ProjectTasksController(AppDbContext context, IHubContext<NotificationHub> hubContext, ILogger<ProjectTasksController> logger)
         {
             _context = context;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -60,11 +62,7 @@ namespace OCC.API.Controllers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(t => t.Id == id);
 
-                if (task == null)
-                {
-                    return NotFound();
-                }
-
+                if (task == null) return NotFound();
                 return task;
             }
             catch (Exception ex)
@@ -86,6 +84,8 @@ namespace OCC.API.Controllers
                 _context.ProjectTasks.Add(task);
                 await _context.SaveChangesAsync();
 
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "ProjectTask", "Create", task.Id);
+
                 return CreatedAtAction("GetProjectTask", new { id = task.Id }, task);
             }
             catch (Exception ex)
@@ -100,13 +100,13 @@ namespace OCC.API.Controllers
         public async Task<IActionResult> PutProjectTask(Guid id, ProjectTask task)
         {
             if (id != task.Id) return BadRequest();
-
             TaskHelper.EnsureUtcDates(task);
             _context.Entry(task).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "ProjectTask", "Update", id);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -118,7 +118,6 @@ namespace OCC.API.Controllers
                 _logger.LogError(ex, "Error updating task {Id}", id);
                 return StatusCode(500, "Internal server error");
             }
-
             return NoContent();
         }
 
@@ -130,9 +129,10 @@ namespace OCC.API.Controllers
             {
                 var task = await _context.ProjectTasks.FindAsync(id);
                 if (task == null) return NotFound();
-
                 _context.ProjectTasks.Remove(task);
                 await _context.SaveChangesAsync();
+
+                await _hubContext.Clients.All.SendAsync("EntityUpdate", "ProjectTask", "Delete", id);
 
                 return NoContent();
             }
@@ -143,7 +143,6 @@ namespace OCC.API.Controllers
             }
         }
         
-        // Helper to check existence
         private bool ProjectTaskExists(Guid id) => _context.ProjectTasks.Any(e => e.Id == id);
     }
     
@@ -151,8 +150,6 @@ namespace OCC.API.Controllers
     {
         public static void EnsureUtcDates(ProjectTask task)
         {
-            // EF Core on SQL Server can be picky with DateTimes if they are Unspecified or Local when storing to datetime2
-            // Best practice is to ensure UTC or Unspecified that is treated as UTC
             if (task.StartDate.Kind == DateTimeKind.Local) task.StartDate = task.StartDate.ToUniversalTime();
             if (task.FinishDate.Kind == DateTimeKind.Local) task.FinishDate = task.FinishDate.ToUniversalTime();
         }

@@ -7,6 +7,7 @@ namespace OCC.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
     public class AuditController : ControllerBase
     {
         private readonly AppDbContext _context;
