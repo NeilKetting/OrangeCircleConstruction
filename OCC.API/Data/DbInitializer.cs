@@ -1,5 +1,6 @@
 using OCC.API.Data;
 using OCC.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace OCC.API.Data
 {
@@ -7,7 +8,6 @@ namespace OCC.API.Data
     {
         public static void Initialize(AppDbContext context)
         {
-            // Prepare DB (Apply Migrations)
             // Prepare DB (Apply Migrations)
             context.Database.Migrate();
 
