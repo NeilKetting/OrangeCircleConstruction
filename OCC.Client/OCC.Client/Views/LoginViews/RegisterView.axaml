@@ -92,6 +92,7 @@
 								<TextBlock Text="{Binding ErrorMessage}"
 										   Foreground="Red"
 										   FontSize="12"
+										   TextWrapping="Wrap"
 										   IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
 								<Button Command="{Binding RegisterCommand}"
