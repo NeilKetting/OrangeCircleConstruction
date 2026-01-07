@@ -115,6 +115,7 @@ namespace OCC.Client
             services.AddSingleton<IUpdateService, UpdateService>();
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
+            services.AddSingleton<LocalSettingsService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();

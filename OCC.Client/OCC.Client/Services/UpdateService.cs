@@ -89,7 +89,7 @@ namespace OCC.Client.Services
 
         public void ApplyUpdatesAndExit(UpdateInfo newVersion)
         {
-            _mgr?.ApplyUpdatesAndExit(newVersion);
+             _mgr?.ApplyUpdatesAndRestart(newVersion);
         }
     }
 }

@@ -12,24 +12,50 @@ namespace OCC.API.Data
             context.Database.Migrate();
 
             // Look for any users.
-            if (context.Users.Any())
-            {
-                return;   // DB has been seeded
-            }
+            /* 
+             * Previous check: if (context.Users.Any()) return; 
+             * This prevents seeding if ANY user exists (e.g. invalid test users).
+             * We will now explicitly ensure the Admin user exists.
+             */
 
-            var users = new User[]
+            var adminEmail = "neil@mdk.co.za";
+            var adminUser = context.Users.FirstOrDefault(u => u.Email == adminEmail);
+
+            if (adminUser == null)
             {
-                new User
+                adminUser = new User
                 {
-                    Email = "neil@mdk.co.za",
+                    Email = adminEmail,
                     Password = hasher.HashPassword("pass"), // Hashed Password
                     FirstName = "Neil",
                     LastName = "Admin",
                     UserRole = UserRole.Admin,
                     IsApproved = true,
                     IsEmailVerified = true
-                }
+                };
+                context.Users.Add(adminUser);
+                context.SaveChanges();
+            }
+            else
+            {
+                // Optional: Ensure password matches "pass" hash if debugging, 
+                // but usually we don't overwrite passwords in prod. 
+                // For this dev request: "Can we not seed me as a user created with password hash?"
+                // Implicitly implies valid user should exist. 
+                // If the user forgot their password (likely "pass" logic from failsafe), 
+                // we could force reset it here, but that's aggressive.
+                // Assuming existence is enough given the failsafe removal.
+            }
+
+            // Other default users if needed...
+            if (context.Users.Count() > 1) return; // If more than just our admin, skip rest
+
+            var users = new User[]
+            {
+                // ... add other seed users here if requested ...
             };
+            // Note: The original returned early, so users array was never reached if Any() was true.
+            // Keeping it simple.
 
             foreach (User u in users)
             {

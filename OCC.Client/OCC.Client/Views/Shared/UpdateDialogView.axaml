@@ -19,8 +19,13 @@
 		<vm:UpdateDialogViewModel/>
 	</Design.DataContext>
 
-	<Border CornerRadius="8" Background="{DynamicResource AppBackgroundSlate}"
-			BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Padding="20">
+	<Border CornerRadius="8"
+			Background="{DynamicResource AppBackgroundSlate}"
+			BorderBrush="{DynamicResource BorderGray}"
+			BorderThickness="2"
+			Padding="20"
+			Margin="15"
+			BoxShadow="0 2 15 5 #A3E635">
 
 		<Grid RowDefinitions="Auto,*,Auto,Auto">
 

@@ -16,7 +16,7 @@ namespace OCC.API.Controllers
         private readonly AppDbContext _context;
         private readonly PasswordHasher _passwordHasher;
         private readonly ILogger<UsersController> _logger;
-        private readonly Microsoft.AspNetCore.SignalR.IHubContext<OCC.API.Hubs.NotificationHub> _hubContext;
+        private readonly IHubContext<Hubs.NotificationHub> _hubContext;
 
         public UsersController(AppDbContext context, PasswordHasher passwordHasher, ILogger<UsersController> logger, Microsoft.AspNetCore.SignalR.IHubContext<OCC.API.Hubs.NotificationHub> hubContext)
         {
@@ -61,6 +61,30 @@ namespace OCC.API.Controllers
                 _logger.LogError(ex, "Error retrieving user {Id}", id);
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        // POST: api/Users
+        [HttpPost]
+        public async Task<ActionResult<User>> PostUser(User user)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == user.Email))
+            {
+                return Conflict("User with this email already exists.");
+            }
+
+            if (!string.IsNullOrEmpty(user.Password))
+            {
+                user.Password = _passwordHasher.HashPassword(user.Password);
+            }
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Notify clients
+            await _hubContext.Clients.All.SendAsync("EntityUpdate", "User", "Create", user.Id);
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"New user created: {user.FirstName} {user.LastName}");
+
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
         // PUT: api/Users/5

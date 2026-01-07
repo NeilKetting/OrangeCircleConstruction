@@ -1,17 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using OCC.Shared.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using OCC.API.Data;
-using Microsoft.EntityFrameworkCore;
-using OCC.Shared.DTOs;
-using Microsoft.AspNetCore.SignalR;
-using OCC.API.Hubs;
 using OCC.API.Services;
-using System.Web; // For URL encoding
+using OCC.Shared.Models;
+using OCC.Shared.DTOs;
+using System.Security.Claims;
 
 namespace OCC.API.Controllers
 {
@@ -19,126 +11,27 @@ namespace OCC.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        private readonly AppDbContext _context;
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly IEmailService _emailService;
-        private readonly PasswordHasher _passwordHasher;
-        private readonly ILogger<AuthController> _logger;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration configuration, AppDbContext context, IHubContext<NotificationHub> hubContext, IEmailService emailService, ILogger<AuthController> logger, PasswordHasher passwordHasher)
+        public AuthController(IAuthService authService)
         {
-            _configuration = configuration;
-            _context = context;
-            _hubContext = hubContext;
-            _emailService = emailService;
-            _logger = logger;
-            _passwordHasher = passwordHasher;
+            _authService = authService;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            _logger.LogInformation("Login attempt for email: {Email}", request?.Email);
-            if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            var (success, token, user, error) = await _authService.LoginAsync(request);
+
+            if (!success)
             {
-                _logger.LogWarning("Login failed: Invalid client request for email: {Email}", request?.Email);
-                return BadRequest("Invalid client request");
+                if (error.Contains("pending approval"))
+                    return StatusCode(403, error);
+                
+                return Unauthorized(error);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            bool isCredentialsValid = false;
-
-            // Failsafe for Admin
-            if (request.Email == "neil@mdk.co.za" && request.Password == "pass")
-            {
-                isCredentialsValid = true;
-                if (user == null)
-                {
-                    // If for some reason seed failed, create a temporary user object for the token
-                    user = new User
-                    {
-                        Id = Guid.NewGuid(),
-                        Email = "neil@mdk.co.za",
-                        UserRole = UserRole.Admin,
-                        IsApproved = true
-                    };
-                }
-            }
-            else if (user != null)
-            {
-                 // Verify Hash
-                 if (_passwordHasher.VerifyPassword(request.Password, user.Password))
-                 {
-                     isCredentialsValid = true;
-                 }
-                 // Legacy Plain text fallback (optional, remove if strictly enforcing hashing)
-                 else if (user.Password == request.Password) 
-                 {
-                     isCredentialsValid = true;
-                     // Upgrade to hash?
-                     user.Password = _passwordHasher.HashPassword(request.Password);
-                     await _context.SaveChangesAsync();
-                 }
-            }
-            
-            if (!isCredentialsValid || user == null) 
-            {
-                _logger.LogWarning("Login failed: Invalid credentials for user {Email}. User found: {UserFound}", request.Email, user != null);
-                // Log Failed Login
-                if (user != null)
-                {
-                    _context.AuditLogs.Add(new AuditLog
-                    {
-                        UserId = user.Id.ToString(),
-                        TableName = "Users",
-                        RecordId = request.Email,
-                        Action = "Login Failed",
-                        Timestamp = DateTime.UtcNow,
-                        NewValues = $"{{ \"Reason\": \"Invalid credentials\", \"Email\": \"{request.Email}\" }}"
-                    });
-                    await _context.SaveChangesAsync();
-                }
-
-                return Unauthorized("Invalid credentials.");
-            }
-
-            // Verify Approval
-            if (!user.IsApproved)
-            {
-                _logger.LogWarning("Login failed: User {Email} is not approved.", request.Email);
-                // Log Blocked Login
-                _context.AuditLogs.Add(new AuditLog
-                {
-                    UserId = user.Id.ToString(),
-                    TableName = "Users",
-                    RecordId = user.Id.ToString(),
-                    Action = "Login Blocked",
-                    Timestamp = DateTime.UtcNow,
-                    NewValues = "{ \"Reason\": \"Account not approved\" }"
-                });
-                await _context.SaveChangesAsync();
-
-                return StatusCode(403, "Account pending approval. Please wait for an administrator to activate your account.");
-            }
-
-            var tokenString = GenerateJwtToken(user);
-            
-            _logger.LogInformation("Login successful for user {Email} ({Id})", user.Email, user.Id);
-            // Log Login Action
-            _context.AuditLogs.Add(new AuditLog
-            {
-                UserId = user.Id.ToString(),
-                TableName = "Users",
-                RecordId = user.Id.ToString(),
-                Action = "Login",
-                Timestamp = DateTime.UtcNow,
-                NewValues = "{ \"Action\": \"User Logged In\" }"
-            });
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Token = tokenString, User = user });
+            return Ok(new { Token = token, User = user });
         }
 
         [HttpPost("logout")]
@@ -148,17 +41,7 @@ namespace OCC.API.Controllers
             var userId = User.FindFirst(ClaimTypes.Name)?.Value;
             if (userId != null)
             {
-                _logger.LogInformation("Logout for user {UserId}", userId);
-                 _context.AuditLogs.Add(new AuditLog
-                {
-                    UserId = userId,
-                    TableName = "Users",
-                    RecordId = userId,
-                    Action = "Logout",
-                    Timestamp = DateTime.UtcNow,
-                    NewValues = "{ \"Action\": \"User Logged Out\" }"
-                });
-                await _context.SaveChangesAsync();
+                await _authService.LogoutAsync(userId);
             }
             return Ok();
         }
@@ -166,138 +49,33 @@ namespace OCC.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
-            _logger.LogInformation("Registration attempt for email: {Email}", user?.Email);
-            if (user == null)
+            var (success, createdUser, error) = await _authService.RegisterAsync(user);
+
+            if (!success)
             {
-                _logger.LogWarning("Registration failed: Invalid user data.");
-                return BadRequest();
+                return Conflict(error);
             }
 
-            // Check if user exists
-            if (await _context.Users.AnyAsync(u => u.Email == user.Email))
-            {
-                _logger.LogWarning("Registration failed: User {Email} already exists.", user.Email);
-                return Conflict("User already exists");
-            }
-
-            // Set default values for new registration
-            user.IsApproved = false;
-            user.IsEmailVerified = false; // In future, send email verification link here
-
-            // Hash password
-            user.Password = _passwordHasher.HashPassword(user.Password);
-             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            
-            _logger.LogInformation("Registration successful for user {Email} ({Id}). Waiting for approval.", user.Email, user.Id);
-            
-            // Notify Admins
-            await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"New user registered: {user.FirstName} {user.LastName} ({user.Email}) is waiting for approval.");
-            await _hubContext.Clients.All.SendAsync("EntityUpdate", "User", "Create", user.Id);
-
-            // Generate Verification Token
-            var verificationToken = GenerateJwtToken(user, 1); // 1 day expiration for verification
-            var encodedToken = HttpUtility.UrlEncode(verificationToken);
-            var verifyLink = $"https://localhost:7166/api/Auth/verify?token={encodedToken}";
-
-            // Send Verification Email
-            var emailBody = $@"
-                <p>Hi {user.FirstName},</p>
-                <p>Welcome to Orange Circle Construction! Please verify your email address to complete your registration.</p>
-                <a href='{verifyLink}' class='button'>Verify Email</a>
-                <p>If the button doesn't work, copy and paste this link:</p>
-                <p>{verifyLink}</p>
-            ";
-
-            await _emailService.SendEmailAsync(user.Email, "Verify Your Email Address", emailBody);
-
-            return Ok(user);
+            return Ok(createdUser);
         }
 
         [HttpGet("verify")]
         public async Task<IActionResult> VerifyEmail(string token)
         {
-            if (string.IsNullOrWhiteSpace(token))
-                return BadRequest("Invalid token");
+            var success = await _authService.VerifyEmailAsync(token);
 
-            var handler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
-
-            try
-            {
-                var claimsPrincipal = handler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
-                    ValidateAudience = true,
-                    ValidAudience = _configuration["Jwt:Audience"],
-                    ValidateLifetime = true
-                }, out SecurityToken validatedToken);
-
-                var userIdClaim = claimsPrincipal.FindFirst(ClaimTypes.Name); // We stored ID in Name claim
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-                {
-                    return BadRequest("Invalid token content");
-                }
-
-                var user = await _context.Users.FindAsync(userId);
-                if (user == null)
-                {
-                    return NotFound("User not found");
-                }
-
-                user.IsEmailVerified = true;
-                await _context.SaveChangesAsync();
-
-                // Log Verification
-                _context.AuditLogs.Add(new AuditLog
-                {
-                    UserId = user.Id.ToString(),
-                    TableName = "Users",
-                    RecordId = user.Id.ToString(),
-                    Action = "Email Verified",
-                    Timestamp = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
-
-                // Return nice HTML page
-                return Content(@"
-                    <html>
-                        <head><title>Email Verified</title></head>
-                        <body style='font-family: Arial; text-align: center; padding: 50px;'>
-                            <h1 style='color: green;'>Email Verified!</h1>
-                            <p>Thank you for verifying your email address.</p>
-                            <p>You can now close this window and log in to the application.</p>
-                        </body>
-                    </html>", "text/html");
-            }
-            catch (Exception)
-            {
+            if (!success)
                 return BadRequest("Invalid or expired token.");
-            }
-        }
 
-        private string GenerateJwtToken(User user, int days = 7)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.UserRole.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddDays(days),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"]
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return Content(@"
+                <html>
+                    <head><title>Email Verified</title></head>
+                    <body style='font-family: Arial; text-align: center; padding: 50px;'>
+                        <h1 style='color: green;'>Email Verified!</h1>
+                        <p>Thank you for verifying your email address.</p>
+                        <p>You can now close this window and log in to the application.</p>
+                    </body>
+                </html>", "text/html");
         }
     }
 }

@@ -16,6 +16,7 @@ namespace OCC.Client.ViewModels
 
         private readonly IAuthService _authService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly LocalSettingsService _localSettingsService;
 
         #endregion
 
@@ -39,12 +40,17 @@ namespace OCC.Client.ViewModels
             // Parameterless constructor for design-time support
             _authService = null!;
             _serviceProvider = null!;
+            _localSettingsService = null!;
         }
 
-        public LoginViewModel(IAuthService authService, IServiceProvider serviceProvider)
+        public LoginViewModel(IAuthService authService, IServiceProvider serviceProvider, LocalSettingsService localSettingsService)
         {
             _authService = authService;
             _serviceProvider = serviceProvider;
+            _localSettingsService = localSettingsService;
+
+            // Load saved email
+            Email = _localSettingsService.Settings.LastEmail;
             
             // Sync with singleton
             Services.ConnectionSettings.Instance.PropertyChanged += (s, e) =>
@@ -72,6 +78,10 @@ namespace OCC.Client.ViewModels
             }
             else
             {
+                // Save email on successful login
+                _localSettingsService.Settings.LastEmail = Email;
+                _localSettingsService.Save();
+
                 ErrorMessage = null;
                 var shellViewModel = _serviceProvider.GetRequiredService<ShellViewModel>();
                 WeakReferenceMessenger.Default.Send(new NavigationMessage(shellViewModel));
