@@ -7,6 +7,7 @@ using OCC.Client.ViewModels.Home.Shared;
 using System;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace OCC.Client.ViewModels.Home.Dashboard
 {
@@ -15,6 +16,7 @@ namespace OCC.Client.ViewModels.Home.Dashboard
         #region Private Members
 
         private readonly IRepository<ProjectTask> _taskRepository;
+        private readonly ILogger<TasksWidgetViewModel> _logger;
 
         #endregion
 
@@ -31,11 +33,13 @@ namespace OCC.Client.ViewModels.Home.Dashboard
         {
             // Parameterless constructor for design-time support
             _taskRepository = null!;
+            _logger = null!;
         }
         
-        public TasksWidgetViewModel(IRepository<ProjectTask> taskRepository)
+        public TasksWidgetViewModel(IRepository<ProjectTask> taskRepository, ILogger<TasksWidgetViewModel> logger)
         {
             _taskRepository = taskRepository;
+            _logger = logger;
             LoadTasks();
             
             // Subscribe to updates
@@ -48,30 +52,37 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 
         private async void LoadTasks()
         {
-            IEnumerable<ProjectTask> tasks;
-            if (_taskRepository is ApiProjectTaskRepository apiRepo)
+            try
             {
-                tasks = await apiRepo.GetMyTasksAsync();
-            }
-            else
-            {
-                tasks = await _taskRepository.GetAllAsync();
-            }
-            var recentTasks = tasks.OrderByDescending(t => t.StartDate).Take(5); // Show recent or upcoming
-
-            Tasks.Clear();
-            foreach (var task in recentTasks)
-            {
-                Tasks.Add(new HomeTaskItem
+                IEnumerable<ProjectTask> tasks;
+                if (_taskRepository is ApiProjectTaskRepository apiRepo)
                 {
-                    Id = task.Id,
-                    Title = task.Name,
-                    Description = task.Description,
-                    DueDate = task.FinishDate,
-                    Status = task.Status,
-                    Priority = task.Priority,
-                    AssigneeInitials = string.IsNullOrEmpty(task.AssignedTo) ? "UN" : task.AssignedTo.Substring(0, Math.Min(2, task.AssignedTo.Length)).ToUpper()
-                });
+                    tasks = await apiRepo.GetMyTasksAsync();
+                }
+                else
+                {
+                    tasks = await _taskRepository.GetAllAsync();
+                }
+                var recentTasks = tasks.OrderByDescending(t => t.StartDate).Take(5); // Show recent or upcoming
+
+                Tasks.Clear();
+                foreach (var task in recentTasks)
+                {
+                    Tasks.Add(new HomeTaskItem
+                    {
+                        Id = task.Id,
+                        Title = task.Name,
+                        Description = task.Description,
+                        DueDate = task.FinishDate,
+                        Status = task.Status,
+                        Priority = task.Priority,
+                        AssigneeInitials = string.IsNullOrEmpty(task.AssignedTo) ? "UN" : task.AssignedTo.Substring(0, Math.Min(2, task.AssignedTo.Length)).ToUpper()
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                 _logger.LogError(ex, "Error loading tasks widget");
             }
         }
 

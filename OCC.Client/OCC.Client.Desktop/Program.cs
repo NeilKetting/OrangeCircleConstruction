@@ -1,5 +1,6 @@
 ﻿using System;
 using Avalonia;
+using Serilog;
 
 namespace OCC.Client.Desktop
 {
@@ -11,10 +12,43 @@ namespace OCC.Client.Desktop
         [STAThread]
         public static void Main(string[] args)
         {
-            Velopack.VelopackApp.Build().Run();
+            // Configure Serilog
+            var logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
+                "OCC", "logs", "log-.txt");
 
-            BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
+                .CreateLogger();
+
+            // Global Exception Handlers
+            AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
+            {
+                Log.Fatal(error.ExceptionObject as Exception, "AppDomain Unhandled Exception");
+                Log.CloseAndFlush();
+            };
+
+            System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (sender, error) =>
+            {
+                Log.Error(error.Exception, "TaskScheduler Unobserved Task Exception");
+                error.SetObserved();
+            };
+
+            try
+            {
+                Velopack.VelopackApp.Build().Run();
+
+                BuildAvaloniaApp()
+                    .StartWithClassicDesktopLifetime(args);
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application StartWithClassicDesktopLifetime Crash");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.

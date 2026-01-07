@@ -4,6 +4,7 @@ using OCC.Shared.Models;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace OCC.Client.ViewModels.Home.Dashboard
 {
@@ -13,6 +14,7 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<ProjectTask> _taskRepository;
+        private readonly ILogger<SummaryViewModel> _logger;
 
         #endregion
 
@@ -79,10 +81,11 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 
         #region Constructors
 
-        public SummaryViewModel(IRepository<Project> projectRepository, IRepository<ProjectTask> taskRepository)
+        public SummaryViewModel(IRepository<Project> projectRepository, IRepository<ProjectTask> taskRepository, ILogger<SummaryViewModel> logger)
         {
             _projectRepository = projectRepository;
             _taskRepository = taskRepository;
+            _logger = logger;
             LoadData();
         }
 
@@ -95,45 +98,52 @@ namespace OCC.Client.ViewModels.Home.Dashboard
 
         private async void LoadData()
         {
-            // Load Projects
-            var projects = await _projectRepository.GetAllAsync();
-            var projectList = projects.ToList();
-
-            TotalProjects = projectList.Count.ToString();
-            ActiveProjects = projectList.Count(p => p.Status == "Active").ToString();
-            ProjectsCompleted = projectList.Count(p => p.Status == "Completed").ToString();
-
-            // Load Tasks
-            // Use ApiProjectTaskRepository to get tasks assigned to the current user
-            IEnumerable<ProjectTask> tasks;
-            if (_taskRepository is ApiProjectTaskRepository apiRepo)
+            try
             {
-                tasks = await apiRepo.GetMyTasksAsync();
+                // Load Projects
+                var projects = await _projectRepository.GetAllAsync();
+                var projectList = projects.ToList();
+
+                TotalProjects = projectList.Count.ToString();
+                ActiveProjects = projectList.Count(p => p.Status == "Active").ToString();
+                ProjectsCompleted = projectList.Count(p => p.Status == "Completed").ToString();
+
+                // Load Tasks
+                // Use ApiProjectTaskRepository to get tasks assigned to the current user
+                IEnumerable<ProjectTask> tasks;
+                if (_taskRepository is ApiProjectTaskRepository apiRepo)
+                {
+                    tasks = await apiRepo.GetMyTasksAsync();
+                }
+                else
+                {
+                    // Fallback for design time or mock
+                    tasks = await _taskRepository.GetAllAsync();
+                }
+
+                var allTasks = tasks.ToList();
+                TotalTaskCount = allTasks.Count;
+
+                var now = System.DateTime.Now.Date;
+
+                CompletedCount = allTasks.Count(t => t.ActualCompleteDate.HasValue);
+                
+                InProgressCount = allTasks.Count(t => 
+                    !t.ActualCompleteDate.HasValue && 
+                    (t.ActualStartDate.HasValue || (t.StartDate.Date <= now)));
+
+                NotStartedCount = allTasks.Count(t => 
+                    !t.ActualCompleteDate.HasValue && 
+                    !t.ActualStartDate.HasValue && 
+                    (t.StartDate.Date > now));
+
+                CalculateTimeStatistics(allTasks);
+                CalculateChartAngles();
             }
-            else
+            catch (Exception ex)
             {
-                // Fallback for design time or mock
-                tasks = await _taskRepository.GetAllAsync();
+                _logger.LogError(ex, "Error loading summary data");
             }
-
-            var allTasks = tasks.ToList();
-            TotalTaskCount = allTasks.Count;
-
-            var now = System.DateTime.Now.Date;
-
-            CompletedCount = allTasks.Count(t => t.ActualCompleteDate.HasValue);
-            
-            InProgressCount = allTasks.Count(t => 
-                !t.ActualCompleteDate.HasValue && 
-                (t.ActualStartDate.HasValue || (t.StartDate.Date <= now)));
-
-            NotStartedCount = allTasks.Count(t => 
-                !t.ActualCompleteDate.HasValue && 
-                !t.ActualStartDate.HasValue && 
-                (t.StartDate.Date > now));
-
-            CalculateTimeStatistics(allTasks);
-            CalculateChartAngles();
         }
 
         #endregion

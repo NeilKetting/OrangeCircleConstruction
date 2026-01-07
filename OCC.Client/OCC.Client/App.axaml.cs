@@ -16,6 +16,7 @@ using OCC.Client.ViewModels.Shared;
 using OCC.Client.Views;
 using System;
 using System.Linq;
+using Serilog;
 using OCC.Shared.Models;
 
 namespace OCC.Client
@@ -116,6 +117,9 @@ namespace OCC.Client
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
+
+            // Logging
+            services.AddLogging(l => l.AddSerilog());
 
             // ViewModels
             services.AddTransient<MainViewModel>();

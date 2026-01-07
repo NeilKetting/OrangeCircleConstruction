@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace OCC.Client.ViewModels.Shared
 {
@@ -22,6 +23,7 @@ namespace OCC.Client.ViewModels.Shared
         private readonly IServiceProvider _serviceProvider;
         private readonly IRepository<Project> _projectRepository;
         private readonly IPermissionService _permissionService;
+        private readonly ILogger<SidebarViewModel> _logger;
         private List<Project> _allProjects = new();
 
         #endregion
@@ -76,15 +78,17 @@ namespace OCC.Client.ViewModels.Shared
             _serviceProvider = null!;
             _projectRepository = null!;
             _permissionService = null!;
+            _logger = null!;
         }
 
-        public SidebarViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IRepository<Project> projectRepository, IPermissionService permissionService)
+        public SidebarViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IRepository<Project> projectRepository, IPermissionService permissionService, ILogger<SidebarViewModel> logger)
         {
             _authService = authService;
             _updateService = updateService;
             _serviceProvider = serviceProvider;
             _projectRepository = projectRepository;
             _permissionService = permissionService;
+            _logger = logger;
 
             AppVersion = $"v{_updateService.CurrentVersion}";
 
@@ -321,21 +325,32 @@ namespace OCC.Client.ViewModels.Shared
 
         private async void LoadProjects()
         {
-            IEnumerable<Project> projects;
-
-            // Use ApiProjectRepository to get projects assigned to the current user (or all if admin)
-            if (_projectRepository is ApiProjectRepository apiRepo)
+            try 
             {
-                projects = await apiRepo.GetMyProjectsAsync();
-            }
-            else
-            {
-                // Fallback for design time or mock
-                projects = await _projectRepository.GetAllAsync();
-            }
+                IEnumerable<Project> projects;
 
-            _allProjects = projects.ToList();
-            FilterProjects();
+                // Use ApiProjectRepository to get projects assigned to the current user (or all if admin)
+                if (_projectRepository is ApiProjectRepository apiRepo)
+                {
+                    projects = await apiRepo.GetMyProjectsAsync();
+                }
+                else
+                {
+                    // Fallback for design time or mock
+                    projects = await _projectRepository.GetAllAsync();
+                }
+
+                _allProjects = projects.ToList();
+                FilterProjects();
+            }
+            catch (Exception ex)
+            {
+                // Prevent crash, usually log this or show a toast
+                _logger.LogError(ex, "Error loading projects");
+                // Fallback to empty to ensure UI doesn't break
+                _allProjects = new List<Project>();
+                FilterProjects();
+            }
         }
 
         partial void OnProjectSearchTextChanged(string value)

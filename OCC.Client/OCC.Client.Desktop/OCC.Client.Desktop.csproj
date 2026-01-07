@@ -13,7 +13,7 @@
     <Copyright>Copyright © 2026 Origize63</Copyright>
     <!-- Icon Configuration -->
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,6 +28,9 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Avalonia.Svg.Skia" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Velopack" />
   </ItemGroup>
 
