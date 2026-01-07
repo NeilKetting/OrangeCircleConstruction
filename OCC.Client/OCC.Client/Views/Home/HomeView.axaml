@@ -45,7 +45,7 @@
 					<!-- Widgets Content -->
 					<Panel Grid.Row="1">
 						<!-- My Summary (Original Dashboard) -->
-						<WrapPanel Orientation="Horizontal" IsVisible="{Binding IsMySummaryVisible, FallbackValue=false}">
+						<WrapPanel Orientation="Horizontal" IsVisible="{Binding IsMySummaryVisible}">
 							<!-- My Summary Widget -->
 							<homeDash:SummaryView MinWidth="450" Margin="0,0,25,25" DataContext="{Binding MySummary}"/>
 
@@ -62,13 +62,13 @@
 						</Border>
 
 						<!-- Team Summary View -->
-						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
+						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsTeamSummaryVisible}" ZIndex="1" Margin="30, 20, 20, 20">
 							<homeDash:TeamSummaryView DataContext="{Binding TeamSummary}"/>
 						</Border>
 
 						<!-- Calendar View -->
 						<Border Grid.Row="1" Grid.Column="1" 
-                                IsVisible="{Binding IsCalendarVisible, FallbackValue=false}" 
+                                IsVisible="{Binding IsCalendarVisible}" 
                                 ZIndex="1" 
                                 Margin="30, 20, 20, 20"
                                 VerticalAlignment="Top"
@@ -77,7 +77,7 @@
 						</Border>
 
 						<!-- List View -->
-						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsListVisible, FallbackValue=false}" ZIndex="1" Margin="30, 20, 20, 20">
+						<Border Grid.Row="1" Grid.Column="1" IsVisible="{Binding IsListVisible}" ZIndex="1" Margin="30, 20, 20, 20">
 							<homeTasks:TaskListView DataContext="{Binding TaskList}"/>
 						</Border>
 					</Panel>
@@ -91,12 +91,12 @@
 		<!-- I will keep the overlays here for now if they are triggered from Dashboard widgets. -->
 
 		<Grid
-		IsVisible="{Binding IsTaskDetailVisible, FallbackValue=false}"
+		IsVisible="{Binding IsTaskDetailVisible}"
 		Background="#40000000"
 		ClipToBounds="False"
 		Name="OverlayGrid"
 		PointerPressed="OnOverlayPointerPressed">
-			<homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail, FallbackValue=false}"
+			<homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail}"
 									  Width="1000"
 									  HorizontalAlignment="Right"/>
 		</Grid>
@@ -104,7 +104,7 @@
 
 		<!-- Create Project Overlay -->
 		<Grid
-		IsVisible="{Binding IsCreateProjectVisible, FallbackValue=false}"
+		IsVisible="{Binding IsCreateProjectVisible}"
 		Background="#40000000">
 			<homeProjects:CreateProjectView DataContext="{Binding CreateProjectVM}"
 											HorizontalAlignment="Center"
@@ -112,7 +112,7 @@
 		</Grid>
 		<!-- New Task Popup Overlay -->
 		<Grid
-		IsVisible="{Binding IsNewTaskPopupVisible, FallbackValue=false}"
+		IsVisible="{Binding IsNewTaskPopupVisible}"
 		Background="#40000000">
 			<homeTasks:NewTaskPopupView DataContext="{Binding NewTaskPopup}"
 										HorizontalAlignment="Center"

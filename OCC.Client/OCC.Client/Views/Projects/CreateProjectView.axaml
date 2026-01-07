@@ -87,7 +87,7 @@
                 </Grid>
 
                 <!-- IMPORT PROGRESS OVERLAY -->
-                <Grid IsVisible="{Binding IsImporting, FallbackValue=false}" Background="#CCFFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid IsVisible="{Binding IsImporting}" Background="#CCFFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="15">
                         <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
                         <TextBlock Text="{Binding ImportProgressMessage}" Foreground="{DynamicResource TextPrimaryDark}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
@@ -95,7 +95,7 @@
                 </Grid>
 
                 <!-- IMPORT COMPLETE OVERLAY -->
-                <Grid IsVisible="{Binding ShowImportComplete, FallbackValue=false}" Background="#CCFFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid IsVisible="{Binding ShowImportComplete}" Background="#CCFFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Border Background="White" CornerRadius="8" BoxShadow="0 4 20 0 #40000000" Padding="30" VerticalAlignment="Center" HorizontalAlignment="Center" Width="350">
                         <StackPanel Spacing="20">
                             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">

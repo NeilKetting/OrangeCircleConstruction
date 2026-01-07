@@ -89,10 +89,7 @@ namespace OCC.Client
             // Let's swap the repositories first.
             
             // Auth Services
-            // Auth Services
-            // services.AddSingleton<MockAuthService>();
             services.AddSingleton<ApiAuthService>();
-            // services.AddSingleton<IAuthService, HybridAuthService>();
             services.AddSingleton<IAuthService>(sp => sp.GetRequiredService<ApiAuthService>());
             
             // Re-register specific repositories if they have specific interfaces or we want to force the generic one?

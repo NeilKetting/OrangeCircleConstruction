@@ -12,6 +12,8 @@ using OCC.Shared.Models;
 using System;
 
 
+using Microsoft.Extensions.Logging;
+
 namespace OCC.Client.ViewModels.Home
 {
     public partial class HomeViewModel : ViewModelBase
@@ -29,6 +31,7 @@ namespace OCC.Client.ViewModels.Home
         private readonly IRepository<TaskAssignment> _taskAssignmentRepository;
         private readonly IRepository<TaskComment> _commentRepository;
         private readonly IRepository<User> _userRepository;
+        private readonly ILoggerFactory _loggerFactory;
 
         #endregion
 
@@ -133,7 +136,9 @@ namespace OCC.Client.ViewModels.Home
             _taskAssignmentRepository = null!;
             _commentRepository = null!;
             _userRepository = null!;
+            _loggerFactory = null!;
         }
+
         public HomeViewModel(TopBarViewModel topBar,
                              SummaryViewModel mySummary,
                              TasksWidgetViewModel myTasks,
@@ -149,7 +154,8 @@ namespace OCC.Client.ViewModels.Home
                              IRepository<Employee> staffRepository,
                              IRepository<TaskAssignment> taskAssignmentRepository,
                              IRepository<TaskComment> commentRepository,
-                              IRepository<User> userRepository)
+                             IRepository<User> userRepository,
+                             ILoggerFactory loggerFactory)
         {
             _authService = authService;
             _timeService = timeService;
@@ -162,6 +168,8 @@ namespace OCC.Client.ViewModels.Home
             _taskAssignmentRepository = taskAssignmentRepository;
             _commentRepository = commentRepository;
             _userRepository = userRepository;
+            _loggerFactory = loggerFactory;
+
             TopBar = topBar;
             MySummary = mySummary;
             MyTasks = myTasks;
@@ -169,7 +177,7 @@ namespace OCC.Client.ViewModels.Home
             ProjectSummary = projectSummary;
             TeamSummary = new TeamSummaryViewModel();
             Calendar = new Calendar.CalendarViewModel(_projectTaskRepository, _projectRepository, _authService);
-            TaskList = new TaskListViewModel(_projectTaskRepository);
+            TaskList = new TaskListViewModel(_projectTaskRepository, _loggerFactory.CreateLogger<TaskListViewModel>());
             
             // Subscribe to selection
             TaskList.TaskSelectionRequested += (s, idString) => 

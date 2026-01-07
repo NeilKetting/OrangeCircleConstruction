@@ -136,31 +136,29 @@
 			<!-- Bottom section -->
 			<StackPanel Grid.Row="2" Margin="0,10">
 
-			<Button x:Name="ActionsButton" Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}">
-				<Button.Flyout>
-					<Flyout IsOpen="{Binding IsQuickActionsOpen, Mode=TwoWay}" FlyoutPresenterClasses="SidebarFlyout" Placement="RightEdgeAlignedBottom" HorizontalOffset="10">
+			<Grid>
+				<Button x:Name="ActionsButton" Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}" Command="{Binding ToggleQuickActionsCommand}">
+					<StackPanel Classes="SidebarItem" Orientation="Horizontal">
+						<TextBlock Text="+" FontSize="22" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+						<TextBlock Text="New" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+					</StackPanel>
+				</Button>
+				<Popup IsOpen="{Binding IsQuickActionsOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=ActionsButton}" Placement="RightEdgeAlignedBottom" HorizontalOffset="10" IsLightDismissEnabled="True">
+					<Border Background="White" CornerRadius="8" BoxShadow="0 4 15 0 #20000000" Padding="0">
 						<local:QuickActionsMenuView/>
-					</Flyout>
-				</Button.Flyout>
+					</Border>
+				</Popup>
+			</Grid>
+
+			<Button Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}">
 				<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-					<TextBlock Text="+" FontSize="22" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
-					<TextBlock Text="New" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+					<TextBlock Text="?" FontSize="18" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+					<TextBlock Text="Help" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
 				</StackPanel>
 			</Button>
 
-				<Button Classes="SidebarButton" Foreground="{DynamicResource TextSecondaryGray}">
-					<StackPanel Classes="SidebarItem" Orientation="Horizontal">
-						<TextBlock Text="?" FontSize="18" FontWeight="Bold" Width="24" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
-						<TextBlock Text="Help" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
-					</StackPanel>
-				</Button>
-
-				<Button x:Name="SettingsButton" Classes="SidebarButton" Padding="0" HorizontalAlignment="Stretch">
-					<Button.Flyout>
-						<Flyout IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" FlyoutPresenterClasses="SidebarFlyout" Placement="RightEdgeAlignedBottom" HorizontalOffset="10">
-							<local:SettingsMenuView/>
-						</Flyout>
-					</Button.Flyout>
+			<Grid>
+				<Button x:Name="SettingsButton" Classes="SidebarButton" Padding="0" HorizontalAlignment="Stretch" Command="{Binding ToggleSettingsCommand}">
 					<Grid ColumnDefinitions="Auto, *" Margin="20,15">
 						<Border Width="32" Height="32" CornerRadius="16" Background="{DynamicResource PrimaryTeal}">
 							<TextBlock Text="{Binding UserInitials}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -170,6 +168,12 @@
 								   Margin="10,0,0,0" TextTrimming="CharacterEllipsis"/>
 					</Grid>
 				</Button>
+				<Popup IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=SettingsButton}" Placement="RightEdgeAlignedBottom" HorizontalOffset="10" IsLightDismissEnabled="True">
+					<Border Background="White" CornerRadius="8" BoxShadow="0 4 15 0 #20000000" Padding="0">
+						<local:SettingsMenuView/>
+					</Border>
+				</Popup>
+			</Grid>
 
 				 <!-- Action Feedback Display -->
 				<TextBlock Text="{Binding LastActionMessage}"

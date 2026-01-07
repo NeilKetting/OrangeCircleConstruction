@@ -29,7 +29,7 @@
 		</Grid>
 
 		<!-- Roll-Call Overlay -->
-		<Grid IsVisible="{Binding IsRollCallVisible, FallbackValue=false}" Background="#80000000">
+		<Grid IsVisible="{Binding IsRollCallVisible}" Background="#80000000">
 			<views:RollCallView DataContext="{Binding CurrentRollCall}"
 								Width="700" Height="700"
 								HorizontalAlignment="Center"

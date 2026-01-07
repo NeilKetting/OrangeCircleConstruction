@@ -4,9 +4,10 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Linq;
-
 using OCC.Client.Services;
 using OCC.Shared.Models;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace OCC.Client.ViewModels.Home.Tasks
 {
@@ -19,7 +20,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
         private readonly IRepository<TaskAssignment> _assignmentRepository;
         private readonly IRepository<TaskComment> _commentRepository;
         
-        private readonly System.Threading.SemaphoreSlim _updateLock = new(1, 1);
+        private readonly SemaphoreSlim _updateLock = new(1, 1);
         private Guid _currentTaskId; 
         private bool _isLoading = false;
         private bool _isUpdatingDuration = false;
@@ -113,6 +114,18 @@ namespace OCC.Client.ViewModels.Home.Tasks
 
         [ObservableProperty]
         private ObservableCollection<TaskAssignment> _assignments = new();
+
+        [ObservableProperty]
+        private ObservableCollection<ProjectTask> _subtasks = new();
+
+        [ObservableProperty]
+        private ObservableCollection<ProjectTask> _visibleSubtasks = new();
+
+        [ObservableProperty]
+        private bool _hasMoreSubtasks;
+
+        [ObservableProperty]
+        private bool _isShowingAllSubtasks;
 
         #endregion
 
@@ -266,6 +279,42 @@ namespace OCC.Client.ViewModels.Home.Tasks
             CloseRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        [RelayCommand]
+        private void ShowAllSubtasks()
+        {
+            IsShowingAllSubtasks = true;
+            UpdateVisibleSubtasks();
+        }
+
+        [RelayCommand]
+        private void OpenSubtask(ProjectTask subtask)
+        {
+             // For now, load this subtask in the current view? 
+             // Or request navigation. Ideally request navigation.
+             // We can re-use LoadTaskById logic effectively "drilling down".
+             if (subtask != null)
+             {
+                 LoadTaskById(subtask.Id);
+             }
+        }
+
+        [RelayCommand]
+        private void AddSubtask()
+        {
+            // Placeholder: Add a new dummy subtask for now, or logic to create real one
+             var newSubtask = new ProjectTask
+             {
+                 Name = "New Subtask",
+                 ProjectId = Guid.Empty, // Should link to parent's project
+                 // ParentId? Model doesn't have it explicit but IndentLevel/Order implies it.
+                 // For this simple view, we just add it to Children.
+                 IndentLevel = 1 // Simplified
+             };
+             
+             Subtasks.Add(newSubtask);
+             UpdateVisibleSubtasks();
+        }
+
         #endregion
 
         #region Methods
@@ -279,7 +328,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
             await LoadAssignableResources();
         }
 
-        private async System.Threading.Tasks.Task LoadAssignableResources()
+        private async Task LoadAssignableResources()
         {
             AvailableStaff.Clear();
             var staff = await _staffRepository.GetAllAsync();
@@ -289,7 +338,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
             await LoadAssignments();
         }
 
-        private async System.Threading.Tasks.Task LoadComments()
+        private async Task LoadComments()
         {
              Comments.Clear();
              var comments = await _commentRepository.FindAsync(c => c.TaskId == _currentTaskId);
@@ -301,7 +350,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
              OnPropertyChanged(nameof(CommentsCount));
         }
 
-        private async System.Threading.Tasks.Task LoadAssignments()
+        private async Task LoadAssignments()
         {
              Assignments.Clear();
              var assignments = await _assignmentRepository.FindAsync(a => a.ProjectTaskId == _currentTaskId);
@@ -338,6 +387,14 @@ namespace OCC.Client.ViewModels.Home.Tasks
 
                 UpdatePlannedDuration();
                 UpdateActualDuration();
+
+                // Load Subtasks
+                Subtasks.Clear();
+                if (task.Children != null)
+                {
+                    foreach(var child in task.Children) Subtasks.Add(child);
+                }
+                UpdateVisibleSubtasks();
 
                 OnPropertyChanged(nameof(SubtaskCount));
             }
@@ -446,7 +503,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
 
             if (IsOnHold) StatusColor = "#22C55E"; // Green
 
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnIsOnHoldChanged(bool value)
@@ -460,17 +517,17 @@ namespace OCC.Client.ViewModels.Home.Tasks
                     default: StatusColor = "#EF4444"; break;
                  }
              }
-             await System.Threading.Tasks.Task.Run(() => UpdateTask());
+             await Task.Run(() => UpdateTask());
         }
 
-        async partial void OnPriorityChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        async partial void OnPriorityChanged(string value) => await Task.Run(() => UpdateTask());
 
         async partial void OnPlannedStartDateChanged(DateTime? value) 
         {
             if (PlannedStartDate.HasValue && DueDate.HasValue)
                  PlannedHours = CalculatePlannedHours(new ProjectTask { StartDate = PlannedStartDate.Value, FinishDate = DueDate.Value });
             UpdatePlannedDuration();
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnDueDateChanged(DateTime? value) 
@@ -478,7 +535,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
             if (PlannedStartDate.HasValue && DueDate.HasValue)
                  PlannedHours = CalculatePlannedHours(new ProjectTask { StartDate = PlannedStartDate.Value, FinishDate = DueDate.Value });
             UpdatePlannedDuration();
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnPlannedHoursChanged(double? value) 
@@ -494,19 +551,19 @@ namespace OCC.Client.ViewModels.Home.Tasks
                 _isUpdatingDuration = false;
             }
             
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnActualStartDateChanged(DateTime? value) 
         {
             UpdateActualDuration();
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnDoneDateChanged(DateTime? value) 
         {
             UpdateActualDuration();
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnPlannedDurationChanged(string value)
@@ -516,13 +573,13 @@ namespace OCC.Client.ViewModels.Home.Tasks
              // Try parse days
              FormatPlannedDuration(value);
 
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         async partial void OnActualDurationChanged(string value)
         {
             if (_isUpdatingDuration) return;
-            await System.Threading.Tasks.Task.Run(() => UpdateTask());
+            await Task.Run(() => UpdateTask());
         }
 
         private void FormatPlannedDuration(string value)
@@ -601,16 +658,32 @@ namespace OCC.Client.ViewModels.Home.Tasks
             }
         }
 
-        async partial void OnActualHoursChanged(double? value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
-        async partial void OnDescriptionChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
-        async partial void OnTitleChanged(string value) => await System.Threading.Tasks.Task.Run(() => UpdateTask());
+        async partial void OnActualHoursChanged(double? value) => await Task.Run(() => UpdateTask());
+        async partial void OnDescriptionChanged(string value) => await Task.Run(() => UpdateTask());
+        async partial void OnTitleChanged(string value) => await Task.Run(() => UpdateTask());
         async partial void OnIsCompletedChanged(bool? value) 
         {
              // Special handling for Done Checkbox (could set DoneDate automatically)
              if(value == true && DoneDate == null) DoneDate = DateTime.Now;
              if(value == false) DoneDate = null;
              
-             await System.Threading.Tasks.Task.Run(() => UpdateTask());
+             await Task.Run(() => UpdateTask());
+        }
+
+        private void UpdateVisibleSubtasks()
+        {
+            VisibleSubtasks.Clear();
+            if (IsShowingAllSubtasks)
+            {
+                foreach(var s in Subtasks) VisibleSubtasks.Add(s);
+                HasMoreSubtasks = false;
+            }
+            else
+            {
+                var take = 5;
+                foreach(var s in Subtasks.Take(take)) VisibleSubtasks.Add(s);
+                HasMoreSubtasks = Subtasks.Count > take;
+            }
         }
 
         #endregion

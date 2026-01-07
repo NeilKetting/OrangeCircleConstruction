@@ -31,12 +31,12 @@
 
         <!-- Overlay Layer -->
         <Grid Grid.Row="0" Grid.RowSpan="2" 
-              IsVisible="{Binding IsTaskDetailVisible, FallbackValue=false}"
+              IsVisible="{Binding IsTaskDetailVisible}"
               Background="#40000000"
               ClipToBounds="False"
               Name="OverlayGrid"
               PointerPressed="OnOverlayPointerPressed">
-            <homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail, FallbackValue=false}"
+            <homeTasks:TaskDetailView DataContext="{Binding CurrentTaskDetail}"
                                      Width="1000"
                                      HorizontalAlignment="Right"/>
         </Grid>

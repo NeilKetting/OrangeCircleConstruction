@@ -145,6 +145,20 @@ namespace OCC.Client.ViewModels.Shared
         #region Commands
 
         [RelayCommand]
+        public void ToggleQuickActions()
+        {
+            IsQuickActionsOpen = !IsQuickActionsOpen;
+            if (IsQuickActionsOpen) IsSettingsOpen = false;
+        }
+
+        [RelayCommand]
+        public void ToggleSettings()
+        {
+            IsSettingsOpen = !IsSettingsOpen;
+            if (IsSettingsOpen) IsQuickActionsOpen = false;
+        }
+
+        [RelayCommand]
         public void ToggleProjects()
         {
             IsProjectsExpanded = !IsProjectsExpanded;
