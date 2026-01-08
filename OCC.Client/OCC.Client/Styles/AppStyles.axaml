@@ -455,7 +455,7 @@
 		<StreamGeometry x:Key="IconI">M11 4h2v2h-2V4zm0 3h2v10h-2V7z</StreamGeometry>
 		<StreamGeometry x:Key="IconHistory">M13 3a9 9 0 1 0 8.95 10h-2.02a7 7 0 1 1-6.93-8V3l4 4-4 4V7zM12 8h1v5h-4v-1h3V8z</StreamGeometry>
 		<StreamGeometry x:Key="IconClock">M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm.5 5h-1v6l5.25 3.15.5-.86L12.5 13V7z</StreamGeometry>
-        <!--<StreamGeometry x:Key="IconChevronDown">M6 9l6 6 6-6</StreamGeometry>-->
+
 		<StreamGeometry x:Key="IconLeavingEarly">M15 2a2 2 0 1 1-2 2a2 2 0 0 1 2-2zm-1.5 5l-2.5 3l-2-1l-1 2l3 2l2-2l2 3v4h2v-4l-1.5-4l1.5-3h-2.5zM6 4a6 6 0 1 0 6 6H10a4 4 0 1 1-4-4V4zm-1 3h1v3h3v1H5V7z</StreamGeometry>
 
 		<StreamGeometry x:Key="IconHealthSafety">M12 2L4 5v6c0 5.05 3.44 9.74 8 11c4.56-1.26 8-5.95 8-11V5L12 2zM13 7v3h3v2h-3v3h-2v-3H8v-2h3V7h2z</StreamGeometry>
