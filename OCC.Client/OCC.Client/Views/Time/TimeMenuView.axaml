@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+			 xmlns:conv="clr-namespace:OCC.Client.Converters"
+			 mc:Ignorable="d"
+			 x:Class="OCC.Client.Views.Time.TimeMenuView"
+			 x:DataType="vm:TimeMenuViewModel">
+
+	<Border Classes="TopBar">
+		<Grid ColumnDefinitions="*,Auto, *, Auto">
+
+			<!-- Menu Buttons Area -->
+			<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+				<StackPanel.Resources>
+					<conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
+				</StackPanel.Resources>
+
+				<!-- Live -->
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Live" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Live'}">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconLiveView}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="LIVE" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+
+				<!-- Daily Roll Call -->
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Daily Roll Call" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Daily Roll Call'}">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconDailyRollCall}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="DAILY ROLL CALL" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+
+				<!-- History -->
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Leave Application" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Leave Application'}">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconHistory}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="ATTENDANCE HISTORY" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+
+				<!-- Leave Application -->
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Leave Application" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Leave Application'}">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconCalendar}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="LEAVE APPLICATION" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+			</StackPanel>
+
+			<!-- Helper Tools (Similar to Home) -->
+			<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center" Margin="20,0">
+				<Button Classes="IconButton" Command="{Binding OpenNotificationsCommand}" ToolTip.Tip="Notifications">
+					<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle" Width="20" Height="20"/>
+				</Button>
+
+				<TextBox Width="200" Classes="FormInput" Watermark="Search..."/>
+				<PathIcon Data="{StaticResource IconSearch}" Classes="IconStyle" Width="18" Height="18"/>
+			</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

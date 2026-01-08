@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using OCC.Client.ViewModels.Home;
+using OCC.Client.ViewModels.HealthSafety;
 using OCC.Client.ViewModels.Projects;
 using OCC.Client.ViewModels.EmployeeManagement;
 using OCC.Client.ViewModels.Settings;
@@ -83,8 +84,20 @@ namespace OCC.Client.ViewModels.Core
             // Initialize persistent Notification ViewModel
             _notificationVM = _serviceProvider.GetRequiredService<NotificationViewModel>();
 
-            // Default to Home (Dashboard)
-            NavigateTo(Infrastructure.NavigationRoutes.Home);
+            // Default to Home (Dashboard) unless Beta Notice is pending
+            if (!DevelopmentToBeDeleted.BetaNoticeViewModel.IsNoticeAccepted())
+            {
+                var betaVM = new DevelopmentToBeDeleted.BetaNoticeViewModel();
+                betaVM.Accepted += () => 
+                {
+                    NavigateTo(Infrastructure.NavigationRoutes.Home);
+                };
+                CurrentPage = betaVM;
+            }
+            else
+            {
+                NavigateTo(Infrastructure.NavigationRoutes.Home);
+            }
 
             WeakReferenceMessenger.Default.RegisterAll(this); // Register for messages
 
@@ -149,7 +162,7 @@ namespace OCC.Client.ViewModels.Core
                     CurrentPage = _serviceProvider.GetRequiredService<ProjectsViewModel>();
                     break;
                 case Infrastructure.NavigationRoutes.Time:
-                    CurrentPage = _serviceProvider.GetRequiredService<ViewModels.Time.TimeViewModel>();
+                    CurrentPage = _serviceProvider.GetRequiredService<ViewModels.Time.TimeAttendanceViewModel>();
                     break;
                 case Infrastructure.NavigationRoutes.Calendar: 
                     CurrentPage = _serviceProvider.GetRequiredService<ViewModels.Home.Calendar.CalendarViewModel>();
@@ -159,6 +172,9 @@ namespace OCC.Client.ViewModels.Core
                     break;
                 case "MyProfile":
                     CurrentPage = _serviceProvider.GetRequiredService<ProfileViewModel>();
+                    break;
+                case "HealthSafety":
+                    CurrentPage = _serviceProvider.GetRequiredService<ViewModels.HealthSafety.HealthSafetyViewModel>();
                     break;
                  default:
                     CurrentPage = _serviceProvider.GetRequiredService<HomeViewModel>();

@@ -23,6 +23,9 @@ namespace OCC.Shared.Models
         public string? Notes { get; set; }
         public string? LeaveReason { get; set; }
         public string? DoctorsNoteImagePath { get; set; }
+
+        public string Branch { get; set; } = string.Empty;
+        public TimeSpan? ClockInTime { get; set; } // Default 07:00 logic in VM
     }
 
     public enum AttendanceStatus

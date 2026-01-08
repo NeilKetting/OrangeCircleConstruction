@@ -130,6 +130,13 @@
 							<TextBlock Text="Projects" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
+
+					<Button Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding NavigateCommand}" CommandParameter="HealthSafety" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='HealthSafety'}" HorizontalAlignment="Stretch">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconHealthSafety}" Classes="IconStyle"/>
+							<TextBlock Text="Health &amp; Safety" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+						</StackPanel>
+					</Button>
 				</StackPanel>
 			</ScrollViewer>
 

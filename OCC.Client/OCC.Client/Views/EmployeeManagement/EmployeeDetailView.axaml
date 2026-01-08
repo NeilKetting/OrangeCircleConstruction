@@ -18,8 +18,8 @@
 
 	<Border Background="{DynamicResource SurfaceWhite}"
 			CornerRadius="0"
-			MinHeight="550"
-			MinWidth="900"
+			MinHeight="600"
+			MinWidth="1100"
 			BoxShadow="0 2 15 5 #292828"
 			VerticalAlignment="Center"
 			HorizontalAlignment="Center">
@@ -46,10 +46,10 @@
 			</Border>
 
 			<!-- Scrollable Content -->
-			<ScrollViewer Grid.Row="1" Padding="25,10,25,25">
+			<ScrollViewer Grid.Row="1" Padding="40,20,40,40">
 				<StackPanel Spacing="20">
 					<!-- Personal Details -->
-					<Grid ColumnDefinitions="*, 30, *, 30, *">
+					<Grid ColumnDefinitions="*, 50, *, 50, *">
 
 						<!-- Left Column -->
 						<StackPanel Grid.Column="0" Spacing="10">
@@ -99,6 +99,13 @@
 								<TextBox Text="{Binding IdNumber}" Classes="FormInput" Watermark="Enter RSA ID or Passport Number"
 										 ToolTip.Tip="Enter the 13-digit RSA ID or Passport Number"/>
 							</StackPanel>
+
+                            <!-- Branch -->
+                            <StackPanel>
+                                <TextBlock Text="Branch" Classes="FormLabel"/>
+                                <ComboBox ItemsSource="{Binding Branches}" SelectedItem="{Binding Branch}" HorizontalAlignment="Stretch"
+                                          ToolTip.Tip="Select the employee's primary branch"/>
+                            </StackPanel>
 						</StackPanel>
 
 						<!-- Right Column -->
@@ -143,6 +150,21 @@
 								<TextBox Text="{Binding HourlyRate}" Watermark="0.00"
 										 ToolTip.Tip="Hourly pay rate in ZAR"/>
 							</StackPanel>
+
+                            <!-- Working Hours -->
+                            <StackPanel>
+                                <TextBlock Text="Working Hours" Classes="FormLabel"/>
+                                <Grid ColumnDefinitions="*, 10, *">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Start" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
+                                        <TimePicker SelectedTime="{Binding ShiftStartTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="End" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
+                                        <TimePicker SelectedTime="{Binding ShiftEndTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
 						</StackPanel>
 					</Grid>
 

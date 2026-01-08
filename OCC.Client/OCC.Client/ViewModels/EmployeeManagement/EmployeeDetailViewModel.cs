@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using OCC.Client.Services;
 using OCC.Shared.Models;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -72,6 +73,15 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         [ObservableProperty]
         private string _saveButtonText = "Add Employee";
 
+        [ObservableProperty]
+        private string _branch = "Johannesburg";
+
+        [ObservableProperty]
+        private TimeSpan? _shiftStartTime = new TimeSpan(7, 0, 0);
+
+        [ObservableProperty]
+        private TimeSpan? _shiftEndTime = new TimeSpan(17, 0, 0);
+
         #endregion
 
         #region Properties
@@ -126,6 +136,8 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 
         // Exposed Enum Values for ComboBox
         public EmployeeRole[] EmployeeRoles { get; } = Enum.GetValues<EmployeeRole>();
+
+        public List<string> Branches { get; } = new() { "Johannesburg", "Cape Town" };
 
         public string DisplayName
         {
@@ -192,6 +204,9 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             staff.DoB = _calculatedDoB;
             staff.EmploymentDate = EmploymentDate.DateTime;
             staff.ContractDuration = ContractDuration;
+            staff.Branch = Branch;
+            staff.ShiftStartTime = ShiftStartTime;
+            staff.ShiftEndTime = ShiftEndTime;
 
             if (_staffRepository != null)
             {
@@ -239,6 +254,9 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             SelectedEmploymentType = staff.EmploymentType;
             EmploymentDate = staff.EmploymentDate;
             ContractDuration = staff.ContractDuration ?? string.Empty;
+            Branch = staff.Branch;
+            ShiftStartTime = staff.ShiftStartTime;
+            ShiftEndTime = staff.ShiftEndTime;
             
             OnPropertyChanged(nameof(IsRsaId));
             OnPropertyChanged(nameof(IsPassport));

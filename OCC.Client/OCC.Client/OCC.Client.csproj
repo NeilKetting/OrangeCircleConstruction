@@ -43,5 +43,6 @@
 
   <ItemGroup>
     <Folder Include="ModelWrappers\" />
+    <Folder Include="Views\HealthSafety\" />
   </ItemGroup>
 </Project>

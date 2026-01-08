@@ -5,19 +5,25 @@
              xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
              xmlns:models="clr-namespace:OCC.Shared.Models;assembly=OCC.Shared"
              xmlns:conv="clr-namespace:OCC.Client.Converters"
-             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="800"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="800"
              x:Class="OCC.Client.Views.Time.RollCallView"
+             x:Name="Root"
              x:DataType="vm:RollCallViewModel">
 
-	<Border Background="White" CornerRadius="12" BoxShadow="0 4 20 0 #20000000" Margin="20">
+	<Border Background="White" CornerRadius="12" BoxShadow="0 4 20 0 #20000000" Margin="20" MinWidth="850">
 		<Grid RowDefinitions="Auto, *, Auto" Margin="25">
 			<!-- Header -->
-			<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
-				<StackPanel>
+			<Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto, Auto" Margin="0,0,0,20">
+				<StackPanel Grid.Column="0">
 					<TextBlock Text="Daily Roll-Call" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
 					<TextBlock Text="{Binding Date, StringFormat='{}{0:dddd, dd MMMM yyyy}'}" Foreground="{DynamicResource TextSecondaryGray}" FontSize="12"/>
 				</StackPanel>
-				<Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="Close">
+                
+                <!-- Branch Selector -->
+                <ComboBox Grid.Column="2" ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch}" 
+                          Width="180" Margin="0,0,20,0" VerticalAlignment="Center" Classes="FormInput"/>
+
+				<Button Grid.Column="3" Command="{Binding CancelCommand}" Classes="Close">
 					<PathIcon Data="{StaticResource IconClose}" Width="14" Height="14"/>
 				</Button>
 			</Grid>
@@ -27,19 +33,37 @@
 				<ItemsControl ItemsSource="{Binding StaffList}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
-							<Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="0,15">
+							<Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="10,15">
 								<Grid RowDefinitions="Auto, Auto">
-									<Grid ColumnDefinitions="*, Auto">
-										<StackPanel>
+									<Grid ColumnDefinitions="2*, Auto, 1*, 3*">
+                                        <!-- Name & Role -->
+										<StackPanel Grid.Column="0" VerticalAlignment="Center">
 											<TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
 											<TextBlock Text="{Binding Role}" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}"/>
 										</StackPanel>
 
-										<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                                        <!-- Clock Action -->
+                                        <Button Grid.Column="1" Classes="Primary" Height="32" Padding="10,0" Margin="10,0"
+                                                Command="{Binding #Root.((vm:RollCallViewModel)DataContext).ClockIndividualCommand}"
+                                                CommandParameter="{Binding}">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <PathIcon Data="{StaticResource IconTime}" Width="12" Height="12"/>
+                                                <TextBlock Text="Clock" FontSize="12"/>
+                                            </StackPanel>
+                                        </Button>
+                                        
+                                        <!-- Clock In Time Filter (Visual only if editing?) -> Kept but maybe redundant if Clock button auto-timestamps -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0">
+                                            <TextBlock Text="Time" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,2"/>
+                                            <TimePicker SelectedTime="{Binding ClockInTime}" ClockIdentifier="24HourClock" MinuteIncrement="5"/>
+                                        </StackPanel>
+
+                                        <!-- Status Radios -->
+										<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
 											<RadioButton Content="Present" IsChecked="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.Present}}"/>
 											<RadioButton Content="Absent" IsChecked="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.Absent}}"/>
 											<RadioButton Content="Sick" IsChecked="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.Sick}}"/>
-											<RadioButton Content="Leave Early" IsChecked="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.LeaveEarly}}"/>
+											<RadioButton Content="Early" IsChecked="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.LeaveEarly}}"/>
 										</StackPanel>
 									</Grid>
 

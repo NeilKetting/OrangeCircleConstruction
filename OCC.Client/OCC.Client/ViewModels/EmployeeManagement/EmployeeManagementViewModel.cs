@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.Services;
 using OCC.Shared.Models;
 using System;
@@ -29,7 +30,7 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         #region Observables
 
         [ObservableProperty]
-        private string _activeTab = "Manage Staff";
+        private string _activeTab = "Employees";
 
         [ObservableProperty]
         private int _totalStaff = 0;
@@ -63,17 +64,28 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 
         #endregion
 
+        [ObservableProperty]
+        private int _selectedBranchFilterIndex = 0;
+
+        [ObservableProperty]
+        private TeamsViewModel _teamsVM;
+
         #region Constructors
 
         public EmployeeManagementViewModel()
         {
             // Designer constructor
             _employeeRepository = null!;
+            _teamsVM = null!;
         }
 
-        public EmployeeManagementViewModel(IRepository<Employee> employeeRepository)
+        public EmployeeManagementViewModel(
+            IRepository<Employee> employeeRepository, 
+            TeamsViewModel teamsVM)
         {
             _employeeRepository = employeeRepository;
+            _teamsVM = teamsVM;
+            
             LoadData();
             
             // Register for real-time updates
@@ -133,9 +145,40 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         }
 
         [RelayCommand]
-        private void SwitchTab(string tabName)
+        private void SetActiveTab(string tabName)
         {
             ActiveTab = tabName;
+        }
+
+        [RelayCommand]
+        private async Task ExportEmployees()
+        {
+            try
+            {
+                if (_allEmployees == null || !_allEmployees.Any()) return;
+
+                var options = new System.Text.Json.JsonSerializerOptions 
+                { 
+                    WriteIndented = true 
+                };
+                
+                string jsonString = System.Text.Json.JsonSerializer.Serialize(_allEmployees, options);
+
+                string folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string fileName = $"OCC_Employees_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string fullPath = System.IO.Path.Combine(folder, fileName);
+
+                await System.IO.File.WriteAllTextAsync(fullPath, jsonString);
+
+                // Notify user via toast
+                CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new ViewModels.Messages.UpdateStatusMessage($"Backup Saved to Documents: {fileName}"));
+                
+                System.Diagnostics.Debug.WriteLine($"Exported to: {fullPath}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Export failed: {ex.Message}");
+            }
         }
 
         #endregion
@@ -150,11 +193,6 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 
                 _allEmployees = employees.ToList(); // Cache full list
                 FilterEmployees();
-                
-                TotalStaff = _allEmployees.Count;
-                TotalCount = _allEmployees.Count;
-                PermanentCount = _allEmployees.Count(s => s.EmploymentType == EmploymentType.Permanent);
-                ContractCount = _allEmployees.Count(s => s.EmploymentType == EmploymentType.Contract);
             }
             catch (Exception ex)
             {
@@ -168,6 +206,11 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         }
 
         partial void OnSelectedFilterIndexChanged(int value)
+        {
+            FilterEmployees();
+        }
+
+        partial void OnSelectedBranchFilterIndexChanged(int value)
         {
             FilterEmployees();
         }
@@ -206,7 +249,23 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 _ => filtered
             };
 
-            Employees = new ObservableCollection<Employee>(filtered);
+            // 3. Branch Filter
+            // 0 = All, 1 = JHB, 2 = CPT
+            filtered = SelectedBranchFilterIndex switch
+            {
+                1 => filtered.Where(s => s.Branch == "Johannesburg"),
+                2 => filtered.Where(s => s.Branch == "Cape Town"),
+                _ => filtered
+            };
+
+            var resultList = filtered.ToList();
+            Employees = new ObservableCollection<Employee>(resultList);
+
+            // Update Stats based on FILTERED results
+            TotalStaff = resultList.Count;
+            TotalCount = resultList.Count;
+            PermanentCount = resultList.Count(s => s.EmploymentType == EmploymentType.Permanent);
+            ContractCount = resultList.Count(s => s.EmploymentType == EmploymentType.Contract);
         }
 
         #endregion

@@ -25,7 +25,7 @@ namespace OCC.Client.ViewModels.Core
     /// ViewModel for the SideMenu navigation view.
     /// Manages the state of the sidebar (collapsed/expanded), navigation logic, user profile display, and quick actions.
     /// </summary>
-    public partial class SideMenuViewModel : ViewModelBase
+    public partial class SideMenuViewModel : ViewModelBase, IRecipient<UpdateStatusMessage>
     {
         #region Private Members
 
@@ -139,6 +139,9 @@ namespace OCC.Client.ViewModels.Core
             _permissionService = permissionService;
             _logger = logger;
 
+            // Register for messages
+            WeakReferenceMessenger.Default.RegisterAll(this);
+
             // Initialize version info
             AppVersion = $"v{_updateService.CurrentVersion}";
 
@@ -159,6 +162,11 @@ namespace OCC.Client.ViewModels.Core
             {
                 await CheckForUpdates();
             }
+        }
+
+        public void Receive(UpdateStatusMessage message)
+        {
+            UpdateLastActionMessage(message.Value);
         }
 
         #endregion
@@ -276,7 +284,7 @@ namespace OCC.Client.ViewModels.Core
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("My Summary"));
                     break;
                 case NavigationRoutes.Time:
-                    WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Time"));
+                    WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Live"));
                     break;
                 case NavigationRoutes.Projects:
                     WeakReferenceMessenger.Default.Send(new SwitchTabMessage("Projects"));

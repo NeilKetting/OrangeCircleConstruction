@@ -28,12 +28,18 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private string? _doctorsNotePath;
 
+        [ObservableProperty]
+        private TimeSpan? _clockInTime = new TimeSpan(7, 0, 0); // Default 07:00
+
+        [ObservableProperty]
+        private string _branch = string.Empty;
+
         #endregion
 
         #region Properties
 
         public Guid EmployeeId => _staff.Id;
-        public string Name => _staff.DisplayName;
+        public string Name => $"{_staff.FirstName} {_staff.LastName}";
         public string Role => _staff.Role.ToString();
 
         #endregion
@@ -43,6 +49,7 @@ namespace OCC.Client.ViewModels.Time
         public StaffAttendanceViewModel(Employee staff)
         {
             _staff = staff;
+            Branch = staff.Branch ?? "Johannesburg";
         }
 
         #endregion

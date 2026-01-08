@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+             xmlns:views="clr-namespace:OCC.Client.Views.Time"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:Class="OCC.Client.Views.Time.TimeLiveView"
+             x:DataType="vm:TimeLiveViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header / Controls -->
+        <!-- Just Last Updated and potentially a refresh or roll call button if needed still? User said "no need for the navigation buttons". -->
+        <!-- Keeping Roll Call button as it's the only way to input attendance manually for now if not purely automated -->
+        
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                 <TextBlock Text="Live Attendance" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                 <TextBlock Text="{Binding LastUpdatedText}" VerticalAlignment="Bottom" Margin="10,0,0,3" Foreground="{DynamicResource TextTertiarySlate}" FontSize="12"/>
+            </StackPanel>
+
+            <Button Grid.Column="1" Command="{Binding OpenRollCallCommand}" Classes="Primary">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <PathIcon Data="{StaticResource IconList}" Width="16" Height="16"/>
+                    <TextBlock Text="Roll Call"/>
+                </StackPanel>
+            </Button>
+            
+            <!-- Dev Tool: Clear Data -->
+            <Button Grid.Column="2" Command="{Binding ClearAttendanceCommand}" Margin="10,0,0,0" Background="Transparent" BorderBrush="Transparent">
+                <PathIcon Data="{StaticResource IconTrash}" Width="16" Height="16" Foreground="Red"/>
+                <ToolTip.Tip>DEV: Clear All Attendance</ToolTip.Tip>
+            </Button>
+        </Grid>
+
+        <!-- Main Content (Cards) -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding LiveUsers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="200" Height="100" Margin="10" CornerRadius="8" Background="White"
+                                BorderThickness="2" BorderBrush="{Binding BorderBrush}"
+                                BoxShadow="0 2 4 0 #10000000">
+                            <Grid RowDefinitions="*, *">
+                                <TextBlock Grid.Row="0" Text="{Binding DisplayName}" FontWeight="Bold" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" Margin="10,0"/>
+                                
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                                    <PathIcon Data="{StaticResource IconTime}" Width="14" Height="14" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                    <TextBlock Text="{Binding ClockInTimeDisplay}" FontSize="16" Foreground="{DynamicResource TextPrimaryDark}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <!-- Roll Call Overlay -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsRollCallVisible}">
+            <views:RollCallView DataContext="{Binding CurrentRollCall}" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+
+    </Grid>
+</UserControl>

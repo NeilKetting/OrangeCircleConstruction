@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.EmployeeManagement"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OCC.Client.Views.EmployeeManagement.TeamsView"
+             x:DataType="vm:TeamsViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Classes="TopHeader" Margin="0,0,0,20">
+            <Grid ColumnDefinitions="*, Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="Teams" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Teams.Count, StringFormat='({0})'}" FontSize="16" Foreground="{DynamicResource TextSecondaryGray}" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" Command="{Binding CreateTeamCommand}" Classes="Primary">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                         <PathIcon Data="{StaticResource IconAddUser}" Width="16" Height="16"/>
+                         <TextBlock Text="Create Team"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Grid -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Teams}" SelectedItem="{Binding SelectedTeam}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="2*"/>
+                <!-- <DataGridTextColumn Header="MEMBERS" Binding="{Binding Members.Count}" Width="Auto"/> EF Core Count issue potentially if not loaded? -->
+                
+                <DataGridTemplateColumn Width="Auto">
+                     <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Classes="IconButton" Command="{Binding $parent[UserControl].((vm:TeamsViewModel)DataContext).DeleteTeamCommand}" CommandParameter="{Binding .}" Foreground="Red">
+                                <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16"/>
+                            </Button>
+                        </DataTemplate>
+                     </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

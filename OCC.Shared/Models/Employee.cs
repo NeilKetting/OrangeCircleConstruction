@@ -5,6 +5,9 @@ namespace OCC.Shared.Models
     /// <summary>
     /// Represents an employee in the system.
     /// </summary>
+    /// <summary>
+    /// Represents an employee in the system.
+    /// </summary>
     public class Employee : IEntity
     {
         /// <summary>
@@ -89,6 +92,21 @@ namespace OCC.Shared.Models
         /// The date the employee started working.
         /// </summary>
         public DateTime EmploymentDate { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Valid values: "Johannesburg", "Cape Town"
+        /// </summary>
+        public string Branch { get; set; } = "Johannesburg";
+
+        /// <summary>
+        /// Start time of the employee's shift.
+        /// </summary>
+        public TimeSpan? ShiftStartTime { get; set; } = new TimeSpan(7, 0, 0);
+
+        /// <summary>
+        /// End time of the employee's shift.
+        /// </summary>
+        public TimeSpan? ShiftEndTime { get; set; } = new TimeSpan(17, 0, 0);
     }
 
     /// <summary>
@@ -102,18 +120,34 @@ namespace OCC.Shared.Models
 
     /// <summary>
     /// Defines the role or trade of the employee.
+    ///Ids are explicitly assigned to prevent shifting if items are reordered.
     /// </summary>
     public enum EmployeeRole
     {
-        Office,
-        GeneralWorker,
-        Builder,
-        Tiler,
-        Painter,
-        Electrician,
-        Plumber,
-        Supervisor,
-        ExternalContractor
+        // Legacy / Existing Roles
+        Office = 0,
+        GeneralWorker = 1,
+        Builder = 2,
+        Tiler = 3,
+        Painter = 4,
+        Electrician = 5,
+        Plumber = 6,
+        Supervisor = 7,             // Generic Supervisor (legacy)
+        ExternalContractor = 8,
+
+        // New Client Requested Roles
+        BuildingSupervisor = 9,
+        PlasterSupervisor = 10,
+        ShopfittingSupervisor = 11,
+        PaintingSupervisor = 12,
+        LabourSupervisor = 13,
+        Cleaner = 14,
+        Shopfitter = 15,
+        Plasterer = 16,
+        PlasterLabour = 17,
+        SeniorForeman = 18,
+        Foreman = 19,
+        Welder = 20
     }
 
     /// <summary>

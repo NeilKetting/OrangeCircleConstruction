@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.HealthSafety"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OCC.Client.Views.HealthSafety.HealthSafetyDashboardView"
+             x:DataType="vm:HealthSafetyDashboardViewModel">
+    
+    <Grid Background="{DynamicResource AppBackgroundSlate}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+            <PathIcon Data="{StaticResource IconHealthSafety}" Width="64" Height="64" Foreground="{DynamicResource PrimaryBlue}" HorizontalAlignment="Center"/>
+            <TextBlock Text="Health &amp; Safety" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}" HorizontalAlignment="Center"/>
+            <TextBlock Text="Coming Soon" FontSize="18" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center"/>
+            <TextBlock Text="This module is currently under development." FontSize="14" Foreground="{DynamicResource TextSecondaryGray}" HorizontalAlignment="Center" Opacity="0.7"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

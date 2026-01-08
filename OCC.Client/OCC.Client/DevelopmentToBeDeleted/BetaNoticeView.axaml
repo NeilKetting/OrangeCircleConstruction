@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.DevelopmentToBeDeleted"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="OCC.Client.DevelopmentToBeDeleted.BetaNoticeView"
+             x:DataType="vm:BetaNoticeViewModel">
+
+    <Design.DataContext>
+        <vm:BetaNoticeViewModel/>
+        </Design.DataContext>
+
+    <Grid Background="#202020">
+        <Border Background="White" CornerRadius="12" Width="550" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="40" BoxShadow="0 10 30 0 #50000000">
+            <StackPanel Spacing="20">
+                <!-- Header -->
+                <StackPanel Spacing="5" HorizontalAlignment="Center">
+                    <PathIcon Data="{StaticResource IconInfo}" Width="40" Height="40" Foreground="#F59E0B" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Pre-Release Beta Notice" FontSize="24" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding VersionText}" FontSize="14" Foreground="#6B7280" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <Separator Background="#E5E7EB" Height="1" Margin="0,10"/>
+
+                <!-- Content -->
+                <TextBlock Text="Welcome to the latest beta version of the Orange Circle Construction Application." 
+                           TextWrapping="Wrap" FontSize="16" Foreground="#374151" TextAlignment="Center"/>
+
+                <TextBlock Text="Usage of this software is subject to active development. You may encounter bugs, incomplete features, or unexpected behavior. We specifically request your testing feedback on:"
+                           TextWrapping="Wrap" FontSize="14" Foreground="#4B5563"/>
+
+                <Border Background="#F3F4F6" CornerRadius="6" Padding="15">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
+                            <TextBlock Text="User Management" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
+                            <TextBlock Text="Employee Management" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
+                            <TextBlock Text="Time &amp; Attendance" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="By proceeding, you acknowledge that this is a pre-release build intended for testing purposes only."
+                           TextWrapping="Wrap" FontSize="12" Foreground="#9CA3AF" TextAlignment="Center" FontStyle="Italic"/>
+
+                <!-- Buttons -->
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Button Command="{Binding CancelCommand}" Content="Exit Application" 
+                            HorizontalAlignment="Left" Background="Transparent" Foreground="#EF4444" BorderBrush="Transparent"/>
+                    
+                    <Button Grid.Column="2" Command="{Binding AcceptCommand}" Classes="Primary" HorizontalAlignment="Right" Padding="30,10">
+                        <TextBlock Text="I Understand, Proceed" FontWeight="Bold"/>
+                    </Button>
+					
+                </Grid>                
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

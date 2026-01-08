@@ -17,128 +17,145 @@
 		<vm:EmployeeManagementViewModel/>
 	</Design.DataContext>
 
-	<Grid RowDefinitions="50, Auto, *">
+	<Grid RowDefinitions="50, *">
 		<!-- Top Bar -->
 		<Border Grid.Row="0" Classes="Topbar">
 			<Grid ColumnDefinitions="Auto, *, Auto, Auto">
 				<!-- Tab Buttons -->
 				<StackPanel Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="2" HorizontalAlignment="Center">
-					<Button Classes="TabButton" Command="{Binding SwitchTabCommand}" CommandParameter="Manage Staff"
-							Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Manage Staff'}">
+					<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Employees"
+							Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Employees'}">
 						<StackPanel Orientation="Horizontal" Spacing="8">
 							<PathIcon Data="{StaticResource IconUser}" Width="16" Height="16"/>
-							<TextBlock Text="MANAGE WORKFORCE"/>
+							<TextBlock Text="MANAGE EMPLOYEES"/>
 						</StackPanel>
 					</Button>
 
-					<Button Classes="TabButton" Command="{Binding SwitchTabCommand}" CommandParameter="Teams"
+					<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Teams"
 							Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Teams'}">
 						<StackPanel Orientation="Horizontal" Spacing="8">
 							<PathIcon Data="{StaticResource IconTeam}" Width="16" Height="16"/>
 							<TextBlock Text="TEAMS"/>
 						</StackPanel>
 					</Button>
-
-					<Button Classes="TabButton" Command="{Binding SwitchTabCommand}" CommandParameter="Holidays"
-							Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Holidays'}">
-						<StackPanel Orientation="Horizontal" Spacing="8">
-							<PathIcon Data="{StaticResource IconCalendar}" Width="16" Height="16"/>
-							<TextBlock Text="HOLIDAYS"/>
-						</StackPanel>
-					</Button>
 				</StackPanel>
 			</Grid>
 		</Border>
 
-		<!-- Stats Bar -->
-		<Border Grid.Row="1" Classes="TopHeader">
-			<Grid ColumnDefinitions="Auto, *, Auto">
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            
+            <!-- STAFF VIEW -->
+            <Grid RowDefinitions="Auto, *" IsVisible="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Employees'}">
+                <!-- Stats Bar -->
+		        <Border Grid.Row="0" Classes="TopHeader">
+			        <Grid ColumnDefinitions="Auto, *, Auto">
 
-				<StackPanel Grid.Column="0" Orientation="Horizontal">
-					<StackPanel Classes="Stat">
-						<TextBlock Text="TOTAL EMPLOYEES" Classes="StatLabel"/>
-						<TextBlock Text="{Binding TotalCount}" Classes="StatValue" HorizontalAlignment="Center"/>
-					</StackPanel>
+				        <StackPanel Grid.Column="0" Orientation="Horizontal">
+					        <StackPanel Classes="Stat">
+						        <TextBlock Text="TOTAL EMPLOYEES" Classes="StatLabel"/>
+						        <TextBlock Text="{Binding TotalCount}" Classes="StatValue" HorizontalAlignment="Center"/>
+					        </StackPanel>
 
-					<StackPanel Classes="Stat">
-						<TextBlock Text="PERMANENT" Classes="StatLabel"/>
-						<TextBlock Text="{Binding PermanentCount}" Classes="StatValue" HorizontalAlignment="Center"/>
-					</StackPanel>
+					        <StackPanel Classes="Stat">
+						        <TextBlock Text="PERMANENT" Classes="StatLabel"/>
+						        <TextBlock Text="{Binding PermanentCount}" Classes="StatValue" HorizontalAlignment="Center"/>
+					        </StackPanel>
 
-					<StackPanel Classes="Stat">
-						<TextBlock Text="CONTRACT" Classes="StatLabel"/>
-						<TextBlock Text="{Binding ContractCount}" Classes="StatValue"  HorizontalAlignment="Center"/>
-					</StackPanel>
-				</StackPanel>
+					        <StackPanel Classes="Stat">
+						        <TextBlock Text="CONTRACT" Classes="StatLabel"/>
+						        <TextBlock Text="{Binding ContractCount}" Classes="StatValue"  HorizontalAlignment="Center"/>
+					        </StackPanel>
+				        </StackPanel>
 
-				<!-- Tools -->
-				<StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
-					<Button Command="{Binding AddEmployeeCommand}" Classes="Primary">
-						<StackPanel Orientation="Horizontal" Spacing="5">
-							<PathIcon Data="{StaticResource IconAddUser}" Width="16" Height="16"/>
-							<TextBlock Text="Add Employee" Foreground="{DynamicResource TextPrimaryDark}" VerticalAlignment="Center"/>
-						</StackPanel>
-					</Button>
+				        <!-- Tools -->
+				        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+					        <Button Command="{Binding ExportEmployeesCommand}" Classes="Secondary" Margin="0,0,10,0" ToolTip.Tip="Export all data to JSON (My Documents)">
+						        <StackPanel Orientation="Horizontal" Spacing="5">
+							        <PathIcon Data="{StaticResource IconSave}" Width="16" Height="16"/>
+							        <TextBlock Text="Export Data" Foreground="{DynamicResource TextPrimaryDark}" VerticalAlignment="Center"/>
+						        </StackPanel>
+					        </Button>
 
-					<!-- Search -->
-					<StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-						<TextBox Width="200" Watermark="Search employees..." VerticalContentAlignment="Center" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Background="White" BorderBrush="{DynamicResource BorderGray}" Padding="30,5,10,5"/>
-						<PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
-					</StackPanel>
+					        <Button Command="{Binding AddEmployeeCommand}" Classes="Primary">
+						        <StackPanel Orientation="Horizontal" Spacing="5">
+							        <PathIcon Data="{StaticResource IconAddUser}" Width="16" Height="16"/>
+							        <TextBlock Text="Add Employee" Foreground="{DynamicResource TextPrimaryDark}" VerticalAlignment="Center"/>
+						        </StackPanel>
+					        </Button>
 
-					<ComboBox SelectedIndex="{Binding SelectedFilterIndex}" Width="150" Background="White" BorderBrush="{DynamicResource BorderGray}">
-						<ComboBoxItem>Everyone</ComboBoxItem>
-						<ComboBoxItem>Permanent</ComboBoxItem>
-						<ComboBoxItem>Contract</ComboBoxItem>
-					</ComboBox>
-				</StackPanel>
-			</Grid>
-		</Border>
+					        <!-- Search -->
+					        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+						        <TextBox Width="200" Watermark="Search employees..." VerticalContentAlignment="Center" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Background="White" BorderBrush="{DynamicResource BorderGray}" Padding="30,5,10,5"/>
+						        <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+					        </StackPanel>
 
-		<!-- Employee Grid -->
-		<DataGrid Grid.Row="2"
-				  ItemsSource="{Binding Employees}"
-				  SelectedItem="{Binding SelectedEmployee}"
-				  AutoGenerateColumns="False"
-				  IsReadOnly="True"
-				  HeadersVisibility="Column"
-				  GridLinesVisibility="Horizontal"
-				  Background="White"
-				  BorderThickness="0"
-				  DoubleTapped="DataGrid_DoubleTapped">
+					        <ComboBox SelectedIndex="{Binding SelectedFilterIndex}" Width="150" Background="White" BorderBrush="{DynamicResource BorderGray}">
+						        <ComboBoxItem>Everyone</ComboBoxItem>
+						        <ComboBoxItem>Permanent</ComboBoxItem>
+						        <ComboBoxItem>Contract</ComboBoxItem>
+					        </ComboBox>
+
+					        <ComboBox SelectedIndex="{Binding SelectedBranchFilterIndex}" Width="150" Background="White" BorderBrush="{DynamicResource BorderGray}">
+						        <ComboBoxItem>All Branches</ComboBoxItem>
+						        <ComboBoxItem>Johannesburg</ComboBoxItem>
+						        <ComboBoxItem>Cape Town</ComboBoxItem>
+					        </ComboBox>
+				        </StackPanel>
+			        </Grid>
+		        </Border>
+
+		        <!-- Employee Grid -->
+		        <DataGrid Grid.Row="1"
+				          ItemsSource="{Binding Employees}"
+				          SelectedItem="{Binding SelectedEmployee}"
+				          AutoGenerateColumns="False"
+				          IsReadOnly="True"
+				          HeadersVisibility="Column"
+				          GridLinesVisibility="Horizontal"
+				          Background="White"
+				          BorderThickness="0"
+				          DoubleTapped="DataGrid_DoubleTapped">
 
 
-			<DataGrid.Columns>
-				<!-- Employee Number -->
-				<DataGridTextColumn Header="EMPLOYEE NUMBER" Binding="{Binding EmployeeNumber}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
+			        <DataGrid.Columns>
+				        <!-- Employee Number -->
+				        <DataGridTextColumn Header="EMPLOYEE NUMBER" Binding="{Binding EmployeeNumber}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
 
-				<!-- Name -->
-				<DataGridTextColumn Header="NAME" Binding="{Binding FirstName}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
+				        <!-- Name -->
+				        <DataGridTextColumn Header="NAME" Binding="{Binding FirstName}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
 
-				<!-- Surname -->
-				<DataGridTextColumn Header="SURNAME" Binding="{Binding LastName}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
+				        <!-- Surname -->
+				        <DataGridTextColumn Header="SURNAME" Binding="{Binding LastName}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
 
-				<!-- Contract or Permanent -->
-				<DataGridTextColumn Header="EMPLOYMENT TYPE" Binding="{Binding EmploymentType}" Width="2*" Foreground="{DynamicResource TextPrimaryDark}"/>
+				        <!-- Contract or Permanent -->
+				        <DataGridTextColumn Header="EMPLOYMENT TYPE" Binding="{Binding EmploymentType}" Width="2*" Foreground="{DynamicResource TextPrimaryDark}"/>
 
-				<!-- Actions -->
-				<DataGridTemplateColumn Width="Auto">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<Button Classes="IconButton" Margin="0,0,20,0">
-								<Button.Flyout>
-									<MenuFlyout Placement="BottomEdgeAlignedRight">
-										<MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:EmployeeManagementViewModel)DataContext).EditEmployeeCommand}" CommandParameter="{Binding .}"/>
-										<MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:EmployeeManagementViewModel)DataContext).DeleteEmployeeCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
-									</MenuFlyout>
-								</Button.Flyout>
-								<PathIcon Data="{StaticResource IconMoreHorizontal}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
-							</Button>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-			</DataGrid.Columns>
-		</DataGrid>
+				        <!-- Actions -->
+				        <DataGridTemplateColumn Width="Auto">
+					        <DataGridTemplateColumn.CellTemplate>
+						        <DataTemplate>
+							        <Button Classes="IconButton" Margin="0,0,20,0">
+								        <Button.Flyout>
+									        <MenuFlyout Placement="BottomEdgeAlignedRight">
+										        <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:EmployeeManagementViewModel)DataContext).EditEmployeeCommand}" CommandParameter="{Binding .}"/>
+										        <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:EmployeeManagementViewModel)DataContext).DeleteEmployeeCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+									        </MenuFlyout>
+								        </Button.Flyout>
+								        <PathIcon Data="{StaticResource IconMoreHorizontal}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+							        </Button>
+						        </DataTemplate>
+					        </DataGridTemplateColumn.CellTemplate>
+				        </DataGridTemplateColumn>
+			        </DataGrid.Columns>
+		        </DataGrid>
+            </Grid>
+
+            <!-- TEAMS VIEW -->
+            <views:TeamsView DataContext="{Binding TeamsVM}" 
+                             IsVisible="{Binding $parent[UserControl].((vm:EmployeeManagementViewModel)DataContext).ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Teams'}"/>
+
+        </Grid>
 
 		<!-- Popup Overlay -->
 		<Grid Grid.Row="0" Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsAddEmployeePopupVisible}">

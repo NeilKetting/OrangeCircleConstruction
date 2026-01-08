@@ -60,6 +60,24 @@ namespace OCC.Client.Services
             }
         }
 
+        public async Task ClearAllAttendanceAsync()
+        {
+            try
+            {
+                // For development: fetch all and delete.
+                var allRecords = await _attendanceRepository.GetAllAsync();
+                foreach (var record in allRecords)
+                {
+                    await _attendanceRepository.DeleteAsync(record.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error clearing attendance: {ex.Message}");
+                // In production, log properly
+            }
+        }
+
         public async Task<IEnumerable<Employee>> GetAllStaffAsync()
         {
             return await _staffRepository.GetAllAsync();

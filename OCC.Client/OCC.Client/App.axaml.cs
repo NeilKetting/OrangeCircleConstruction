@@ -27,6 +27,7 @@ using Serilog;
 using OCC.Shared.Models;
 using OCC.Client.ViewModels.Home.Calendar;
 using OCC.Client.ViewModels.Time;
+using OCC.Client.ViewModels.HealthSafety;
 using OCC.Client.ViewModels.Settings;
 using OCC.Client.ViewModels.Projects.Shared;
 using OCC.Client.ViewModels.Projects.Dashboard;
@@ -73,7 +74,7 @@ namespace OCC.Client
         private void ConfigureServices(IServiceCollection services)
         {
             // Database
-            // services.AddDbContext<Data.AppDbContext>(); // Removed duplicate, we configure it below with Transient lifetime
+            services.AddDbContext<Data.AppDbContext>(options => { }, ServiceLifetime.Transient); 
 
             // Repositories
             // repositories - Specific Repositories for API
@@ -87,6 +88,10 @@ namespace OCC.Client
             services.AddTransient<IRepository<TimeRecord>, ApiTimeRecordRepository>();
             services.AddTransient<IRepository<AttendanceRecord>, ApiAttendanceRecordRepository>();
             services.AddTransient<IRepository<AppSetting>, ApiAppSettingRepository>();
+            
+            // Teams (Local DB for now)
+            services.AddTransient<IRepository<Team>, Data.SqlRepository<Team>>();
+            services.AddTransient<IRepository<TeamMember>, Data.SqlRepository<TeamMember>>();
 
             // Fallback for any other type not explicitly mapped (e.g. TimeRecord) - though unlikely to be used if we covered main ones
             // services.AddTransient(typeof(IRepository<>), typeof(SqlRepository<>));
@@ -171,9 +176,18 @@ namespace OCC.Client
             services.AddTransient<AuditLogViewModel>();
             services.AddTransient<TaskDetailViewModel>(); // If needed
             services.AddTransient<EmployeeManagementViewModel>();
-            services.AddTransient<TimeViewModel>();
+            services.AddTransient<TimeLiveViewModel>();
+            services.AddTransient<TimeMenuViewModel>();
+            services.AddTransient<TimeAttendanceViewModel>();
+            services.AddTransient<RollCallViewModel>(); // Added
+            services.AddTransient<LeaveApplicationViewModel>();
             services.AddTransient<CalendarViewModel>();
+            services.AddTransient<TeamsViewModel>();
             services.AddTransient<ProfileViewModel>();
+            
+            // Health Safety
+            services.AddTransient<HealthSafetyViewModel>();
+            services.AddTransient<HealthSafetyDashboardViewModel>();
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

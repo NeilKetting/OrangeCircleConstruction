@@ -62,6 +62,9 @@ namespace OCC.Client.Data
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
         public DbSet<TimeRecord> TimeRecords { get; set; }
         public DbSet<AppSetting> AppSettings { get; set; }
+        
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamMember> TeamMembers { get; set; }
 
         public DbSet<TaskAssignment> TaskAssignments { get; set; }
 

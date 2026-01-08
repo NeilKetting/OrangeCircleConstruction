@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+			 xmlns:viewTime="clr-namespace:OCC.Client.Views.Time"
+			 mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
+			 x:Class="OCC.Client.Views.Time.TimeAttendanceView"
+			 x:DataType="vm:TimeAttendanceViewModel">
+
+	<Design.DataContext>
+		<vm:TimeAttendanceViewModel/>
+	</Design.DataContext>
+
+	<UserControl.DataTemplates>
+		<DataTemplate DataType="{x:Type vm:TimeLiveViewModel}">
+			<viewTime:TimeLiveView/>
+		</DataTemplate>
+		<DataTemplate DataType="{x:Type vm:RollCallViewModel}">
+			<viewTime:RollCallView/>
+		</DataTemplate>
+		<DataTemplate DataType="{x:Type vm:LeaveApplicationViewModel}">
+			<viewTime:LeaveApplicationView/>
+		</DataTemplate>
+	</UserControl.DataTemplates>
+
+	<Grid RowDefinitions="60, Auto, *" Background="{DynamicResource AppBackgroundSlate}">
+		<!-- Top Bar -->
+		<viewTime:TimeMenuView Grid.Row="0" DataContext="{Binding TimeMenu}"/>	
+
+		<!-- Content Area -->
+		<TransitioningContentControl Grid.Row="2" Content="{Binding CurrentView}">
+			<TransitioningContentControl.PageTransition>
+				<CrossFade Duration="0:00:00.500" />
+			</TransitioningContentControl.PageTransition>
+		</TransitioningContentControl>
+	</Grid>
+</UserControl>
