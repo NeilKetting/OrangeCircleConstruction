@@ -248,7 +248,8 @@ namespace OCC.API.Services
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.UserRole.ToString())
+                    new Claim(ClaimTypes.Role, user.UserRole.ToString()),
+                    new Claim(ClaimTypes.GivenName, user.DisplayName ?? user.Email)
                 }),
                 Expires = DateTime.UtcNow.AddDays(days),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),

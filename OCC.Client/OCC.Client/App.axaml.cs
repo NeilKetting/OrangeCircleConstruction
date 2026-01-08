@@ -160,7 +160,6 @@ namespace OCC.Client
             // Home
             services.AddTransient<HomeMenuViewModel>();
             services.AddTransient<HomeViewModel>();
-            services.AddTransient<HomeViewModel>();
             services.AddTransient<SummaryViewModel>();
             services.AddTransient<TasksWidgetViewModel>();
             services.AddTransient<PulseViewModel>();

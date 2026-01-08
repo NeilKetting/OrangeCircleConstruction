@@ -12,7 +12,9 @@ namespace OCC.API.Hubs
         {
             try
             {
-                var userName = Context.User?.Identity?.Name ?? "Anonymous";
+                var userName = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
+                               ?? Context.User?.Identity?.Name 
+                               ?? "Anonymous";
                 var id = Context.ConnectionId;
                 
                 var info = new OCC.Shared.DTOs.UserConnectionInfo 

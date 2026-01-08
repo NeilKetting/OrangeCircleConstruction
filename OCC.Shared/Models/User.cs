@@ -15,7 +15,9 @@
         
         // Simplified for now, in a real app these might be navigation properties
         public UserRole UserRole { get; set; } = UserRole.Guest;
-        public string? DisplayName => $"{FirstName} {LastName}".Trim();
+        public string? DisplayName => (!string.IsNullOrWhiteSpace(FirstName) && !string.IsNullOrWhiteSpace(LastName)) 
+            ? $"{FirstName}, {LastName}" 
+            : $"{FirstName} {LastName}".Trim();
     }
 
     public enum UserRole

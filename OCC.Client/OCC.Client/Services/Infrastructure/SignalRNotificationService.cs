@@ -7,24 +7,33 @@ namespace OCC.Client.Services.Infrastructure
 {
     public class SignalRNotificationService : IAsyncDisposable
     {
-        private readonly HubConnection _hubConnection;
+        private HubConnection _hubConnection = null!;
 
         public event Action<string>? OnNotificationReceived;
 
-        public SignalRNotificationService()
+        private readonly IServiceProvider _serviceProvider;
+        private readonly Services.Interfaces.IAuthService _authService;
+
+        public SignalRNotificationService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+            _authService = (Services.Interfaces.IAuthService)_serviceProvider.GetService(typeof(Services.Interfaces.IAuthService))!; // Service locator to avoid circle if any (though AuthService shouldn't depend on SignalR)
+            
+            InitializeConnection();
+        }
+
+        private void InitializeConnection()
         {
             var baseUrl = ConnectionSettings.Instance.ApiBaseUrl;
             if (!baseUrl.EndsWith("/")) baseUrl += "/";
             
-            // Adjust protocol if needed (http vs https). 
-            // The API is http://102.39.20.146:8081/, so SignalR is on the same host/port.
-            // CAREFUL: SignalR client might default to forcing HTTPS or need options.
-            // If the server is HTTP, we use HTTP.
-            
             var hubUrl = $"{baseUrl}hubs/notifications";
 
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(hubUrl) 
+                .WithUrl(hubUrl, options =>
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(_authService?.AuthToken);
+                }) 
                 .WithAutomaticReconnect()
                 .Build();
 
@@ -35,8 +44,6 @@ namespace OCC.Client.Services.Infrastructure
 
             _hubConnection.On<string, string, Guid>("EntityUpdate", (entityType, action, id) =>
             {
-                // Dispatch to UI thread if needed, but Messenger handles logic. 
-                // Using WeakReferenceMessenger to broadcast
                 var msg = new ViewModels.Messages.EntityUpdatedMessage(entityType, action, id);
                 WeakReferenceMessenger.Default.Send(msg);
             });
@@ -45,6 +52,17 @@ namespace OCC.Client.Services.Infrastructure
             {
                 OnUserListReceived?.Invoke(users);
             });
+        }
+
+        public async Task RestartAsync()
+        {
+            if (_hubConnection != null)
+            {
+                await _hubConnection.StopAsync();
+                await _hubConnection.DisposeAsync();
+            }
+            InitializeConnection();
+            await StartAsync();
         }
         
         public event Action<System.Collections.Generic.List<OCC.Shared.DTOs.UserConnectionInfo>>? OnUserListReceived;

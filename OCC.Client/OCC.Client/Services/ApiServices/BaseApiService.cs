@@ -50,7 +50,14 @@ namespace OCC.Client.Services.ApiServices
         public virtual async Task<T?> GetByIdAsync(Guid id)
         {
             EnsureAuthorization();
-            return await _httpClient.GetFromJsonAsync<T>($"api/{ApiEndpoint}/{id}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<T>($"api/{ApiEndpoint}/{id}");
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         public virtual async Task AddAsync(T entity)

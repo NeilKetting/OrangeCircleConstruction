@@ -110,8 +110,8 @@ namespace OCC.Client.ViewModels.Core
 
             WeakReferenceMessenger.Default.RegisterAll(this); // Register for messages
 
-            // Start SignalR Connection Globally
-            _ = _signalRService.StartAsync();
+            // Start/Restart SignalR Connection Globally to ensure Auth Token is used
+            _ = _signalRService.RestartAsync();
 
             // Check for updates in background, but show UI if found
             Task.Run(async () => 
