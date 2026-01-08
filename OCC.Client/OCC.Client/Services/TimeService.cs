@@ -48,6 +48,19 @@ namespace OCC.Client.Services
             return await _attendanceRepository.FindAsync(r => r.Date >= dayStart && r.Date < dayEnd);
         }
 
+        public async Task<IEnumerable<AttendanceRecord>> GetAttendanceByRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            // Ensure end date is inclusive of the day (e.g., if user picks 2026-01-08, we want up to 2026-01-08 23:59:59)
+            // If the incoming View Logic gives "Today" as start:Today, end:Today, we want full day.
+            // Usually best to treat EndDate as "End of Day" or next day 00:00.
+            // But let's assume the VM gives strict boundaries, or we standardize here.
+            
+            // Standardizing: Date portion comparison or simple range.
+            // Best practice: >= Start AND < End (where End is +1 day of the visualization range).
+            
+            return await _attendanceRepository.FindAsync(r => r.Date >= startDate && r.Date <= endDate);
+        }
+
         public async Task SaveAttendanceRecordAsync(AttendanceRecord record)
         {
             if (record.Id == Guid.Empty || (await _attendanceRepository.GetByIdAsync(record.Id)) == null)

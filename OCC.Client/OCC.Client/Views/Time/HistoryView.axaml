@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
+             x:Class="OCC.Client.Views.Time.HistoryView"
+             x:DataType="vm:HistoryViewModel">
+
+	<Grid RowDefinitions="Auto, Auto, *">
+		<!-- Top Bar -->
+		<Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto" Margin="20" VerticalAlignment="Center">
+			<TextBlock Text="Attendance History" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}" Margin="0,0,20,0"/>
+
+			<!-- Filters -->
+			<ComboBox Grid.Column="1" ItemsSource="{Binding RangeOptions}" SelectedItem="{Binding SelectedRange}" 
+                      Width="180" Classes="FormInput" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+			<DatePicker Grid.Column="2" SelectedDate="{Binding StartDate}" IsEnabled="{Binding IsCustomDateEnabled}" 
+                        VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBlock Grid.Column="3" Text="-" VerticalAlignment="Center" Margin="0,0,5,0"/>
+			<DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" IsEnabled="{Binding IsCustomDateEnabled}" 
+                        VerticalAlignment="Center" Margin="10,0,20,0"/>
+
+			<!-- Summary Cards -->
+			<StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="20">
+				<Border Classes="Card" Padding="15,10" Width="150">
+					<StackPanel>
+						<TextBlock Text="Total Hours" Classes="LabelText" HorizontalAlignment="Center"/>
+						<TextBlock Text="{Binding TotalHours, StringFormat='{}{0:F2}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlue}" HorizontalAlignment="Center"/>
+					</StackPanel>
+				</Border>
+				<Border Classes="Card" Padding="15,10" Width="150" Background="#E8F5E9" BorderBrush="#81C784"> <!-- Green tint -->
+					<StackPanel>
+						<TextBlock Text="Est. Wages" Classes="LabelText" HorizontalAlignment="Center" Foreground="#388E3C"/>
+						<TextBlock Text="{Binding TotalWages, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Center"/>
+					</StackPanel>
+				</Border>
+                <!-- Actions -->
+                <StackPanel Orientation="Horizontal" Spacing="5" Margin="20,0,0,0">
+                    <Button Command="{Binding PrintReportCommand}" Classes="Secondary" ToolTip.Tip="Print Report">
+                         <StackPanel Orientation="Horizontal" Spacing="5">
+                            <PathIcon Data="{StaticResource IconPrint}" Width="16" Height="16"/>
+                            <TextBlock Text="Print"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding ExportCsvCommand}" Classes="Secondary" ToolTip.Tip="Export CSV">
+                        <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16"/>
+                    </Button>
+                    <Button Command="{Binding RefreshCommand}" Classes="Secondary" ToolTip.Tip="Refresh">
+                        <PathIcon Data="{StaticResource IconHistory}" Width="16" Height="16"/>
+                    </Button>
+                </StackPanel>
+			</StackPanel>
+		</Grid>
+
+		<!-- DataGrid -->
+		<DataGrid Grid.Row="2" ItemsSource="{Binding Records}" AutoGenerateColumns="False" 
+                  IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderGray}"
+                  Background="White" RowBackground="White">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yyyy}'}" Width="120"/>
+				<DataGridTextColumn Header="Employee" Binding="{Binding EmployeeName}" Width="2*"/>
+				<DataGridTextColumn Header="Branch" Binding="{Binding Branch}" Width="150"/>
+				<DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+				<DataGridTextColumn Header="In" Binding="{Binding InTime}" Width="80"/>
+				<DataGridTextColumn Header="Out" Binding="{Binding OutTime}" Width="80"/>
+				<DataGridTextColumn Header="Hours" Binding="{Binding HoursWorkedDisplay}" Width="80"/>
+				<DataGridTextColumn Header="Wage (Est.)" Binding="{Binding WageDisplay}" Width="120" Foreground="#2E7D32" FontWeight="Bold"/>
+			</DataGrid.Columns>
+		</DataGrid>
+        
+        <!-- Empty State -->
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !Records.Count}">
+             <PathIcon Data="{StaticResource IconHistory}" Width="48" Height="48" Foreground="{DynamicResource TextTertiarySlate}"/>
+             <TextBlock Text="No records found for this period." Margin="0,10,0,0" Foreground="{DynamicResource TextTertiarySlate}"/>
+        </StackPanel>
+	</Grid>
+</UserControl>

@@ -129,6 +129,7 @@ namespace OCC.Client
              services.AddSingleton<ITimeService, TimeService>();
             services.AddSingleton<INotificationService, ApiNotificationService>();
             services.AddSingleton<IUpdateService, UpdateService>();
+            services.AddSingleton<IExportService, ExportService>();
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
@@ -181,6 +182,7 @@ namespace OCC.Client
             services.AddTransient<TimeAttendanceViewModel>();
             services.AddTransient<RollCallViewModel>(); // Added
             services.AddTransient<ClockOutViewModel>();
+            services.AddTransient<HistoryViewModel>();
             services.AddTransient<LeaveApplicationViewModel>();
             services.AddTransient<CalendarViewModel>();
             // services.AddTransient<TeamsViewModel>(); // Removed

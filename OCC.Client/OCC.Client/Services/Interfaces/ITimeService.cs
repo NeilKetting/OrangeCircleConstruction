@@ -12,6 +12,7 @@ namespace OCC.Client.Services.Interfaces
         Task<IEnumerable<AttendanceRecord>> GetDailyAttendanceAsync(DateTime date);
         Task SaveAttendanceRecordAsync(AttendanceRecord record);
         Task ClearAllAttendanceAsync();
+        Task<IEnumerable<AttendanceRecord>> GetAttendanceByRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<Employee>> GetAllStaffAsync();
     }
 }

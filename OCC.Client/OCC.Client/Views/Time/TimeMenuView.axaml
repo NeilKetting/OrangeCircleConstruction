@@ -43,7 +43,7 @@
 
 
 				<!-- History -->
-				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Leave Application" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Leave Application'}">
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="History" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='History'}">
 					<StackPanel Orientation="Horizontal" Spacing="8">
 						<PathIcon Data="{StaticResource IconHistory}" Classes="IconStyle" Width="16" Height="16"/>
 						<TextBlock Text="ATTENDANCE HISTORY" VerticalAlignment="Center"/>

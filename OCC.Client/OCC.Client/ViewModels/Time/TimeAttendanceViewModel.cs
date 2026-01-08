@@ -28,6 +28,7 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty] private TimeLiveViewModel _liveView;
         [ObservableProperty] private RollCallViewModel _dailyRollCallView;
         [ObservableProperty] private ClockOutViewModel _clockOutView;
+        [ObservableProperty] private HistoryViewModel _historyView;
         [ObservableProperty] private LeaveApplicationViewModel _leaveApplicationView;
 
         [ObservableProperty]
@@ -47,6 +48,7 @@ namespace OCC.Client.ViewModels.Time
             _liveView = null!;
             _dailyRollCallView = null!;
             _clockOutView = null!;
+            _historyView = null!;
             _leaveApplicationView = null!;
             _currentView = null!;
 
@@ -58,6 +60,7 @@ namespace OCC.Client.ViewModels.Time
             TimeLiveViewModel liveView,
             RollCallViewModel dailyRollCallView,
             ClockOutViewModel clockOutView,
+            HistoryViewModel historyView,
             LeaveApplicationViewModel leaveApplicationView,
             IAuthService authService)
         {
@@ -65,6 +68,7 @@ namespace OCC.Client.ViewModels.Time
             _liveView = liveView;
             _dailyRollCallView = dailyRollCallView;
             _clockOutView = clockOutView;
+            _historyView = historyView;
             _leaveApplicationView = leaveApplicationView;
             _authService = authService;
             
@@ -114,6 +118,10 @@ namespace OCC.Client.ViewModels.Time
                     CurrentView = ClockOutView;
                     // Trigger refresh if needed
                     ClockOutView.InitializeCommand.Execute(null);
+                    break;
+                case "History":
+                    CurrentView = HistoryView;
+                    // Trigger refresh if needed, but VM does it on init
                     break;
                 case "Leave Application":
                     CurrentView = LeaveApplicationView;
