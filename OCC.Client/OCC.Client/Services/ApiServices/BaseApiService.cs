@@ -43,50 +43,36 @@ namespace OCC.Client.Services.ApiServices
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             EnsureAuthorization();
-            try 
-            {
-                var result = await _httpClient.GetFromJsonAsync<IEnumerable<T>>($"api/{ApiEndpoint}");
-                return result ?? Enumerable.Empty<T>();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"API Get Error: {ex.Message}");
-                // Return empty list on failure to prevent crash
-                return Enumerable.Empty<T>();
-            }
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<T>>($"api/{ApiEndpoint}");
+            return result ?? Enumerable.Empty<T>();
         }
 
         public virtual async Task<T?> GetByIdAsync(Guid id)
         {
             EnsureAuthorization();
-            try
-            {
-                return await _httpClient.GetFromJsonAsync<T>($"api/{ApiEndpoint}/{id}");
-            }
-            catch (Exception ex)
-            {
-                 System.Diagnostics.Debug.WriteLine($"API GetById Error: {ex.Message}");
-                return null;
-            }
+            return await _httpClient.GetFromJsonAsync<T>($"api/{ApiEndpoint}/{id}");
         }
 
         public virtual async Task AddAsync(T entity)
         {
             EnsureAuthorization();
-            await _httpClient.PostAsJsonAsync($"api/{ApiEndpoint}", entity);
+            var response = await _httpClient.PostAsJsonAsync($"api/{ApiEndpoint}", entity);
+            response.EnsureSuccessStatusCode();
         }
 
         public virtual async Task UpdateAsync(T entity)
         {
             EnsureAuthorization();
             // Use PUT to update. Backend should handle identifying the entity from the body.
-            await _httpClient.PutAsJsonAsync($"api/{ApiEndpoint}/{entity.Id}", entity);
+            var response = await _httpClient.PutAsJsonAsync($"api/{ApiEndpoint}/{entity.Id}", entity);
+            response.EnsureSuccessStatusCode();
         }
 
         public virtual async Task DeleteAsync(Guid id)
         {
             EnsureAuthorization();
-            await _httpClient.DeleteAsync($"api/{ApiEndpoint}/{id}");
+            var response = await _httpClient.DeleteAsync($"api/{ApiEndpoint}/{id}");
+            response.EnsureSuccessStatusCode();
         }
 
         public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)

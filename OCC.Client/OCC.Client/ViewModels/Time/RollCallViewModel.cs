@@ -180,39 +180,49 @@ namespace OCC.Client.ViewModels.Time
 
         private async Task LoadStaff()
         {
-            var staff = await _timeService.GetAllStaffAsync();
-            var existingRecords = (await _timeService.GetDailyAttendanceAsync(Date)).ToList();
+            try
+            {
+                var staff = await _timeService.GetAllStaffAsync();
+                var existingRecords = (await _timeService.GetDailyAttendanceAsync(Date)).ToList();
             
-            // Filter by Branch
-            if (!string.IsNullOrEmpty(SelectedBranch) && !SelectedBranch.Equals("All", StringComparison.OrdinalIgnoreCase))
-            {
-                staff = staff.Where(s => string.Equals(s.Branch?.Trim(), SelectedBranch.Trim(), StringComparison.OrdinalIgnoreCase));
-            }
-
-            StaffList.Clear();
-            foreach (var s in staff)
-            {
-                // SPLIT SHIFT CHANGE:
-                // Check if they have an ACTIVE session (CheckIn but NO CheckOut)
-                var activeSession = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id && r.CheckOutTime == null);
-                
-                // If they are currently clocked in, DO NOT SHOW in Roll Call (they must clock out first)
-                if (activeSession != null)
+                // Filter by Branch
+                if (!string.IsNullOrEmpty(SelectedBranch) && !SelectedBranch.Equals("All", StringComparison.OrdinalIgnoreCase))
                 {
-                    continue;
+                    staff = staff.Where(s => string.Equals(s.Branch?.Trim(), SelectedBranch.Trim(), StringComparison.OrdinalIgnoreCase));
                 }
 
-                // If they have previous CLOSED sessions, that's fine. We show them so they can start a NEW session.
+                StaffList.Clear();
+                foreach (var s in staff)
+                {
+                    // SPLIT SHIFT CHANGE:
+                    // Check if they have an ACTIVE session (CheckIn but NO CheckOut)
+                    var activeSession = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id && r.CheckOutTime == null);
                 
-                var vm = new StaffAttendanceViewModel(s);
-                // We DO NOT map ID here, because we want a NEW record if they clock in.
-                // UNLESS... do we want to support "Resume"? No, that's complex. New Session is cleaner.
+                    // If they are currently clocked in, DO NOT SHOW in Roll Call (they must clock out first)
+                    if (activeSession != null)
+                    {
+                        continue;
+                    }
+
+                    // If they have previous CLOSED sessions, that's fine. We show them so they can start a NEW session.
                 
-                // Pre-populate Shift Start Time from Employee settings (not previous record)
-                // If they have a shift set on employee profile, use it? 
-                // Currently just defaults to 7:00 in VM ctor or similar.
+                    var vm = new StaffAttendanceViewModel(s);
+                    // We DO NOT map ID here, because we want a NEW record if they clock in.
+                    // UNLESS... do we want to support "Resume"? No, that's complex. New Session is cleaner.
                 
-                StaffList.Add(vm);
+                    // Pre-populate Shift Start Time from Employee settings (not previous record)
+                    // If they have a shift set on employee profile, use it? 
+                    // Currently just defaults to 7:00 in VM ctor or similar.
+                
+                    StaffList.Add(vm);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Notify User of Error
+                WeakReferenceMessenger.Default.Send(new UpdateStatusMessage($"Error loading staff: {ex.Message}"));
+                // Optionally log
+                System.Diagnostics.Debug.WriteLine(ex);
             }
         }
 
