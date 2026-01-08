@@ -106,7 +106,24 @@ namespace OCC.Shared.Models
         /// <summary>
         /// End time of the employee's shift.
         /// </summary>
-        public TimeSpan? ShiftEndTime { get; set; } = new TimeSpan(17, 0, 0);
+        public TimeSpan? ShiftEndTime { get; set; } = new TimeSpan(16, 45, 0);
+
+        // Banking Details
+        public string? BankName { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? BranchCode { get; set; }
+        public string? AccountType { get; set; }
+        
+        /// <summary>
+        /// Determines if the rate is Hourly or a Monthly Salary.
+        /// </summary>
+        public RateType RateType { get; set; } = RateType.Hourly;
+    }
+
+    public enum RateType
+    {
+        Hourly,
+        MonthlySalary
     }
 
     /// <summary>

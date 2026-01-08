@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection; // Added
 using OCC.Client.Services.Interfaces;
 using OCC.Client.ViewModels.Core;
 
@@ -62,13 +63,12 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         [ObservableProperty]
         private int _totalCount;
 
-        #endregion
-
         [ObservableProperty]
         private int _selectedBranchFilterIndex = 0;
 
         [ObservableProperty]
-        private TeamsViewModel _teamsVM;
+        private TeamManagementViewModel _teamsVM;
+        #endregion
 
         #region Constructors
 
@@ -77,15 +77,29 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             // Designer constructor
             _employeeRepository = null!;
             _teamsVM = null!;
+            _serviceProvider = null!;
         }
+
+        private readonly IServiceProvider _serviceProvider;
 
         public EmployeeManagementViewModel(
             IRepository<Employee> employeeRepository, 
-            TeamsViewModel teamsVM)
+            TeamManagementViewModel teamsVM,
+            IServiceProvider serviceProvider)
         {
             _employeeRepository = employeeRepository;
             _teamsVM = teamsVM;
+            _serviceProvider = serviceProvider;
             
+            _teamsVM.EditTeamRequested += (s, team) => 
+            {
+                var vm = _serviceProvider.GetRequiredService<TeamDetailViewModel>();
+                vm.Load(team);
+                vm.CloseRequested += (s2, e2) => IsAddTeamPopupVisible = false;
+                TeamDetailPopup = vm;
+                IsAddTeamPopupVisible = true;
+            };
+
             LoadData();
             
             // Register for real-time updates
@@ -100,6 +114,23 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(LoadData);
             }
         }
+
+        private void OnEditTeamRequested(object? sender, Team team)
+        {
+            // Resolve TeamDetailViewModel via DI or Factory if possible, or create manually if dependencies allow.
+            // Since we didn't inject a factory, we might need IServiceProvider or pass dependencies.
+            // For now, let's assume we can resolve it or create it.
+            // We need: IRepository<Team>, IRepository<TeamMember>, IRepository<Employee>, SignalR
+            // This is getting complex to instantiate manually.
+            // BETTER: Inject IServiceProvider to resolve transient VMs.
+        }
+        
+        // Simpler for now: Add Properties first.
+        [ObservableProperty]
+        private bool _isAddTeamPopupVisible;
+
+        [ObservableProperty]
+        private TeamDetailViewModel? _teamDetailPopup;
 
         #endregion
 
@@ -162,7 +193,7 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                     WriteIndented = true 
                 };
                 
-                string jsonString = System.Text.Json.JsonSerializer.Serialize(_allEmployees, options);
+                string jsonString = System.Text.Json.JsonSerializer.Serialize(Employees, options);
 
                 string folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string fileName = $"OCC_Employees_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
@@ -189,10 +220,19 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         {
             try 
             {
+                // Capture current selection ID
+                var selectedId = SelectedEmployee?.Id;
+
                 var employees = await _employeeRepository.GetAllAsync();
                 
                 _allEmployees = employees.ToList(); // Cache full list
                 FilterEmployees();
+
+                // Restore selection
+                if (selectedId.HasValue)
+                {
+                    SelectedEmployee = Employees.FirstOrDefault(e => e.Id == selectedId.Value);
+                }
             }
             catch (Exception ex)
             {

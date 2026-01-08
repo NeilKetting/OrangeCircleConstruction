@@ -33,6 +33,15 @@
 					</StackPanel>
 				</Button>
 
+				<!-- Clock Out -->
+				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Clock Out" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Clock Out'}">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconLeavingEarly}" Classes="IconStyle" Width="16" Height="16"/>
+						<TextBlock Text="Clock Out" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+
+
 				<!-- History -->
 				<Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Leave Application" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Leave Application'}">
 					<StackPanel Orientation="Horizontal" Spacing="8">

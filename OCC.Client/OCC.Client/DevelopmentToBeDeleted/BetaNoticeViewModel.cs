@@ -10,14 +10,18 @@ namespace OCC.Client.DevelopmentToBeDeleted
     public partial class BetaNoticeViewModel : ViewModels.Core.ViewModelBase
     {
         public string VersionText { get; }
+        private readonly string _rawVersion;
 
         public event Action? Accepted;
 
-        public BetaNoticeViewModel()
+        public BetaNoticeViewModel(string version)
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+            _rawVersion = version;
             VersionText = $"Version: {version} (BETA)";
         }
+        
+        // Parameterless for Design Time
+        public BetaNoticeViewModel() : this("1.0.0-DEV") { }
 
         [RelayCommand]
         private void Accept()
@@ -26,8 +30,7 @@ namespace OCC.Client.DevelopmentToBeDeleted
             try
             {
                 var path = GetAcceptanceFilePath();
-                var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
-                File.WriteAllText(path, currentVersion);
+                File.WriteAllText(path, _rawVersion);
             }
             catch (Exception ex)
             {
@@ -44,7 +47,7 @@ namespace OCC.Client.DevelopmentToBeDeleted
             Environment.Exit(0);
         }
 
-        public static bool IsNoticeAccepted()
+        public static bool IsNoticeAccepted(string currentVersion)
         {
             try
             {
@@ -52,8 +55,7 @@ namespace OCC.Client.DevelopmentToBeDeleted
                 if (!File.Exists(path)) return false;
 
                 var savedVersion = File.ReadAllText(path).Trim();
-                var currentVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
-
+                // Compare saved string with current passed version
                 return string.Equals(savedVersion, currentVersion, StringComparison.OrdinalIgnoreCase);
             }
             catch

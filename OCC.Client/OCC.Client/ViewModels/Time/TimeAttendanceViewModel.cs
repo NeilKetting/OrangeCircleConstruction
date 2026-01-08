@@ -27,6 +27,7 @@ namespace OCC.Client.ViewModels.Time
         // Sub-ViewModels
         [ObservableProperty] private TimeLiveViewModel _liveView;
         [ObservableProperty] private RollCallViewModel _dailyRollCallView;
+        [ObservableProperty] private ClockOutViewModel _clockOutView;
         [ObservableProperty] private LeaveApplicationViewModel _leaveApplicationView;
 
         [ObservableProperty]
@@ -45,6 +46,7 @@ namespace OCC.Client.ViewModels.Time
             _timeMenu = null!;
             _liveView = null!;
             _dailyRollCallView = null!;
+            _clockOutView = null!;
             _leaveApplicationView = null!;
             _currentView = null!;
 
@@ -55,12 +57,14 @@ namespace OCC.Client.ViewModels.Time
             TimeMenuViewModel timeMenu,
             TimeLiveViewModel liveView,
             RollCallViewModel dailyRollCallView,
+            ClockOutViewModel clockOutView,
             LeaveApplicationViewModel leaveApplicationView,
             IAuthService authService)
         {
             _timeMenu = timeMenu;
             _liveView = liveView;
             _dailyRollCallView = dailyRollCallView;
+            _clockOutView = clockOutView;
             _leaveApplicationView = leaveApplicationView;
             _authService = authService;
             
@@ -105,6 +109,11 @@ namespace OCC.Client.ViewModels.Time
             {
                 case "Daily Roll Call":
                     CurrentView = DailyRollCallView;
+                    break;
+                case "Clock Out":
+                    CurrentView = ClockOutView;
+                    // Trigger refresh if needed
+                    ClockOutView.InitializeCommand.Execute(null);
                     break;
                 case "Leave Application":
                     CurrentView = LeaveApplicationView;

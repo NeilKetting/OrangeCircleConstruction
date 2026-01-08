@@ -42,9 +42,9 @@ namespace OCC.Client.ViewModels.Time
 
         // Branch Selection
         [ObservableProperty]
-        private string _selectedBranch = string.Empty;
+        private string _selectedBranch = "Johannesburg";
         
-        public string[] Branches => new[] { "Johannesburg", "Cape Town" }; // Hardcoded for now based on request
+        public string[] Branches => new[] { "All", "Johannesburg", "Cape Town" };
 
         #endregion
 
@@ -96,6 +96,8 @@ namespace OCC.Client.ViewModels.Time
             }
         }
 
+
+
         [RelayCommand]
         private async Task ClockIndividual(StaffAttendanceViewModel item)
         {
@@ -103,26 +105,83 @@ namespace OCC.Client.ViewModels.Time
             IsSaving = true;
             try
             {
-                var record = new AttendanceRecord
+                DateTime checkInTime;
+                if (item.IsOverrideEnabled && item.ClockInTime.HasValue)
+                {
+                    checkInTime = Date.Date.Add(item.ClockInTime.Value);
+                }
+                else
+                {
+                    checkInTime = DateTime.Now;
+                }
+
+                // Fetch existing to preserve other fields or creates new
+                var dailyRecords = await _timeService.GetDailyAttendanceAsync(Date);
+                var existing = dailyRecords.FirstOrDefault(r => r.EmployeeId == item.EmployeeId);
+                
+                var record = existing ?? new AttendanceRecord
                 {
                     Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
                     EmployeeId = item.EmployeeId,
                     Date = Date,
-                    Status = AttendanceStatus.Present, // Force Present on "Clock" button
-                    LeaveReason = string.Empty,
-                    DoctorsNoteImagePath = string.Empty,
-                    Branch = item.Branch,
-                    ClockInTime = DateTime.Now.TimeOfDay, // Use current time
-                    CheckInTime = DateTime.Now // Also set DateTime for robustness
+                    Branch = item.Branch
                 };
+
+                record.Status = AttendanceStatus.Present;
+                record.CheckInTime = checkInTime;
+                record.ClockInTime = checkInTime.TimeOfDay; // Sync legacy/VM field
                 
                 await _timeService.SaveAttendanceRecordAsync(record);
                 
                 // Notify Live View
-                WeakReferenceMessenger.Default.Send(new UpdateStatusMessage("Attendance Saved"));
+                WeakReferenceMessenger.Default.Send(new UpdateStatusMessage("Clocked In"));
                 WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("AttendanceRecord", "Updated", record.Id));
 
                 // Remove from list
+                StaffList.Remove(item);
+            }
+            finally
+            {
+                IsSaving = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task ClockOutIndividual(StaffAttendanceViewModel item)
+        {
+            if (item == null) return;
+            IsSaving = true;
+            try
+            {
+                DateTime checkOutTime;
+                if (item.IsOverrideEnabled && item.ClockOutTime.HasValue)
+                {
+                     checkOutTime = Date.Date.Add(item.ClockOutTime.Value);
+                }
+                else
+                {
+                     checkOutTime = DateTime.Now;
+                }
+                
+                var dailyRecords = await _timeService.GetDailyAttendanceAsync(Date);
+                var existing = dailyRecords.FirstOrDefault(r => r.EmployeeId == item.EmployeeId);
+                
+                var record = existing ?? new AttendanceRecord
+                {
+                    Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
+                    EmployeeId = item.EmployeeId,
+                    Date = Date,
+                    Branch = item.Branch,
+                    Status = AttendanceStatus.Present // Assume present if clocking out
+                };
+                
+                record.CheckOutTime = checkOutTime;
+
+                await _timeService.SaveAttendanceRecordAsync(record);
+
+                WeakReferenceMessenger.Default.Send(new UpdateStatusMessage("Clocked Out"));
+                WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("AttendanceRecord", "Updated", record.Id));
+
                 StaffList.Remove(item);
             }
             finally
@@ -152,9 +211,9 @@ namespace OCC.Client.ViewModels.Time
             var existingRecords = (await _timeService.GetDailyAttendanceAsync(Date)).ToList();
             
             // Filter by Branch
-            if (!string.IsNullOrEmpty(SelectedBranch))
+            if (!string.IsNullOrEmpty(SelectedBranch) && !SelectedBranch.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                staff = staff.Where(s => s.Branch == SelectedBranch);
+                staff = staff.Where(s => string.Equals(s.Branch?.Trim(), SelectedBranch.Trim(), StringComparison.OrdinalIgnoreCase));
             }
 
             StaffList.Clear();

@@ -85,9 +85,11 @@ namespace OCC.Client.ViewModels.Core
             _notificationVM = _serviceProvider.GetRequiredService<NotificationViewModel>();
 
             // Default to Home (Dashboard) unless Beta Notice is pending
-            if (!DevelopmentToBeDeleted.BetaNoticeViewModel.IsNoticeAccepted())
+            var currentVersion = updateService.CurrentVersion;
+            
+            if (!DevelopmentToBeDeleted.BetaNoticeViewModel.IsNoticeAccepted(currentVersion))
             {
-                var betaVM = new DevelopmentToBeDeleted.BetaNoticeViewModel();
+                var betaVM = new DevelopmentToBeDeleted.BetaNoticeViewModel(currentVersion);
                 betaVM.Accepted += () => 
                 {
                     NavigateTo(Infrastructure.NavigationRoutes.Home);

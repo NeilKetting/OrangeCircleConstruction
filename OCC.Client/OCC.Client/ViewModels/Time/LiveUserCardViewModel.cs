@@ -26,17 +26,29 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private IBrush _backgroundBrush = Brushes.White;
 
+        [ObservableProperty]
+        private string _branch = string.Empty;
+
+        [ObservableProperty]
+        private string _clockOutTimeDisplay = "--:--";
+
         public LiveUserCardViewModel()
         {
             // Default State
             UpdateVisuals();
         }
 
-        public void SetStatus(bool isPresent, TimeSpan? clockInTime)
+        public void SetStatus(bool isPresent, TimeSpan? clockInTime, TimeSpan? clockOutTime, string branch)
         {
             IsPresent = isPresent;
+            Branch = branch;
+            
             ClockInTimeDisplay = isPresent && clockInTime.HasValue 
                 ? clockInTime.Value.ToString(@"hh\:mm") 
+                : "--:--";
+
+            ClockOutTimeDisplay = clockOutTime.HasValue
+                ? clockOutTime.Value.ToString(@"hh\:mm")
                 : "--:--";
             
             UpdateVisuals();

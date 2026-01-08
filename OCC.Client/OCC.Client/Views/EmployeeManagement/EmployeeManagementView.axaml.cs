@@ -16,6 +16,13 @@ namespace OCC.Client.Views.EmployeeManagement
             if (DataContext is EmployeeManagementViewModel vm && vm.SelectedEmployee != null)
             {
                 vm.EditEmployeeCommand.Execute(vm.SelectedEmployee);
+
+                // Force focus to the detail view input
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    var detailView = this.FindControl<EmployeeDetailView>("DetailView");
+                    detailView?.FocusInput();
+                }, Avalonia.Threading.DispatcherPriority.Input);
             }
         }
     }

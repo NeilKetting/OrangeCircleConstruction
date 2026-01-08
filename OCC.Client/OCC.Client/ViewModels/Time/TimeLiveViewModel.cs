@@ -118,13 +118,17 @@ namespace OCC.Client.ViewModels.Time
                     // Determine status
                     bool isPresent = attendance.Status == AttendanceStatus.Present || attendance.Status == AttendanceStatus.Late;
                     TimeSpan? clockIn = attendance.CheckInTime?.TimeOfDay ?? attendance.ClockInTime;
+                    TimeSpan? clockOut = attendance.CheckOutTime?.TimeOfDay; // Extract clock out time
+
+                    string FormatName(string name) => 
+                        System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name?.ToLower() ?? "");
 
                     var vm = new LiveUserCardViewModel
                     {
                         EmployeeId = employee.Id,
-                        DisplayName = $"{employee.FirstName} {employee.LastName}"
+                        DisplayName = $"{FormatName(employee.FirstName)}, {FormatName(employee.LastName)}"
                     };
-                    vm.SetStatus(isPresent, clockIn);
+                    vm.SetStatus(isPresent, clockIn, clockOut, employee.Branch ?? "Unknown");
 
                     userViewModels.Add(vm);
                 }

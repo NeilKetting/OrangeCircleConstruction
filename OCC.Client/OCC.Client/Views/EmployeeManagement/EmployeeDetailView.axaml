@@ -3,18 +3,26 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:OCC.Client.ViewModels.EmployeeManagement"
+             xmlns:models="using:OCC.Shared.Models"
 			 xmlns:conv="clr-namespace:OCC.Client.Converters"
 			 mc:Ignorable="d"
 			 x:Class="OCC.Client.Views.EmployeeManagement.EmployeeDetailView"
-			 x:DataType="vm:EmployeeDetailViewModel">
+			 x:DataType="vm:EmployeeDetailViewModel"
+             Focusable="True">
 
 	<Design.DataContext>
 		<vm:EmployeeDetailViewModel/>
 	</Design.DataContext>
 
+	<UserControl.KeyBindings>
+		<KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+	</UserControl.KeyBindings>
+
 	<UserControl.Resources>
 		<conv:FriendlyEnumConverter x:Key="FriendlyEnumConverter"/>
 	</UserControl.Resources>
+
+    <!-- ... rest of bindings ... -->
 
 	<Border Background="{DynamicResource SurfaceWhite}"
 			CornerRadius="0"
@@ -56,7 +64,7 @@
 							<!---->
 							<StackPanel>
 								<TextBlock Text="Employee Number" Classes="FormLabel"/>
-								<TextBox Text="{Binding EmployeeNumber}" Classes="FormInput" Watermark="e.g. EMP001"
+								<TextBox x:Name="EmployeeNumberInput" Text="{Binding EmployeeNumber}" Classes="FormInput" Watermark="e.g. EMP001"
 										 ToolTip.Tip="Unique employee identifier (e.g., EMP001)"/>
 							</StackPanel>
 							<!-- First Name -->
@@ -77,10 +85,6 @@
 								<TextBox Text="{Binding Phone}" Classes="FormInput" Watermark="+27 ..."
 										 ToolTip.Tip="Contact phone number"/>
 							</StackPanel>
-						</StackPanel>
-
-						<!-- Middle Column -->
-						<StackPanel Grid.Column="2" Spacing="10">
 							<!-- Email Address -->
 							<StackPanel>
 								<TextBlock Text="Email Address" Classes="FormLabel"/>
@@ -99,22 +103,31 @@
 								<TextBox Text="{Binding IdNumber}" Classes="FormInput" Watermark="Enter RSA ID or Passport Number"
 										 ToolTip.Tip="Enter the 13-digit RSA ID or Passport Number"/>
 							</StackPanel>
-
-                            <!-- Branch -->
-                            <StackPanel>
-                                <TextBlock Text="Branch" Classes="FormLabel"/>
-                                <ComboBox ItemsSource="{Binding Branches}" SelectedItem="{Binding Branch}" HorizontalAlignment="Stretch"
-                                          ToolTip.Tip="Select the employee's primary branch"/>
-                            </StackPanel>
+							<!-- Branch -->
+							<StackPanel>
+								<TextBlock Text="Branch" Classes="FormLabel"/>
+								<ComboBox ItemsSource="{Binding Branches}" SelectedItem="{Binding Branch}" HorizontalAlignment="Stretch"
+										  ToolTip.Tip="Select the employee's primary branch"/>
+							</StackPanel>
 						</StackPanel>
 
-						<!-- Right Column -->
-						<StackPanel Grid.Column="4" Spacing="10">
+						<!-- Middle Column -->
+						<StackPanel Grid.Column="2" Spacing="10">
+
 							<!-- Employment Date -->
 							<StackPanel>
 								<TextBlock Text="Employment Date" Classes="FormLabel"/>
-								<DatePicker SelectedDate="{Binding EmploymentDate}" HorizontalAlignment="Left" Width="300" Height="50"
-											ToolTip.Tip="Date when employment started"/>
+								<Grid ColumnDefinitions="*, Auto">
+									<TextBox Grid.Column="0" Text="{Binding EmploymentDateDateTime, StringFormat='dd MMM yyyy'}" IsReadOnly="True" Classes="FormInput"/>
+									<Button Grid.Column="1" Classes="IconButton" Margin="5,0,0,0" ToolTip.Tip="Select Date">
+										<PathIcon Data="{StaticResource IconCalendar}" Width="16" Height="16"/>
+										<Button.Flyout>
+											<Flyout Placement="Bottom">
+												<Calendar SelectedDate="{Binding EmploymentDateDateTime}" SelectionMode="SingleDate"/>
+											</Flyout>
+										</Button.Flyout>
+									</Button>
+								</Grid>
 							</StackPanel>
 							<!-- Employment Type Section -->
 							<StackPanel>
@@ -144,31 +157,116 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 							</StackPanel>
-							<!-- Hourly Rate -->
+							<!-- Skills -->
+
+
+							<!-- Rate Type -->
 							<StackPanel>
-								<TextBlock Text="Hourly Rate (R)" Classes="FormLabel"/>
-								<TextBox Text="{Binding HourlyRate}" Watermark="0.00"
-										 ToolTip.Tip="Hourly pay rate in ZAR"/>
+								<TextBlock Text="Remuneration Type" Classes="FormLabel"/>
+								<StackPanel Orientation="Horizontal" Spacing="20">
+									<RadioButton Content="Hourly" IsChecked="{Binding IsHourly}"/>
+									<RadioButton Content="Fixed Salary" IsChecked="{Binding IsSalary}"/>
+								</StackPanel>
 							</StackPanel>
 
-                            <!-- Working Hours -->
-                            <StackPanel>
-                                <TextBlock Text="Working Hours" Classes="FormLabel"/>
-                                <Grid ColumnDefinitions="*, 10, *">
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Start" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
-                                        <TimePicker SelectedTime="{Binding ShiftStartTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="End" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
-                                        <TimePicker SelectedTime="{Binding ShiftEndTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
+							<!-- Rate -->
+							<StackPanel>
+								<TextBlock Text="Rate / Salary (R)" Classes="FormLabel"/>
+								<TextBox Text="{Binding HourlyRate}" Watermark="0.00"
+										 ToolTip.Tip="Hourly rate or monthly salary amount"/>
+							</StackPanel>
+
+							<!-- Working Hours -->
+							<StackPanel>
+								<TextBlock Text="Working Hours" Classes="FormLabel"/>
+								<Grid ColumnDefinitions="*, 10, *">
+									<!-- Start Time -->
+									<StackPanel Grid.Column="0">
+										<TextBlock Text="Start" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
+										<Grid ColumnDefinitions="*, Auto">
+											<TextBox Grid.Column="0" Text="{Binding ShiftStartTime, StringFormat='hh\\:mm'}" IsReadOnly="True" Classes="FormInput"/>
+											<Button Grid.Column="1" Classes="IconButton" Margin="5,0,0,0">
+												<PathIcon Data="{StaticResource IconClock}" Width="16" Height="16"/>
+												<Button.Flyout>
+													<Flyout Placement="Bottom">
+														<TimePicker SelectedTime="{Binding ShiftStartTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
+													</Flyout>
+												</Button.Flyout>
+											</Button>
+										</Grid>
+									</StackPanel>
+
+									<!-- End Time -->
+									<StackPanel Grid.Column="2">
+										<TextBlock Text="End" FontSize="10" Foreground="{DynamicResource TextSecondaryGray}" Margin="0,0,0,5"/>
+										<Grid ColumnDefinitions="*, Auto">
+											<TextBox Grid.Column="0" Text="{Binding ShiftEndTime, StringFormat='hh\\:mm'}" IsReadOnly="True" Classes="FormInput"/>
+											<Button Grid.Column="1" Classes="IconButton" Margin="5,0,0,0">
+												<PathIcon Data="{StaticResource IconClock}" Width="16" Height="16"/>
+												<Button.Flyout>
+													<Flyout Placement="Bottom">
+														<TimePicker SelectedTime="{Binding ShiftEndTime}" ClockIdentifier="24HourClock" MinuteIncrement="15"/>
+													</Flyout>
+												</Button.Flyout>
+											</Button>
+										</Grid>
+									</StackPanel>
+								</Grid>
+							</StackPanel>
+						</StackPanel>
+
+						<!-- Right Column -->
+						<StackPanel Grid.Column="4" Spacing="10">
+							<StackPanel Orientation="Horizontal" Spacing="10">
+								<PathIcon Data="{StaticResource IconSettings}" Width="20" Height="20" Foreground="{DynamicResource PrimaryTeal}"/>
+								<TextBlock Text="Banking Details" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+							</StackPanel>
+							<!-- Bank Name -->
+							<StackPanel Grid.Column="0">
+								<TextBlock Text="Bank Name" Classes="FormLabel"/>
+								
+								<!-- Dropdown for standard banks -->
+								<ComboBox ItemsSource="{Binding AvailableBanks}" 
+										  SelectedItem="{Binding SelectedBank}" 
+										  HorizontalAlignment="Stretch"
+										  IsVisible="{Binding !IsOtherBankSelected}"
+                                          IsTextSearchEnabled="True">
+									<ComboBox.ItemTemplate>
+										<DataTemplate>
+											<TextBlock Text="{Binding Converter={StaticResource FriendlyEnumConverter}}"/>
+										</DataTemplate>
+									</ComboBox.ItemTemplate>
+								</ComboBox>
+
+								<!-- Text input for 'Other' -->
+								<Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsOtherBankSelected}">
+									<TextBox Text="{Binding CustomBankName}" Classes="FormInput" Watermark="Enter Bank Name"/>
+									<Button Grid.Column="1" Classes="IconButton" Margin="5,0,0,0" 
+											Command="{Binding SetSelectedBankCommand}" 
+											CommandParameter="{x:Static models:BankName.FNB_RMB}"
+											ToolTip.Tip="Select from list">
+										<PathIcon Data="{StaticResource IconClose}" Width="12" Height="12"/>
+									</Button>
+								</Grid>
+							</StackPanel>
+							<!-- Account Type -->
+							<StackPanel Grid.Column="2">
+								<TextBlock Text="Account Type" Classes="FormLabel"/>
+								<ComboBox ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding AccountType}" HorizontalAlignment="Stretch"/>
+							</StackPanel>
+							<!-- Account Number -->
+							<StackPanel Grid.Column="4">
+								<TextBlock Text="Account Number" Classes="FormLabel"/>
+								<TextBox Text="{Binding AccountNumber}" Classes="FormInput" Watermark="Account No."/>
+							</StackPanel>
+							<!-- Branch Code -->
+							<StackPanel Grid.Column="6">
+								<TextBlock Text="Branch Code" Classes="FormLabel"/>
+								<TextBox Text="{Binding BranchCode}" Classes="FormInput" Watermark="Code"/>
+							</StackPanel>
 						</StackPanel>
 					</Grid>
-
-
+					<Separator Background="{DynamicResource SurfaceBorder}" Margin="0,15"/>
 				</StackPanel>
 			</ScrollViewer>
 			<!-- Footer Separator -->

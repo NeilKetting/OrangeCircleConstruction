@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using OCC.Client.Services;
 using OCC.Shared.Models;
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -59,7 +60,14 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         private double _hourlyRate;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(EmploymentDateDateTime))]
         private DateTimeOffset _employmentDate = DateTimeOffset.Now;
+
+        public DateTime EmploymentDateDateTime
+        {
+            get => EmploymentDate.DateTime;
+            set => EmploymentDate = value;
+        }
 
         [ObservableProperty]
         private EmploymentType _selectedEmploymentType = EmploymentType.Permanent;
@@ -80,12 +88,53 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         private TimeSpan? _shiftStartTime = new TimeSpan(7, 0, 0);
 
         [ObservableProperty]
-        private TimeSpan? _shiftEndTime = new TimeSpan(17, 0, 0);
+        private TimeSpan? _shiftEndTime = new TimeSpan(16, 45, 0);
+
+        // Banking Details
+
+
+        [ObservableProperty]
+        private string _accountNumber = string.Empty;
+
+        [ObservableProperty]
+        private string _branchCode = string.Empty;
+
+        [ObservableProperty]
+        private string _accountType = "Select Account Type";
+
+        public List<string> AccountTypes { get; } = new() { "Select Account Type", "Savings", "Cheque", "Transmission" };
+
+
+
+        [ObservableProperty]
+        private RateType _selectedRateType = RateType.Hourly;
 
         #endregion
 
         #region Properties
 
+        public bool IsHourly
+        {
+            get => SelectedRateType == RateType.Hourly;
+            set
+            {
+                if (value) SelectedRateType = RateType.Hourly;
+                OnPropertyChanged(nameof(IsHourly));
+                OnPropertyChanged(nameof(IsSalary));
+            }
+        }
+
+        public bool IsSalary
+        {
+            get => SelectedRateType == RateType.MonthlySalary;
+            set
+            {
+                if (value) SelectedRateType = RateType.MonthlySalary;
+                OnPropertyChanged(nameof(IsHourly));
+                OnPropertyChanged(nameof(IsSalary));
+            }
+        }
+        
         public bool IsRsaId
         {
             get => SelectedIdType == IdType.RSAId;
@@ -96,6 +145,8 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 OnPropertyChanged(nameof(IsPassport));
             }
         }
+
+        // ... existing properties ...
 
         public bool IsPassport
         {
@@ -207,6 +258,26 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             staff.Branch = Branch;
             staff.ShiftStartTime = ShiftStartTime;
             staff.ShiftEndTime = ShiftEndTime;
+            
+            // Banking
+            // Banking
+            // Map "Select Bank" (None) to null/empty
+            if (SelectedBank == OCC.Shared.Models.BankName.None)
+            {
+                 staff.BankName = null;
+            }
+            else
+            {
+                 staff.BankName = IsOtherBankSelected ? CustomBankName : GetEnumDescription(SelectedBank);
+            }
+
+            staff.AccountNumber = AccountNumber;
+            staff.BranchCode = BranchCode;
+            
+            // Map "Select Account Type" to null
+            staff.AccountType = (AccountType == "Select Account Type") ? null : AccountType;
+            
+            staff.RateType = SelectedRateType;
 
             if (_staffRepository != null)
             {
@@ -228,6 +299,12 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         private void Cancel()
         {
             CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        [RelayCommand]
+        private void SetSelectedBank(BankName bank)
+        {
+            SelectedBank = bank;
         }
 
         #endregion
@@ -257,12 +334,61 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             Branch = staff.Branch;
             ShiftStartTime = staff.ShiftStartTime;
             ShiftEndTime = staff.ShiftEndTime;
+
+            // Banking
+            AccountNumber = staff.AccountNumber ?? string.Empty;
+            BranchCode = staff.BranchCode ?? string.Empty;
+            AccountType = string.IsNullOrEmpty(staff.AccountType) ? "Select Account Type" : staff.AccountType;
+            SelectedRateType = staff.RateType;
+
+            // Bank Selection Logic
+            var dbBankName = staff.BankName;
+            var matched = false;
+            
+            if (!string.IsNullOrEmpty(dbBankName))
+            {
+                foreach (var bank in AvailableBanks)
+                {
+                    // Skip None/Other during standard matching if desired, but here we just match description
+                    if (bank == OCC.Shared.Models.BankName.None || bank == OCC.Shared.Models.BankName.Other) continue;
+
+                    if (GetEnumDescription(bank).Equals(dbBankName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        SelectedBank = bank;
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!matched && !string.IsNullOrEmpty(dbBankName))
+            {
+                // Custom bank
+                SelectedBank = OCC.Shared.Models.BankName.Other;
+                CustomBankName = dbBankName;
+            }
+            else if (!matched)
+            {
+                // Default to None (Placeholder)
+                SelectedBank = OCC.Shared.Models.BankName.None;
+                CustomBankName = string.Empty;
+            }
             
             OnPropertyChanged(nameof(IsRsaId));
             OnPropertyChanged(nameof(IsPassport));
+            OnPropertyChanged(nameof(IsHourly));
+            OnPropertyChanged(nameof(IsSalary));
             OnPropertyChanged(nameof(IsPermanent));
             OnPropertyChanged(nameof(IsContract));
             OnPropertyChanged(nameof(IsContractVisible));
+            OnPropertyChanged(nameof(IsOtherBankSelected));
+        }
+
+        private string GetEnumDescription(Enum value)
+        {
+            var field = value.GetType().GetField(value.ToString());
+            var attribute = (DescriptionAttribute?)Attribute.GetCustomAttribute(field!, typeof(DescriptionAttribute));
+            return attribute?.Description ?? value.ToString();
         }
 
         #endregion
@@ -282,6 +408,53 @@ namespace OCC.Client.ViewModels.EmployeeManagement
              if (value == IdType.RSAId && IdNumber.Length >= 6)
             {
                 CalculateDoBFromRsaId(IdNumber);
+            }
+        }
+
+        [ObservableProperty]
+        private BankName _selectedBank = OCC.Shared.Models.BankName.None;
+
+        [ObservableProperty]
+        private string _customBankName = string.Empty;
+
+        public bool IsOtherBankSelected => SelectedBank == OCC.Shared.Models.BankName.Other;
+
+        // Expose Bank Enum
+        public OCC.Shared.Models.BankName[] AvailableBanks { get; } = Enum.GetValues<OCC.Shared.Models.BankName>();
+
+        partial void OnSelectedBankChanged(BankName value)
+        {
+             OnPropertyChanged(nameof(IsOtherBankSelected));
+        }
+
+        partial void OnBranchChanged(string value)
+        {
+            // Default Times
+            var jhbStart = new TimeSpan(7, 0, 0);
+            var jhbEnd = new TimeSpan(16, 45, 0);
+            var cptStart = new TimeSpan(7, 0, 0);
+            var cptEnd = new TimeSpan(16, 30, 0);
+
+            // Helper to check if time is a "known default" or null
+            bool IsDefaultOrNull(TimeSpan? t) 
+            {
+                if (!t.HasValue) return true;
+                return t.Value == jhbStart || t.Value == jhbEnd || t.Value == cptStart || t.Value == cptEnd;
+            }
+
+            // Only update if current times are standard defaults or null
+            if (IsDefaultOrNull(ShiftStartTime) && IsDefaultOrNull(ShiftEndTime))
+            {
+                if (string.Equals(value, "Johannesburg", StringComparison.OrdinalIgnoreCase))
+                {
+                    ShiftStartTime = jhbStart;
+                    ShiftEndTime = jhbEnd;
+                }
+                else if (string.Equals(value, "Cape Town", StringComparison.OrdinalIgnoreCase))
+                {
+                    ShiftStartTime = cptStart;
+                    ShiftEndTime = cptEnd;
+                }
             }
         }
 

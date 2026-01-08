@@ -67,7 +67,7 @@
 						<!-- Login Card -->
 						<Border Classes="Card" Width="480" VerticalAlignment="Center" Margin="15"
 			  BorderBrush="{DynamicResource BorderGray}" BorderThickness="5"
-								BoxShadow="0 0 20 8 #ffa500">
+								BoxShadow="0 0 20 8 #000000">
 							<StackPanel Spacing="25">
 								<TextBlock Text="Log in to your account below"
 										   HorizontalAlignment="Center"

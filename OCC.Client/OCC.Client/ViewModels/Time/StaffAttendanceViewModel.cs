@@ -32,7 +32,13 @@ namespace OCC.Client.ViewModels.Time
         private TimeSpan? _clockInTime = new TimeSpan(7, 0, 0); // Default 07:00
 
         [ObservableProperty]
+        private TimeSpan? _clockOutTime = new TimeSpan(16, 0, 0); // Default 16:00
+
+        [ObservableProperty]
         private string _branch = string.Empty;
+
+        [ObservableProperty]
+        private bool _isOverrideEnabled;
 
         #endregion
 

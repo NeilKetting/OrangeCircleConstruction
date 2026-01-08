@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:OCC.Client.ViewModels.EmployeeManagement"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OCC.Client.Views.EmployeeManagement.TeamsView"
-             x:DataType="vm:TeamsViewModel">
+             x:DataType="vm:TeamManagementViewModel">
 
     <Grid RowDefinitions="Auto, *">
         <!-- Toolbar -->
@@ -16,7 +16,7 @@
                     <TextBlock Text="{Binding Teams.Count, StringFormat='({0})'}" FontSize="16" Foreground="{DynamicResource TextSecondaryGray}" VerticalAlignment="Center"/>
                 </StackPanel>
                 
-                <Button Grid.Column="1" Command="{Binding CreateTeamCommand}" Classes="Primary">
+                <Button Grid.Column="1" Command="{Binding AddTeamCommand}" Classes="Primary">
                     <StackPanel Orientation="Horizontal" Spacing="5">
                          <PathIcon Data="{StaticResource IconAddUser}" Width="16" Height="16"/>
                          <TextBlock Text="Create Team"/>
@@ -37,7 +37,7 @@
                 <DataGridTemplateColumn Width="Auto">
                      <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Classes="IconButton" Command="{Binding $parent[UserControl].((vm:TeamsViewModel)DataContext).DeleteTeamCommand}" CommandParameter="{Binding .}" Foreground="Red">
+                            <Button Classes="IconButton" Command="{Binding $parent[UserControl].((vm:TeamManagementViewModel)DataContext).DeleteTeamCommand}" CommandParameter="{Binding .}" Foreground="Red">
                                 <PathIcon Data="{StaticResource IconDelete}" Width="16" Height="16"/>
                             </Button>
                         </DataTemplate>

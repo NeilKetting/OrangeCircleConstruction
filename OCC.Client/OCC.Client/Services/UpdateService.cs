@@ -19,11 +19,12 @@ namespace OCC.Client.Services
             {
                 try
                 {
-                    return _mgr?.CurrentVersion?.ToString() ?? "1.0.0 (Dev)";
+                    var assemblyVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
+                    return _mgr?.CurrentVersion?.ToString() ?? assemblyVersion;
                 }
                 catch
                 {
-                    return "1.0.0 (Dev)";
+                    return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
                 }
             }
         }

@@ -19,6 +19,9 @@
 		<DataTemplate DataType="{x:Type vm:RollCallViewModel}">
 			<viewTime:RollCallView/>
 		</DataTemplate>
+		<DataTemplate DataType="{x:Type vm:ClockOutViewModel}">
+			<viewTime:ClockOutView/>
+		</DataTemplate>
 		<DataTemplate DataType="{x:Type vm:LeaveApplicationViewModel}">
 			<viewTime:LeaveApplicationView/>
 		</DataTemplate>

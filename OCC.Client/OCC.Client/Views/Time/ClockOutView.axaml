@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OCC.Client.Views.Time.ClockOutView"
+             x:DataType="vm:ClockOutViewModel"
+             x:Name="Root">
+
+	<Grid RowDefinitions="Auto, *">
+		<!-- Header -->
+		<Grid RowDefinitions="Auto" ColumnDefinitions="Auto, *, Auto" Margin="20">
+			<StackPanel Orientation="Horizontal" Spacing="20">
+				<TextBlock Text="Clock Out Early" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryDark}"/>
+				
+				<!-- Branch Filter -->
+				<ComboBox ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch}" 
+                          Width="200" Classes="FormInput" VerticalAlignment="Center"/>
+			</StackPanel>
+            
+            <TextBlock Grid.Column="2" Text="Enter a reason and click Clock Out" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryGray}"/>
+		</Grid>
+
+		<!-- List -->
+		<ScrollViewer Grid.Row="1" Padding="20,0">
+			<ItemsControl ItemsSource="{Binding StaffList}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,0,0,1" Padding="15">
+							<Grid ColumnDefinitions="2*, Auto, 3*, 120">
+								<!-- Name -->
+								<StackPanel Grid.Column="0" VerticalAlignment="Center">
+									<TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryDark}"/>
+									<TextBlock Text="{Binding Role}" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}"/>
+								</StackPanel>
+
+                                <!-- Time In -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" Margin="0,0,20,0">
+                                     <TextBlock Text="In at:" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                     <TextBlock Text="{Binding ClockInTime, StringFormat='{}{0:hh\\:mm}'}" FontWeight="SemiBold"/>
+                                </StackPanel>
+
+								<!-- Reason Input -->
+								<TextBox Grid.Column="2" Text="{Binding LeaveReason}" Watermark="Reason for leaving early..." 
+                                         Classes="FormInput" Margin="0,0,20,0" VerticalAlignment="Center"/>
+
+								<!-- Action Button -->
+								<Button Grid.Column="3" Classes="Secondary" Background="#D32F2F" Foreground="White" BorderThickness="0"
+                                        Command="{Binding #Root.((vm:ClockOutViewModel)DataContext).ClockOutCommand}"
+                                        CommandParameter="{Binding}"
+                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+									<TextBlock Text="Clock Out" FontWeight="Bold"/>
+								</Button>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+        
+        <!-- Empty State -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !StaffList.Count}">
+            <TextBlock Text="No staff currently clocked in." Foreground="{DynamicResource TextTertiarySlate}"/>
+        </StackPanel>
+	</Grid>
+</UserControl>

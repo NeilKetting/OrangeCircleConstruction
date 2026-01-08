@@ -89,9 +89,9 @@ namespace OCC.Client
             services.AddTransient<IRepository<AttendanceRecord>, ApiAttendanceRecordRepository>();
             services.AddTransient<IRepository<AppSetting>, ApiAppSettingRepository>();
             
-            // Teams (Local DB for now)
-            services.AddTransient<IRepository<Team>, Data.SqlRepository<Team>>();
-            services.AddTransient<IRepository<TeamMember>, Data.SqlRepository<TeamMember>>();
+            // Teams
+            services.AddTransient<IRepository<Team>, ApiTeamRepository>();
+            services.AddTransient<IRepository<TeamMember>, ApiTeamMemberRepository>();
 
             // Fallback for any other type not explicitly mapped (e.g. TimeRecord) - though unlikely to be used if we covered main ones
             // services.AddTransient(typeof(IRepository<>), typeof(SqlRepository<>));
@@ -180,9 +180,12 @@ namespace OCC.Client
             services.AddTransient<TimeMenuViewModel>();
             services.AddTransient<TimeAttendanceViewModel>();
             services.AddTransient<RollCallViewModel>(); // Added
+            services.AddTransient<ClockOutViewModel>();
             services.AddTransient<LeaveApplicationViewModel>();
             services.AddTransient<CalendarViewModel>();
-            services.AddTransient<TeamsViewModel>();
+            // services.AddTransient<TeamsViewModel>(); // Removed
+            services.AddTransient<TeamManagementViewModel>();
+            services.AddTransient<TeamDetailViewModel>();
             services.AddTransient<ProfileViewModel>();
             
             // Health Safety
