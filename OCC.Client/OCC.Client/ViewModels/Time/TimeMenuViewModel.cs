@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.ViewModels.Messages;
 using OCC.Client.ViewModels.Core;
+using OCC.Client.Services.Interfaces;
 
 namespace OCC.Client.ViewModels.Time
 {
@@ -17,9 +18,21 @@ namespace OCC.Client.ViewModels.Time
 
         #region Constructors
 
+        private readonly IPermissionService _permissionService;
+
+        public bool CanApproveLeave => _permissionService.CanAccess("LeaveApprovals");
+        public bool CanRequestOvertime => _permissionService.CanAccess("OvertimeRequest");
+        public bool CanApproveOvertime => _permissionService.CanAccess("OvertimeApproval");
+
+        public TimeMenuViewModel(IPermissionService permissionService)
+        {
+            _permissionService = permissionService;
+            WeakReferenceMessenger.Default.RegisterAll(this);
+        }
+
         public TimeMenuViewModel()
         {
-            WeakReferenceMessenger.Default.RegisterAll(this);
+             _permissionService = null!;
         }
 
         #endregion

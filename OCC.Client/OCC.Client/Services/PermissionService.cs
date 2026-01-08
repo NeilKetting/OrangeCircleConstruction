@@ -41,13 +41,28 @@ namespace OCC.Client.Services
             {
                 return route switch
                 {
-                    NavigationRoutes.Home => true,
-                    NavigationRoutes.Projects => true,
-                    NavigationRoutes.StaffManagement => true,
-                    NavigationRoutes.Time => true,
-                    NavigationRoutes.Calendar => true,
-                    NavigationRoutes.Notifications => true,
-                    "UserManagement" => false, 
+                    "HealthSafety" => true,
+                    "RollCall" => true,
+                    "ClockOut" => true,
+                    "LeaveApproval" => true,
+                    "OvertimeRequest" => true,
+                    "OvertimeApproval" => true,
+                    "Teams" => true, 
+                    "EmployeeManagement" => true,
+                    _ => false
+                };
+            }
+
+            // Office Staff Access
+            if (user.UserRole == UserRole.Office)
+            {
+                return route switch
+                {
+                    "HealthSafety" => true,
+                    "LeaveApproval" => true,
+                    "OvertimeRequest" => true,
+                    "OvertimeApproval" => true,
+                    "EmployeeManagement" => true,
                     _ => false
                 };
             }
@@ -66,6 +81,7 @@ namespace OCC.Client.Services
                     NavigationRoutes.Notifications => true,
                     NavigationRoutes.StaffManagement => false,
                     "UserManagement" => false,
+                    "OvertimeRequest" => false,
                     _ => false
                 };
             }

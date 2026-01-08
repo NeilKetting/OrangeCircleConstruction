@@ -40,7 +40,15 @@ namespace OCC.Client.Services.Infrastructure
                 var msg = new ViewModels.Messages.EntityUpdatedMessage(entityType, action, id);
                 WeakReferenceMessenger.Default.Send(msg);
             });
+
+             _hubConnection.On<System.Collections.Generic.List<OCC.Shared.DTOs.UserConnectionInfo>>("UserListUpdate", (users) =>
+            {
+                OnUserListReceived?.Invoke(users);
+            });
         }
+        
+        public event Action<System.Collections.Generic.List<OCC.Shared.DTOs.UserConnectionInfo>>? OnUserListReceived;
+
 
         public async Task StartAsync()
         {

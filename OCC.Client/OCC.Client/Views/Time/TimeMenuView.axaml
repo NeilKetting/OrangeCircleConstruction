@@ -57,6 +57,29 @@
 						<TextBlock Text="LEAVE APPLICATION" VerticalAlignment="Center"/>
 					</StackPanel>
 				</Button>
+
+                <!-- Approvals -->
+                <Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="LeaveApprovals" IsVisible="{Binding CanApproveLeave}" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='LeaveApprovals'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconCheckCircle}" Classes="IconStyle" Width="16" Height="16"/>
+                        <TextBlock Text="APPROVALS" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Overtime -->
+                <Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="Overtime" IsVisible="{Binding CanRequestOvertime}" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Overtime'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconClock}" Classes="IconStyle" Width="16" Height="16"/>
+                        <TextBlock Text="OVERTIME REQUESTS" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                
+                <Button Classes="TabButton" Command="{Binding SetActiveTabCommand}" CommandParameter="OvertimeApproval" IsVisible="{Binding CanApproveOvertime}" Classes.Active="{Binding ActiveTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter='OvertimeApproval'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource IconCheckmark}" Classes="IconStyle" Width="16" Height="16"/>
+                        <TextBlock Text="OVERTIME APPROVALS" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
 			</StackPanel>
 
 			<!-- Helper Tools (Similar to Home) -->

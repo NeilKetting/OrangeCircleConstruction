@@ -24,6 +24,10 @@ namespace OCC.API.Data
 
         public DbSet<TimeRecord> TimeRecords { get; set; }
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
+        public DbSet<LeaveRequest> LeaveRequests { get; set; }
+        public DbSet<PublicHoliday> PublicHolidays { get; set; }
+        public DbSet<OvertimeRequest> OvertimeRequests { get; set; }
+
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<AppSetting> AppSettings { get; set; }
         public DbSet<TaskAssignment> TaskAssignments { get; set; }
@@ -138,11 +142,27 @@ namespace OCC.API.Data
             base.OnModelCreating(modelBuilder);
 
             // Configure relationships if needed
-            // Example:
             // modelBuilder.Entity<ProjectTask>()
             //     .HasOne<Project>()
             //     .WithMany()
             //     .HasForeignKey(t => t.ProjectId);
+
+            // Seed SA Public Holidays 2026
+            modelBuilder.Entity<PublicHoliday>().HasData(
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 1, 1), Name = "New Year's Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 3, 21), Name = "Human Rights Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 4, 3), Name = "Good Friday" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 4, 6), Name = "Family Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 4, 27), Name = "Freedom Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 5, 1), Name = "Workers' Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 6, 16), Name = "Youth Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 8, 9), Name = "National Women's Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 8, 10), Name = "Public Holiday" }, // Observed
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 9, 24), Name = "Heritage Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 12, 16), Name = "Day of Reconciliation" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 12, 25), Name = "Christmas Day" },
+                new PublicHoliday { Id = Guid.NewGuid(), Date = new DateTime(2026, 12, 26), Name = "Day of Goodwill" }
+            );
         }
     }
 

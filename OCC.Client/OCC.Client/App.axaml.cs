@@ -92,6 +92,11 @@ namespace OCC.Client
             // Teams
             services.AddTransient<IRepository<Team>, ApiTeamRepository>();
             services.AddTransient<IRepository<TeamMember>, ApiTeamMemberRepository>();
+            
+            // Leave & Holidays
+            services.AddTransient<IRepository<LeaveRequest>, ApiLeaveRequestRepository>();
+            services.AddTransient<IRepository<PublicHoliday>, ApiPublicHolidayRepository>();
+            services.AddTransient<IRepository<OvertimeRequest>, ApiOvertimeRequestRepository>();
 
             // Fallback for any other type not explicitly mapped (e.g. TimeRecord) - though unlikely to be used if we covered main ones
             // services.AddTransient(typeof(IRepository<>), typeof(SqlRepository<>));
@@ -133,7 +138,9 @@ namespace OCC.Client
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
+            services.AddSingleton<LocalSettingsService>();
             services.AddSingleton(ConnectionSettings.Instance);
+            services.AddSingleton<ILeaveService, LeaveService>();
 
             // Logging
             services.AddLogging(l => l.AddSerilog());
@@ -184,6 +191,9 @@ namespace OCC.Client
             services.AddTransient<ClockOutViewModel>();
             services.AddTransient<HistoryViewModel>();
             services.AddTransient<LeaveApplicationViewModel>();
+            services.AddTransient<LeaveApprovalViewModel>();
+            services.AddTransient<OvertimeViewModel>();
+            services.AddTransient<OvertimeApprovalViewModel>();
             services.AddTransient<CalendarViewModel>();
             // services.AddTransient<TeamsViewModel>(); // Removed
             services.AddTransient<TeamManagementViewModel>();

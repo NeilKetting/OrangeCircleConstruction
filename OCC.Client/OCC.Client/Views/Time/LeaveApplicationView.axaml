@@ -1,12 +1,82 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Time"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OCC.Client.Views.Time.LeaveApplicationView"
              x:DataType="vm:LeaveApplicationViewModel">
-    <Grid>
-        <TextBlock Text="Leave Applications (Coming Soon)" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-    </Grid>
+
+    <ScrollViewer>
+        <StackPanel Spacing="20" Margin="20" MaxWidth="600" HorizontalAlignment="Left">
+            <TextBlock Text="Leave Application" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+
+            <!-- Employee Selection -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Employee" FontWeight="Medium"/>
+                <ComboBox ItemsSource="{Binding Employees}" 
+                          SelectedItem="{Binding SelectedEmployee}"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Dates -->
+            <Grid ColumnDefinitions="*, 10, *">
+                <StackPanel Grid.Column="0" Spacing="5">
+                    <TextBlock Text="Start Date" FontWeight="Medium"/>
+                    <DatePicker SelectedDate="{Binding StartDate}" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Spacing="5">
+                    <TextBlock Text="End Date" FontWeight="Medium"/>
+                    <DatePicker SelectedDate="{Binding EndDate}" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Leave Type -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Leave Type" FontWeight="Medium"/>
+                <ComboBox ItemsSource="{Binding LeaveTypes}" 
+                          SelectedItem="{Binding SelectedLeaveType}"
+                          HorizontalAlignment="Stretch"/>
+            </StackPanel>
+
+            <!-- Evaluation -->
+            <Border Background="#F9FAFB" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="4" Padding="15">
+                <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="Total Business Days:" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CalculatedDays}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTeal}"/>
+                    </StackPanel>
+                    
+                    <!-- Warning -->
+                    <Border IsVisible="{Binding HasBalanceWarning}" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="4" Padding="10">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                             <PathIcon Data="{StaticResource IconAlert}" Foreground="#DC2626"/>
+                             <TextBlock Text="{Binding BalanceWarning}" Foreground="#B91C1C" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Reason -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Reason" FontWeight="Medium"/>
+                <TextBox Text="{Binding Reason}"  Height="80" AcceptsReturn="True" Watermark="Please provide a reason for this leave request..."/>
+            </StackPanel>
+
+            <!-- Submit -->
+            <Button Command="{Binding SubmitCommand}" 
+                    Content="Submit Application" 
+                    Theme="{StaticResource PrimaryButton}"
+                    HorizontalAlignment="Right"
+                    IsEnabled="{Binding !IsSubmitting}"/>
+
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

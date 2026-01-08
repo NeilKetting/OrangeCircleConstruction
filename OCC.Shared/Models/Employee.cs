@@ -113,6 +113,11 @@ namespace OCC.Shared.Models
         public string? AccountNumber { get; set; }
         public string? BranchCode { get; set; }
         public string? AccountType { get; set; }
+
+        /// <summary>
+        /// Available Annual Leave balance in days.
+        /// </summary>
+        public double LeaveBalance { get; set; } = 15.0; // Default Logic? 
         
         /// <summary>
         /// Determines if the rate is Hourly or a Monthly Salary.

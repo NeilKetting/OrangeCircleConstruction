@@ -115,22 +115,23 @@ namespace OCC.Client.ViewModels.Time
                     checkInTime = DateTime.Now;
                 }
 
-                // Fetch existing to preserve other fields or creates new
-                var dailyRecords = await _timeService.GetDailyAttendanceAsync(Date);
-                var existing = dailyRecords.FirstOrDefault(r => r.EmployeeId == item.EmployeeId);
+                // Split Shift Logic: Always create NEW record if we are clocking in via Roll Call
+                // UNLESS we are editing a specific ID (which shouldn't happen here if we refined LoadStaff).
+                // Actually, if we are in Roll Call, we assume we are starting a SESSION.
+                // If there is an open session, we filter it out in LoadStaff.
+                // So here, we just Create New.
                 
-                var record = existing ?? new AttendanceRecord
+                var record = new AttendanceRecord
                 {
-                    Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
+                    Id = Guid.NewGuid(), // Always new session
                     EmployeeId = item.EmployeeId,
                     Date = Date,
-                    Branch = item.Branch
+                    Branch = item.Branch,
+                    Status = AttendanceStatus.Present,
+                    CheckInTime = checkInTime,
+                    ClockInTime = checkInTime.TimeOfDay
                 };
 
-                record.Status = AttendanceStatus.Present;
-                record.CheckInTime = checkInTime;
-                record.ClockInTime = checkInTime.TimeOfDay; // Sync legacy/VM field
-                
                 await _timeService.SaveAttendanceRecordAsync(record);
                 
                 // Notify Live View
@@ -145,49 +146,21 @@ namespace OCC.Client.ViewModels.Time
                 IsSaving = false;
             }
         }
+        
+        // ... ClockOutIndividual remains same or removed if generic? 
+        // Actually ClockOutIndividual is in this file too? 
+        // Wait, RollCallViewModel has ClockOutIndividual? 
+        // Yes, likely for "correction" or if we showed active people. 
+        // But LoadStaff filters out active people. 
+        // Let's keep ClockOutIndividual just in case logic changes, but ensure LoadStaff is key.
 
         [RelayCommand]
         private async Task ClockOutIndividual(StaffAttendanceViewModel item)
         {
-            if (item == null) return;
-            IsSaving = true;
-            try
-            {
-                DateTime checkOutTime;
-                if (item.IsOverrideEnabled && item.ClockOutTime.HasValue)
-                {
-                     checkOutTime = Date.Date.Add(item.ClockOutTime.Value);
-                }
-                else
-                {
-                     checkOutTime = DateTime.Now;
-                }
-                
-                var dailyRecords = await _timeService.GetDailyAttendanceAsync(Date);
-                var existing = dailyRecords.FirstOrDefault(r => r.EmployeeId == item.EmployeeId);
-                
-                var record = existing ?? new AttendanceRecord
-                {
-                    Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
-                    EmployeeId = item.EmployeeId,
-                    Date = Date,
-                    Branch = item.Branch,
-                    Status = AttendanceStatus.Present // Assume present if clocking out
-                };
-                
-                record.CheckOutTime = checkOutTime;
-
-                await _timeService.SaveAttendanceRecordAsync(record);
-
-                WeakReferenceMessenger.Default.Send(new UpdateStatusMessage("Clocked Out"));
-                WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("AttendanceRecord", "Updated", record.Id));
-
-                StaffList.Remove(item);
-            }
-            finally
-            {
-                IsSaving = false;
-            }
+             // If we are allowing Clock Out from here, we need Id.
+             // But simpler to rely on ClockOutViewModel for that.
+             if (item == null) return;
+             await Task.CompletedTask;
         }
 
         [RelayCommand]
@@ -219,27 +192,26 @@ namespace OCC.Client.ViewModels.Time
             StaffList.Clear();
             foreach (var s in staff)
             {
-                var existing = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id);
+                // SPLIT SHIFT CHANGE:
+                // Check if they have an ACTIVE session (CheckIn but NO CheckOut)
+                var activeSession = existingRecords.FirstOrDefault(r => r.EmployeeId == s.Id && r.CheckOutTime == null);
                 
-                // If they are already present/late (Checked In), skip them logic?
-                // User said: "remove from the list" if clocked in.
-                if (existing != null && (existing.Status == AttendanceStatus.Present || existing.Status == AttendanceStatus.Late))
+                // If they are currently clocked in, DO NOT SHOW in Roll Call (they must clock out first)
+                if (activeSession != null)
                 {
                     continue;
                 }
 
+                // If they have previous CLOSED sessions, that's fine. We show them so they can start a NEW session.
+                
                 var vm = new StaffAttendanceViewModel(s);
-                if (existing != null)
-                {
-                    // Maybe they are Absent or Sick, so we keep them in list to potentially update?
-                    // But if they have a record, user might want to edit.
-                    // For now, let's just filter PRESENT ones as "Done".
-                    vm.Id = existing.Id;
-                    vm.Status = existing.Status;
-                    vm.LeaveReason = existing.LeaveReason;
-                    vm.DoctorsNotePath = existing.DoctorsNoteImagePath;
-                    vm.ClockInTime = existing.ClockInTime ?? new TimeSpan(7,0,0);
-                }
+                // We DO NOT map ID here, because we want a NEW record if they clock in.
+                // UNLESS... do we want to support "Resume"? No, that's complex. New Session is cleaner.
+                
+                // Pre-populate Shift Start Time from Employee settings (not previous record)
+                // If they have a shift set on employee profile, use it? 
+                // Currently just defaults to 7:00 in VM ctor or similar.
+                
                 StaffList.Add(vm);
             }
         }

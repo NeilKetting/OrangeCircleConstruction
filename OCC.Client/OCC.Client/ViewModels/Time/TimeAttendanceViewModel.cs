@@ -30,6 +30,9 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty] private ClockOutViewModel _clockOutView;
         [ObservableProperty] private HistoryViewModel _historyView;
         [ObservableProperty] private LeaveApplicationViewModel _leaveApplicationView;
+        [ObservableProperty] private LeaveApprovalViewModel _leaveApprovalVM;
+        [ObservableProperty] private OvertimeViewModel _overtimeVM;
+        [ObservableProperty] private OvertimeApprovalViewModel _overtimeApprovalVM;
 
         [ObservableProperty]
         private string _greeting = string.Empty;
@@ -50,6 +53,9 @@ namespace OCC.Client.ViewModels.Time
             _clockOutView = null!;
             _historyView = null!;
             _leaveApplicationView = null!;
+            _leaveApprovalVM = null!;
+            _overtimeVM = null!;
+            _overtimeApprovalVM = null!;
             _currentView = null!;
 
             _authService = null!;
@@ -62,6 +68,9 @@ namespace OCC.Client.ViewModels.Time
             ClockOutViewModel clockOutView,
             HistoryViewModel historyView,
             LeaveApplicationViewModel leaveApplicationView,
+            LeaveApprovalViewModel leaveApprovalViewModel,
+            OvertimeViewModel overtimeViewModel,
+            OvertimeApprovalViewModel overtimeApprovalViewModel,
             IAuthService authService)
         {
             _timeMenu = timeMenu;
@@ -70,6 +79,9 @@ namespace OCC.Client.ViewModels.Time
             _clockOutView = clockOutView;
             _historyView = historyView;
             _leaveApplicationView = leaveApplicationView;
+            _leaveApprovalVM = leaveApprovalViewModel;
+            _overtimeVM = overtimeViewModel;
+            _overtimeApprovalVM = overtimeApprovalViewModel;
             _authService = authService;
             
             // Default View
@@ -125,6 +137,15 @@ namespace OCC.Client.ViewModels.Time
                     break;
                 case "Leave Application":
                     CurrentView = LeaveApplicationView;
+                    break;
+                case "LeaveApprovals":
+                    CurrentView = LeaveApprovalVM;
+                    break;
+                case "Overtime":
+                    CurrentView = OvertimeVM;
+                    break;
+                case "OvertimeApproval":
+                    CurrentView = OvertimeApprovalVM;
                     break;
                 case "Live":
                 default:

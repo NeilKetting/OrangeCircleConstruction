@@ -13,36 +13,75 @@
 		<vm:ShellViewModel/>
 	</Design.DataContext>
 
-	<Grid>
-		<Grid ColumnDefinitions="Auto, *">
-			<!-- Sidebar -->
-			<core:SideMenuView Grid.Column="0" DataContext="{Binding SideMenuViewModel}"/>
+	<Grid ColumnDefinitions="Auto, *">
+        <!-- Sidebar: Spans full height -->
+		<core:SideMenuView Grid.Column="0" DataContext="{Binding SideMenuViewModel}"/>
 
-			<!-- Page Content -->
-			<ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
-			<!-- Notification Overlay -->
-			<Grid Grid.Column="1" IsVisible="{Binding IsNotificationOpen}" ZIndex="100">
-				<!-- Click-away background -->
-				<Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-						Background="#66000000"
-						Command="{Binding CloseNotificationsCommand}">
-					<Button.Styles>
-						<Style Selector="Button:pointerover /template/ ContentPresenter">
-							<Setter Property="Background" Value="#66000000"/>
-						</Style>
-						<Style Selector="Button:pressed /template/ ContentPresenter">
-							<Setter Property="Background" Value="#66000000"/>
-						</Style>
-					</Button.Styles>
-				</Button>
+        <!-- Main Content Area: Content + Footer -->
+        <Grid Grid.Column="1" RowDefinitions="*, Auto">
+            
+            <!-- Page Content -->
+            <ContentControl Grid.Row="0" Content="{Binding CurrentPage}" />
+            
+            <!-- Notification Overlay -->
+            <Grid Grid.Row="0" IsVisible="{Binding IsNotificationOpen}" ZIndex="100">
+                <!-- Click-away background -->
+                <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        Background="#66000000"
+                        Command="{Binding CloseNotificationsCommand}">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#66000000"/>
+                        </Style>
+                        <Style Selector="Button:pressed /template/ ContentPresenter">
+                            <Setter Property="Background" Value="#66000000"/>
+                        </Style>
+                    </Button.Styles>
+                </Button>
 
-				<!-- Popup Content -->
-				<!-- Aligned Left (start of Column 1, so right next to Sidebar) and Top -->
-				<ContentControl Content="{Binding NotificationVM}"
-								HorizontalAlignment="Left" VerticalAlignment="Top"
-								Margin="0"
-								Width="400" Height="500"/>
-			</Grid>
-		</Grid>
+                <!-- Popup Content -->
+                <ContentControl Content="{Binding NotificationVM}"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"
+                                Margin="0"
+                                Width="400" Height="500"/>
+            </Grid>
+
+            <!-- Bottom Status Bar -->
+            <Border Grid.Row="1" Background="{DynamicResource SurfaceWhite}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,1,0,0" Padding="10,5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <Button Background="Transparent" BorderThickness="0" Padding="4,2">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <PathIcon Data="{StaticResource IconUser}" Width="14" Height="14" Foreground="{DynamicResource PrimaryTeal}"/>
+                            <TextBlock Text="Online:" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}"/>
+                            <TextBlock Text="{Binding OnlineCount}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                        </StackPanel>
+                        
+                        <Button.Flyout>
+                            <Flyout Placement="TopEdgeAlignedRight" ShowMode="TransientWithDismissOnPointerMoveAway">
+                                <StackPanel Spacing="5" MinWidth="150">
+                                    <TextBlock Text="Active Users" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}" Margin="0,0,0,5"/>
+                                    <ItemsControl ItemsSource="{Binding ConnectedUsers}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="5,2" Background="#F5F5F5" CornerRadius="4" Margin="0,2">
+                                                     <Grid ColumnDefinitions="*, Auto">
+                                                         <StackPanel Orientation="Horizontal" Spacing="5">
+                                                            <Ellipse Width="8" Height="8" Fill="#10B981" VerticalAlignment="Center"/> <!-- Green Dot -->
+                                                            <TextBlock Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"/>
+                                                         </StackPanel>
+                                                         <TextBlock Grid.Column="1" Text="{Binding TimeOnline}" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                     </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="No users connected" IsVisible="{Binding !OnlineCount}" FontStyle="Italic" Foreground="{DynamicResource TextSecondaryGray}"/>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
 	</Grid>
 </UserControl>

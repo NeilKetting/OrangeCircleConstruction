@@ -50,6 +50,12 @@ namespace OCC.Client.ViewModels.Core
         [ObservableProperty]
         private bool _isAuthenticated;
 
+        [ObservableProperty]
+        private int _onlineCount;
+
+        [ObservableProperty]
+        private System.Collections.ObjectModel.ObservableCollection<UserDisplayModel> _connectedUsers = new();
+
         #endregion
 
         #region Constructors
@@ -75,6 +81,7 @@ namespace OCC.Client.ViewModels.Core
             _serviceProvider = serviceProvider;
             _permissionService = permissionService;
             _signalRService = signalRService;
+            _signalRService.OnUserListReceived += OnUserUiUpdate;
 
             _sideMenuViewModel = sideMenuViewModel;
             _sideMenuViewModel.PropertyChanged += SideMenu_PropertyChanged;
@@ -195,6 +202,26 @@ namespace OCC.Client.ViewModels.Core
         {
             IsNotificationOpen = false;
         }
+
+        private void OnUserUiUpdate(System.Collections.Generic.List<OCC.Shared.DTOs.UserConnectionInfo> users)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                ConnectedUsers.Clear();
+                foreach (var u in users) 
+                {
+                    var timeOnline = DateTime.UtcNow - u.ConnectedAt;
+                    var timeStr = timeOnline.TotalMinutes < 1 ? "Just now" : 
+                                  timeOnline.TotalHours < 1 ? $"{timeOnline.Minutes}m" : 
+                                  $"{timeOnline.Hours}h {timeOnline.Minutes}m";
+
+                    ConnectedUsers.Add(new UserDisplayModel(u.UserName, timeStr));
+                }
+                OnlineCount = users.Count;
+            });
+        }
+        
+        public record UserDisplayModel(string Name, string TimeOnline);
 
         #endregion
     }
