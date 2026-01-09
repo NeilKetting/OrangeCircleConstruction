@@ -18,6 +18,7 @@ using System.Threading.Tasks; // Added for Task
 using OCC.Client.Services.Interfaces;
 using OCC.Client.Services.Infrastructure;
 using OCC.Client.ViewModels.Login;
+using OCC.Client.ViewModels.Notifications;
 
 namespace OCC.Client.ViewModels.Core
 {
@@ -126,18 +127,28 @@ namespace OCC.Client.ViewModels.Core
             _serviceProvider = null!;
             _permissionService = null!;
             _logger = null!;
+            _notificationViewModel = null!;
         }
 
         /// <summary>
         /// Main constructor with dependency injection.
         /// </summary>
-        public SideMenuViewModel(IAuthService authService, IUpdateService updateService, IServiceProvider serviceProvider, IPermissionService permissionService, ILogger<SideMenuViewModel> logger)
+        private readonly NotificationViewModel _notificationViewModel;
+
+        public SideMenuViewModel(
+            IAuthService authService, 
+            IUpdateService updateService, 
+            IServiceProvider serviceProvider, 
+            IPermissionService permissionService, 
+            ILogger<SideMenuViewModel> logger,
+            NotificationViewModel notificationViewModel)
         {
             _authService = authService;
             _updateService = updateService;
             _serviceProvider = serviceProvider;
             _permissionService = permissionService;
             _logger = logger;
+            _notificationViewModel = notificationViewModel;
 
             // Register for messages
             WeakReferenceMessenger.Default.RegisterAll(this);
@@ -152,8 +163,50 @@ namespace OCC.Client.ViewModels.Core
                 UserInitials = GetInitials(_authService.CurrentUser.DisplayName);
             }
 
+            // Monitor Notifications
+            _notificationViewModel.Notifications.CollectionChanged += (s, e) => UpdateNotificationStatus();
+            UpdateNotificationStatus(); // Initial check
+
             _ = StartAutoUpdateCheckAsync();
         }
+
+        private void UpdateNotificationStatus()
+        {
+            var notes = _notificationViewModel.Notifications;
+            bool hasUnread = false;
+            bool hasPending = false;
+
+            // Avoid iteration on UI thread if huge, but here it's small list
+            foreach (var n in notes)
+            {
+                if (!n.IsRead) 
+                {
+                    hasUnread = true;
+                    break; 
+                }
+                
+                // Logic: If read, but pending action?
+                // The user said: "If the messages are read but no action has been taken like approved or denied it must be orange"
+                // My currently loaded notifications ARE pending actions (they are removed on approval).
+                // So implies: any notification in list = pending action? 
+                // Or I need to check properties. 
+                // Currently `NotificationViewModel` ONLY holds pending/actionable items for Admins mainly (Approvals, Requests). 
+                // So if there are ANY notifications, they effectively represent pending actions.
+                // But the user distinguished between "Unread" (Red) and "Read but no action" (Orange).
+                // So: Unread -> Red. Read -> Orange (if list not empty). Empty -> Gray.
+                hasPending = true; 
+            }
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                if (hasUnread) NotificationIconColor = Avalonia.Media.Brushes.Red;
+                else if (hasPending) NotificationIconColor = Avalonia.Media.Brushes.Orange;
+                else NotificationIconColor = Avalonia.Media.Brushes.Gray; // Default
+            });
+        }
+        
+        [ObservableProperty]
+        private Avalonia.Media.IBrush _notificationIconColor = Avalonia.Media.Brushes.Gray;
 
         private async System.Threading.Tasks.Task StartAutoUpdateCheckAsync()
         {

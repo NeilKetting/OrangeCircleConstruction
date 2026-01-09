@@ -7,7 +7,12 @@
 			 mc:Ignorable="d"
 			 x:Class="OCC.Client.Views.EmployeeManagement.TeamDetailView"
              x:Name="Root"
-			 x:DataType="vm:TeamDetailViewModel">
+			 x:DataType="vm:TeamDetailViewModel"
+             Focusable="True">
+
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+    </UserControl.KeyBindings>
 
 	<Border Background="White" CornerRadius="8" Padding="0" BoxShadow="0 4 10 0 #40000000" Width="800" Height="600">
 		<Grid RowDefinitions="Auto, Auto, *, Auto">
@@ -26,7 +31,7 @@
 					<!-- Team Name -->
 					<StackPanel Spacing="5">
 						<TextBlock Text="Team Name" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryGray}"/>
-						<TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Watermark="Enter team name" Classes="StandardTextBox"/>
+						<TextBox x:Name="NameInput" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Watermark="Enter team name" Classes="StandardTextBox"/>
 					</StackPanel>
 
 					<!-- Description -->

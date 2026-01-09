@@ -24,8 +24,11 @@ using OCC.Client.ViewModels.Core;
 
 namespace OCC.Client.ViewModels.Core
 {
-    public partial class ShellViewModel : ViewModelBase, IRecipient<OpenNotificationsMessage>
+    public partial class ShellViewModel : ViewModelBase, 
+        IRecipient<OpenNotificationsMessage>,
+        IRecipient<OpenManageUsersMessage>
     {
+
         #region Private Members
 
         private readonly IServiceProvider _serviceProvider;
@@ -196,6 +199,9 @@ namespace OCC.Client.ViewModels.Core
                 case "HealthSafety":
                     CurrentPage = _serviceProvider.GetRequiredService<ViewModels.HealthSafety.HealthSafetyViewModel>();
                     break;
+                case "Orders":
+                    CurrentPage = _serviceProvider.GetRequiredService<ViewModels.Orders.OrderViewModel>();
+                    break;
                 case "Help":
                      var releaseNotesVM = new ViewModels.Help.ReleaseNotesViewModel();
                      releaseNotesVM.CloseRequested += (s, e) => NavigateTo(Infrastructure.NavigationRoutes.Home);
@@ -211,6 +217,16 @@ namespace OCC.Client.ViewModels.Core
         {
             // Toggle visibility
             IsNotificationOpen = !IsNotificationOpen;
+        }
+
+        public void Receive(OpenManageUsersMessage message)
+        {
+            NavigateTo("UserManagement");
+            
+            if (message.Value.HasValue && CurrentPage is UserManagementViewModel vm)
+            {
+                vm.OpenUser(message.Value.Value);
+            }
         }
 
         [RelayCommand]

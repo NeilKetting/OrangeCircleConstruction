@@ -248,6 +248,39 @@ namespace OCC.API.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("OCC.Shared.Models.InventoryItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("QuantityOnHand")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ReorderPoint")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UnitOfMeasure")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InventoryItems");
+                });
+
             modelBuilder.Entity("OCC.Shared.Models.LeaveRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -330,6 +363,81 @@ namespace OCC.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("OCC.Shared.Models.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DestinationType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ExpectedDeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProjectName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("OCC.Shared.Models.OrderLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("QuantityOrdered")
+                        .HasColumnType("float");
+
+                    b.Property<double>("QuantityReceived")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UnitOfMeasure")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderLines");
                 });
 
             modelBuilder.Entity("OCC.Shared.Models.OvertimeRequest", b =>
@@ -567,79 +675,79 @@ namespace OCC.API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("5059ae2b-8bb2-4d1e-853a-1ee4d24cd62d"),
+                            Id = new Guid("31be3e2c-bf88-4306-a8cb-09f062ebc40b"),
                             Date = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "New Year's Day"
                         },
                         new
                         {
-                            Id = new Guid("89915147-4a7c-478f-9ee8-9552715bba1b"),
+                            Id = new Guid("d9b909ce-4224-4ac4-ae74-a8dd05713453"),
                             Date = new DateTime(2026, 3, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Human Rights Day"
                         },
                         new
                         {
-                            Id = new Guid("24f09bd7-1b14-4691-b264-deb6d0a39ddd"),
+                            Id = new Guid("70c061c3-df30-4174-8e8a-0aea850487e2"),
                             Date = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Good Friday"
                         },
                         new
                         {
-                            Id = new Guid("c4ac56bf-aac7-465a-bb39-c9cfa48b09b0"),
+                            Id = new Guid("143d8b0c-cd0e-42de-9880-b4b8237e672a"),
                             Date = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Family Day"
                         },
                         new
                         {
-                            Id = new Guid("01d93513-d8d5-42a8-8a08-23156ba00cc0"),
+                            Id = new Guid("2e78b119-f31c-421c-a9e5-b420be8d1cbb"),
                             Date = new DateTime(2026, 4, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Freedom Day"
                         },
                         new
                         {
-                            Id = new Guid("e2856ba5-b66c-45cb-a99f-159260c6e0c2"),
+                            Id = new Guid("679ff7b9-6665-45cb-b2bc-5d719fe13528"),
                             Date = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Workers' Day"
                         },
                         new
                         {
-                            Id = new Guid("c64ce1ad-716c-4a0a-acce-cc9d1356fa28"),
+                            Id = new Guid("7b90f15c-245c-4b97-a36d-9f8142da5158"),
                             Date = new DateTime(2026, 6, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Youth Day"
                         },
                         new
                         {
-                            Id = new Guid("dfc76ca7-4b41-475d-a689-9c8d5472d3a5"),
+                            Id = new Guid("96e79440-f4a8-453f-9a18-ae114d0f5d10"),
                             Date = new DateTime(2026, 8, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "National Women's Day"
                         },
                         new
                         {
-                            Id = new Guid("05f2bc8d-b7cc-4ef2-87f5-3aa5f77b37c1"),
+                            Id = new Guid("584822c3-1a4d-451c-968e-dad89e96dc6c"),
                             Date = new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Public Holiday"
                         },
                         new
                         {
-                            Id = new Guid("06893e26-ad85-49d1-a59e-866d18cfd6d5"),
+                            Id = new Guid("404571ee-46aa-440e-aeff-d71a2cd69b8f"),
                             Date = new DateTime(2026, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Heritage Day"
                         },
                         new
                         {
-                            Id = new Guid("41e36b1a-e0f8-464c-b197-b1f7f860fcc7"),
+                            Id = new Guid("4adccde9-4f7d-4ee8-9d81-5001caf95476"),
                             Date = new DateTime(2026, 12, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Day of Reconciliation"
                         },
                         new
                         {
-                            Id = new Guid("95a00626-7ad5-40d1-a194-09685fd2e5c3"),
+                            Id = new Guid("ee7e6d38-b89c-4f72-bacd-0e4a6f0d81d2"),
                             Date = new DateTime(2026, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Christmas Day"
                         },
                         new
                         {
-                            Id = new Guid("eba7c4c2-620d-4179-b071-21837ecfae5e"),
+                            Id = new Guid("ce05d56f-9972-4479-a5a7-0ade5f00664b"),
                             Date = new DateTime(2026, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Day of Goodwill"
                         });
@@ -837,6 +945,15 @@ namespace OCC.API.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("OCC.Shared.Models.OrderLine", b =>
+                {
+                    b.HasOne("OCC.Shared.Models.Order", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OCC.Shared.Models.OvertimeRequest", b =>
                 {
                     b.HasOne("OCC.Shared.Models.Employee", "Employee")
@@ -905,6 +1022,11 @@ namespace OCC.API.Migrations
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OCC.Shared.Models.Order", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("OCC.Shared.Models.Project", b =>

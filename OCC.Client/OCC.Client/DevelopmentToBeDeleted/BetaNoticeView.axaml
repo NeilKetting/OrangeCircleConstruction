@@ -32,27 +32,15 @@
                     <StackPanel Spacing="15">
                         <TextBlock Text="We have enabled the following features for testing:" FontSize="14" FontWeight="SemiBold" Foreground="#4B5563"/>
                         
-                        <!-- User Management -->
+                        <!-- Notifications -->
                         <Border Background="#F3F4F6" CornerRadius="8" Padding="15">
                              <StackPanel Spacing="5">
                                  <StackPanel Orientation="Horizontal" Spacing="10">
                                      <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
-                                     <TextBlock Text="User Management" FontWeight="Bold"/>
+                                     <TextBlock Text="Notifications (New)" FontWeight="Bold"/>
                                  </StackPanel>
-                                 <TextBlock Text="• Create, Edit, Appoval Workflow" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
-                                 <TextBlock Text="• Role-Based Access Control" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
-                             </StackPanel>
-                        </Border>
-
-                        <!-- Employee Management -->
-                        <Border Background="#F3F4F6" CornerRadius="8" Padding="15">
-                             <StackPanel Spacing="5">
-                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                     <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
-                                     <TextBlock Text="Employee Management" FontWeight="Bold"/>
-                                 </StackPanel>
-                                 <TextBlock Text="• Detailed Profiles &amp; Contracts" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
-                                 <TextBlock Text="• Team Allocation &amp; Project Assignment" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Live Admin Alerts (Leave, Overtime, Registration)" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Dynamic Status Icon (Red/Orange/Gray)" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
                              </StackPanel>
                         </Border>
 
@@ -63,9 +51,21 @@
                                      <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
                                      <TextBlock Text="Time &amp; Attendance" FontWeight="Bold"/>
                                  </StackPanel>
-                                 <TextBlock Text="• Live Roll Call &amp; Tracking" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
-                                 <TextBlock Text="• Real-time Wages &amp; Duration Updates" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
-                                 <TextBlock Text="• Leave Application &amp; Approval" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Doctor's Note Attachment (PDF/Image)" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Improved Roll Call Logic" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Live History Updates" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                             </StackPanel>
+                        </Border>
+
+                        <!-- Employee Management -->
+                        <Border Background="#F3F4F6" CornerRadius="8" Padding="15">
+                             <StackPanel Spacing="5">
+                                 <StackPanel Orientation="Horizontal" Spacing="10">
+                                     <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
+                                     <TextBlock Text="Employee Management" FontWeight="Bold"/>
+                                 </StackPanel>
+                                 <TextBlock Text="• Improved View Transitions" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Detailed Profiles &amp; Team Allocation" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
                              </StackPanel>
                         </Border>
                     </StackPanel>

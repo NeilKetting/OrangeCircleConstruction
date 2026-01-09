@@ -95,7 +95,10 @@
 									<!-- Extra fields for non-present status -->
 									<StackPanel Grid.Row="1" Margin="0,10,0,0" Spacing="10" IsVisible="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.NotPresent}}">
 										<TextBox Watermark="Reason/Comments..." Text="{Binding LeaveReason}" Classes="FormInput"/>
-										<Button Content="Attach Doctor's Note" Classes="ToolbarAction" IsVisible="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.Sick}}"/>
+										<Button Content="Attach Doctor's Note" Classes="ToolbarAction" 
+                                                Command="{Binding #Root.((vm:RollCallViewModel)DataContext).AttachNoteCommand}"
+                                                CommandParameter="{Binding}"
+                                                IsVisible="{Binding Status, Converter={x:Static conv:EnumToBooleanConverter.Instance}, ConverterParameter={x:Static models:AttendanceStatus.Sick}}"/>
 									</StackPanel>
 								</Grid>
 							</Border>

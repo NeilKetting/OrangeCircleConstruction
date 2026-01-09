@@ -11,18 +11,7 @@ namespace OCC.Client.Views.EmployeeManagement
             InitializeComponent();
         }
 
-        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-        {
-            base.OnPropertyChanged(change);
-            if (change.Property == IsVisibleProperty && change.NewValue is true)
-            {
-                var input = this.FindControl<TextBox>("EmployeeNumberInput");
-                if (input != null)
-                {
-                    Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => input.Focus());
-                }
-            }
-        }
+
 
         public void FocusInput()
         {

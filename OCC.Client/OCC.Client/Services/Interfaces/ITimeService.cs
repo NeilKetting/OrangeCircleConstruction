@@ -16,5 +16,6 @@ namespace OCC.Client.Services.Interfaces
         Task<IEnumerable<AttendanceRecord>> GetAttendanceByRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<AttendanceRecord>> GetActiveAttendanceAsync();
         Task<IEnumerable<Employee>> GetAllStaffAsync();
+        Task<string?> UploadDoctorNoteAsync(string localFilePath);
     }
 }

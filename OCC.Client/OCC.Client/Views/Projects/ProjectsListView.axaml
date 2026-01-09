@@ -2,10 +2,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Projects.Dashboard"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Projects;assembly=OCC.Client"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
-             x:Class="OCC.Client.Views.Projects.Dashboard.ProjectsListView"
+             x:Class="OCC.Client.Views.Projects.ProjectsListView"
              x:DataType="vm:ProjectsListViewModel">
+
+    <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Loaded">
+            <InvokeCommandAction Command="{Binding LoadProjectsCommand}"/>
+        </EventTriggerBehavior>
+    </Interaction.Behaviors>
 
     <Grid Background="White" RowDefinitions="Auto, *">
         <!-- Toolbar -->
@@ -42,23 +48,11 @@
                   RowHeight="60"
                   Margin="0">
             
-            <DataGrid.Styles>
-                <Style Selector="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#F8FAFC"/>
-                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryGray}"/>
-                    <Setter Property="FontWeight" Value="Bold"/>
-                    <Setter Property="FontSize" Value="11"/>
-                    <Setter Property="Padding" Value="20,10"/>
-                </Style>
-                 <Style Selector="DataGridRow">
-                    <Setter Property="Background" Value="White"/>
-                    <Setter Property="Padding" Value="0,5"/>
-                </Style>
-            </DataGrid.Styles>
+
 
             <DataGrid.Columns>
-                <!-- Name -->
-                <DataGridTemplateColumn Header="NAME" Width="2*">
+                <!-- Name (Fills remaining space) -->
+                <DataGridTemplateColumn Header="NAME" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="20,0" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
@@ -67,10 +61,10 @@
                 </DataGridTemplateColumn>
 
                 <!-- Progress -->
-                <DataGridTemplateColumn Header="PROGRESS" Width="200">
+                <DataGridTemplateColumn Header="PROGRESS" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Grid VerticalAlignment="Center" Margin="20,0">
+                            <Grid VerticalAlignment="Center" Margin="20,0" Width="150"> <!-- Fixed width for inner content to ensure bar looks good -->
                                 <ProgressBar Value="{Binding Progress}" Maximum="100" Height="20" Background="#F1F5F9" Foreground="#CBD5E1" CornerRadius="2"/>
                                 <ProgressBar Value="{Binding Progress}" Maximum="100" Height="20" Background="Transparent" Foreground="#94A3B8" CornerRadius="2" IsVisible="{Binding Progress, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                                 <TextBlock Text="{Binding Progress, StringFormat='{}{0}%'}" FontSize="11" Foreground="{DynamicResource TextSecondaryGray}" VerticalAlignment="Center" Margin="5,0"/>
@@ -80,10 +74,10 @@
                 </DataGridTemplateColumn>
 
                 <!-- Project Manager -->
-                <DataGridTemplateColumn Header="PROJECT MANAGER" Width="150">
+                <DataGridTemplateColumn Header="SITE MANAGER" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                             <Border Width="30" Height="30" CornerRadius="15" Background="#CBD5E1" HorizontalAlignment="Left" Margin="20,0">
+                            <Border Width="30" Height="30" CornerRadius="15" Background="#CBD5E1" HorizontalAlignment="Left" Margin="20,0">
                                 <TextBlock Text="{Binding ProjectManagerInitials}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
                         </DataTemplate>
@@ -91,7 +85,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Members -->
-               <DataGridTemplateColumn Header="MEMBERS" Width="150">
+               <DataGridTemplateColumn Header="MEMBERS" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                              <Border Width="30" Height="30" CornerRadius="15" Background="#CBD5E1" HorizontalAlignment="Left" Margin="20,0">
@@ -102,7 +96,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Status -->
-                <DataGridTemplateColumn Header="STATUS" Width="120">
+                <DataGridTemplateColumn Header="STATUS" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="20,0" Foreground="{DynamicResource TextPrimaryDark}"/>
@@ -111,14 +105,13 @@
                 </DataGridTemplateColumn>
 
                 <!-- Latest Finish -->
-                 <DataGridTemplateColumn Header="LATEST FINISH" Width="150">
+                 <DataGridTemplateColumn Header="LATEST FINISH" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding LatestFinishDisplay}" VerticalAlignment="Center" Margin="20,0" Foreground="{DynamicResource TextSecondaryGray}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

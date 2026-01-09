@@ -6,8 +6,10 @@ using OCC.Shared.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using OCC.Client.ViewModels.Projects.Dashboard;
 
-namespace OCC.Client.ViewModels.Projects.Dashboard
+namespace OCC.Client.ViewModels.Projects
 {
     public partial class ProjectsListViewModel : ViewModelBase
     {
@@ -32,7 +34,8 @@ namespace OCC.Client.ViewModels.Projects.Dashboard
             };
         }
 
-        public async void LoadProjects()
+        [RelayCommand]
+        public async Task LoadProjects()
         {
             if (_projectRepository == null) return;
 

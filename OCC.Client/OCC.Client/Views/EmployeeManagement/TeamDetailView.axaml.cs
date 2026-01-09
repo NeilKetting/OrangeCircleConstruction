@@ -10,6 +10,14 @@ namespace OCC.Client.Views.EmployeeManagement
             InitializeComponent();
         }
 
+        public void FocusInput()
+        {
+             var input = this.FindControl<TextBox>("NameInput");
+             input?.Focus();
+        }
+
+
+
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);

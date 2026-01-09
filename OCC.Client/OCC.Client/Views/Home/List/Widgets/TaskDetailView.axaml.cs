@@ -14,6 +14,11 @@ namespace OCC.Client.Views.Home.List.Widgets
         protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
         {
             base.OnAttachedToVisualTree(e);
+            // Self-focus on attach is good, but explicit FocusInput called by parent is more robust for visibility toggles
+        }
+
+        public void FocusInput()
+        {
             this.Focus();
         }
 

@@ -36,22 +36,11 @@ namespace OCC.Client.ViewModels.Time
         public TimeMenuViewModel(IPermissionService permissionService)
         {
             _permissionService = permissionService;
-            WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
         public TimeMenuViewModel()
         {
              _permissionService = null!;
-        }
-
-        #endregion
-
-        #region Commands
-
-        [RelayCommand]
-        private void OpenNotifications()
-        {
-            WeakReferenceMessenger.Default.Send(new OpenNotificationsMessage());
         }
 
         #endregion

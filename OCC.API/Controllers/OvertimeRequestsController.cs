@@ -56,6 +56,9 @@ namespace OCC.API.Controllers
             await _context.SaveChangesAsync();
             
             await _hubContext.Clients.All.SendAsync("EntityUpdate", "OvertimeRequest", "Create", request.Id);
+            // Notify Admins
+            string employeeName = request.Employee != null ? $"{request.Employee.FirstName} {request.Employee.LastName}" : "Unknown Employee";
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"New Overtime Request from {employeeName}");
 
             return CreatedAtAction("GetOvertimeRequest", new { id = request.Id }, request);
         }

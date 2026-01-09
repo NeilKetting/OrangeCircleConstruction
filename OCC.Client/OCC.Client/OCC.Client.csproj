@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <Version>1.1.9</Version>
+    <Version>1.1.11</Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -31,6 +31,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.File" />
@@ -44,5 +45,6 @@
   <ItemGroup>
     <Folder Include="ModelWrappers\" />
     <Folder Include="Views\HealthSafety\" />
+    <Folder Include="Views\Order\" />
   </ItemGroup>
 </Project>

@@ -71,7 +71,7 @@
 		ClipToBounds="False"
 		Name="OverlayGrid"
 		PointerPressed="OnOverlayPointerPressed">
-			<viewWidgets:TaskDetailView DataContext="{Binding CurrentTaskDetail}"
+			<viewWidgets:TaskDetailView x:Name="TaskDetailView" DataContext="{Binding CurrentTaskDetail}"
 									  Width="1000"
 									  HorizontalAlignment="Right"/>
 		</Grid>

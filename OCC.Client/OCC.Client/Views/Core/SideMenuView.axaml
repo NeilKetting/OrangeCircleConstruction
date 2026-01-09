@@ -102,7 +102,7 @@
 					<!-- Notifications Link -->
 					<Button Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding NavigateCommand}" CommandParameter="Notifications" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Notifications'}" HorizontalAlignment="Stretch">
 						<StackPanel Orientation="Horizontal" Spacing="15">
-							<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle"/>
+							<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle" Foreground="{Binding NotificationIconColor}"/>
 							<TextBlock Text="Notifications" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
@@ -128,6 +128,14 @@
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconPortfolio}" Classes="IconStyle"/>
 							<TextBlock Text="Projects" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+						</StackPanel>
+					</Button>
+
+					<!-- Orders Link -->
+					<Button Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding NavigateCommand}" CommandParameter="Orders" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Orders'}" HorizontalAlignment="Stretch">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconDelivery}" Classes="IconStyle"/>
+							<TextBlock Text="Orders" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
 

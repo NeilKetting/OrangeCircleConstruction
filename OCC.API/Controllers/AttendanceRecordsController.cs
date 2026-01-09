@@ -125,5 +125,27 @@ namespace OCC.API.Controllers
         }
 
         private bool AttendanceRecordExists(Guid id) => _context.AttendanceRecords.Any(e => e.Id == id);
+
+        [HttpPost("upload")]
+        public async Task<ActionResult<string>> UploadNote(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "notes");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Return relative path
+            return Ok($"/uploads/notes/{uniqueFileName}");
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace OCC.Client.ViewModels.Time
 
         private readonly ITimeService _timeService;
         private readonly IAuthService _authService;
+        private readonly IServiceProvider _serviceProvider;
 
         #endregion
 
@@ -48,12 +49,14 @@ namespace OCC.Client.ViewModels.Time
             // Parameterless constructor for design-time support
             _timeService = null!;
             _authService = null!;
+            _serviceProvider = null!;
         }
 
-        public TimeLiveViewModel(ITimeService timeService, IAuthService authService)
+        public TimeLiveViewModel(ITimeService timeService, IAuthService authService, IServiceProvider serviceProvider)
         {
             _timeService = timeService;
             _authService = authService;
+            _serviceProvider = serviceProvider;
             
             InitializeCommand.Execute(null);
             WeakReferenceMessenger.Default.RegisterAll(this);
@@ -73,7 +76,7 @@ namespace OCC.Client.ViewModels.Time
         [RelayCommand]
         private void OpenRollCall()
         {
-            CurrentRollCall = new RollCallViewModel(_timeService);
+            CurrentRollCall = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<RollCallViewModel>(_serviceProvider);
             CurrentRollCall.CloseRequested += (s, e) => CloseRollCall();
             IsRollCallVisible = true;
         }

@@ -29,12 +29,21 @@ namespace OCC.Client.ViewModels.Notifications
         private readonly SignalRNotificationService _signalRService;
         private readonly IAuthService _authService;
         private readonly IRepository<User> _userRepository;
+        private readonly IRepository<LeaveRequest> _leaveRepository;
+        private readonly IRepository<OvertimeRequest> _overtimeRepository;
 
-        public NotificationViewModel(SignalRNotificationService signalRService, IAuthService authService, IRepository<User> userRepository)
+        public NotificationViewModel(
+            SignalRNotificationService signalRService, 
+            IAuthService authService, 
+            IRepository<User> userRepository,
+            IRepository<LeaveRequest> leaveRepository,
+            IRepository<OvertimeRequest> overtimeRepository)
         {
             _signalRService = signalRService;
             _authService = authService;
             _userRepository = userRepository;
+            _leaveRepository = leaveRepository;
+            _overtimeRepository = overtimeRepository;
             
             // Check Admin Role
             IsAdmin = _authService.CurrentUser?.UserRole == UserRole.Admin;
@@ -49,6 +58,8 @@ namespace OCC.Client.ViewModels.Notifications
             {
                 // Load pending approvals initially
                 LoadPendingApprovals();
+                LoadPendingLeaveRequests();
+                LoadPendingOvertimeRequests();
             }
         }
 
@@ -58,7 +69,11 @@ namespace OCC.Client.ViewModels.Notifications
              _signalRService = null!;
              _authService = null!;
              _userRepository = null!;
+             _leaveRepository = null!;
+             _overtimeRepository = null!;
         }
+
+        // ... methods ...
 
         private async void LoadPendingApprovals()
         {
@@ -71,15 +86,17 @@ namespace OCC.Client.ViewModels.Notifications
                 {
                     foreach (var user in pending)
                     {
-                        // Check if we already have a notification for this user (simple dedup check)
+                        // Dedup
                         if (!Notifications.Any(n => n.Message.Contains(user.Email)))
                         {
                             Notifications.Insert(0, new Notification
                             {
-                                Title = "Approval Needed",
+                                Title = "Status: Approval Needed",
                                 Message = $"New user awaiting approval: {user.FirstName} {user.LastName} ({user.Email})",
-                                Timestamp = DateTime.Now, // Or user.DateCreated if available
-                                IsRead = false
+                                Timestamp = DateTime.Now, 
+                                IsRead = false,
+                                TargetAction = "UserRegistration",
+                                UserId = user.Id
                             });
                         }
                     }
@@ -91,48 +108,183 @@ namespace OCC.Client.ViewModels.Notifications
             }
         }
 
+        private async void LoadPendingLeaveRequests()
+        {
+            try
+            {
+                var requests = await _leaveRepository.GetAllAsync();
+                var pending = requests.Where(r => r.Status == LeaveStatus.Pending).ToList();
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    foreach (var req in pending)
+                    {
+                         // Basic Dedup
+                         string msg = $"New Leave Request from {req.Employee?.FirstName} {req.Employee?.LastName}";
+                         if (!Notifications.Any(n => n.Message.Contains(req.Id.ToString()) || n.Message == msg))
+                         {
+                            Notifications.Insert(0, new Notification
+                            {
+                                Title = "Status: Leave Request",
+                                Message = msg,
+                                Timestamp = req.StartDate, 
+                                IsRead = false
+                            });
+                         }
+                    }
+                });
+            }
+            catch { }
+        }
+
+        private async void LoadPendingOvertimeRequests()
+        {
+            try
+            {
+                var requests = await _overtimeRepository.GetAllAsync();
+                var pending = requests.Where(r => r.Status == LeaveStatus.Pending).ToList();
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    foreach (var req in pending)
+                    {
+                         string msg = $"New Overtime Request from {req.Employee?.FirstName} {req.Employee?.LastName}";
+                         if (!Notifications.Any(n => n.Message == msg))
+                         {
+                            Notifications.Insert(0, new Notification
+                            {
+                                Title = "Status: Overtime Request",
+                                Message = msg,
+                                Timestamp = req.Date,
+                                IsRead = false
+                            });
+                         }
+                    }
+                });
+            }
+            catch { }
+        }
+
         private void OnNotificationReceived(string message)
         {
             // Logic for filtering notifications
             bool isRegistration = message.Contains("New Registration", StringComparison.OrdinalIgnoreCase) || 
-                                  message.Contains("registered", StringComparison.OrdinalIgnoreCase);
+                                  message.Contains("registered", StringComparison.OrdinalIgnoreCase) ||
+                                  message.Contains("awaiting approval", StringComparison.OrdinalIgnoreCase);
 
-            if (isRegistration)
+            bool isLeave = message.Contains("Leave Request", StringComparison.OrdinalIgnoreCase);
+            bool isOvertime = message.Contains("Overtime Request", StringComparison.OrdinalIgnoreCase);
+
+            bool isAdminNotification = isRegistration || isLeave || isOvertime;
+
+            if (isAdminNotification)
             {
-                // Only Admins care about new registrations
                 if (!IsAdmin) return;
-
-                // Bridge the gap: Notify UserManagementView to refresh
-                WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Create", Guid.Empty));
             }
-            else
+            
+            // Perform processing/lookup in background then update UI
+            Task.Run(async () => 
             {
-                // For other notifications (e.g. Task Assigned), check if it's for me
-                // TODO: Parse message to see if it targets current user. For now, we assume other messages might be broadcast relevant.
-                // If strictly "Task Assigned", the backend should ideally target the user ID. 
-                // Since this is a simple string string hook, we'll just show it if it's not a registration message rejected by non-admin.
-            }
+                Guid? matchedUserId = null;
+                string targetAction = string.Empty;
+                string title = "Notification";
 
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                Notifications.Insert(0, new Notification 
-                { 
-                    Title = isRegistration ? "New Registration" : "Notification", 
-                    Message = message, 
-                    Timestamp = DateTime.Now,
-                    IsRead = false 
+                if (isRegistration)
+                {
+                    title = "New Registration";
+                    targetAction = "UserRegistration";
+                    
+                    try 
+                    {
+                         // Extract Email: "New user awaiting approval: Name (email)"
+                         var start = message.LastIndexOf('(');
+                         var end = message.LastIndexOf(')');
+                         if (start > -1 && end > start)
+                         {
+                             var email = message.Substring(start + 1, end - start - 1);
+                             
+                             // Use FindAsync to get user
+                             var users = await _userRepository.FindAsync(u => u.Email == email);
+                             var user = users.FirstOrDefault();
+                             if (user != null)
+                             {
+                                 matchedUserId = user.Id;
+                             }
+                         }
+                    } 
+                    catch { }
+                }
+                else if (isLeave) title = "Leave Request";
+                else if (isOvertime) title = "Overtime Request";
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    Notifications.Insert(0, new Notification 
+                    { 
+                        Title = title, 
+                        Message = message, 
+                        Timestamp = DateTime.Now,
+                        IsRead = false,
+                        TargetAction = targetAction, 
+                        UserId = matchedUserId 
+                    });
                 });
             });
         }
 
         [RelayCommand]
-        private async Task ApproveUser(Notification notification)
+        private async Task ApproveAction(Notification notification)
         {
             if (!IsAdmin) return;
             
-            // Extract Email from message to find user
-            // Message format: "New user awaiting approval: First Last (email)"
-            // Simple extraction logic
+            if (notification.TargetAction == "UserRegistration" && notification.UserId.HasValue)
+            {
+                var user = await _userRepository.GetByIdAsync(notification.UserId.Value);
+                if (user != null)
+                {
+                    user.IsApproved = true;
+                    await _userRepository.UpdateAsync(user);
+                    
+                    Notifications.Remove(notification);
+                    WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Update", user.Id));
+                }
+            }
+            // Fallback for old string-only notifications
+            else if (notification.Title.Contains("Approval Needed") || notification.Message.Contains("awaiting approval"))
+            {
+               await ApproveUserOld(notification);
+            }
+        }
+
+        [RelayCommand]
+        private async Task DenyAction(Notification notification)
+        {
+            if (!IsAdmin) return;
+
+             if (notification.TargetAction == "UserRegistration" && notification.UserId.HasValue)
+            {
+                // Delete user? Or Reject? User requested "Deny".
+                // Be safe: Just remove notification for now, or ask confirmation?
+                // Request says "small approve and small deny buttons".
+                // I'll assume Deny = Reject/Delete for registration.
+                await _userRepository.DeleteAsync(notification.UserId.Value);
+                Notifications.Remove(notification);
+                 WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Delete", notification.UserId.Value));
+            }
+        }
+
+        [RelayCommand]
+        private void Navigate(Notification notification)
+        {
+             if (notification.TargetAction == "UserRegistration" && notification.UserId.HasValue)
+             {
+                 WeakReferenceMessenger.Default.Send(new Messages.OpenManageUsersMessage(notification.UserId.Value));
+             }
+        }
+
+        // Kept for fallback
+        private async Task ApproveUserOld(Notification notification)
+        {
             try 
             {
                 var start = notification.Message.LastIndexOf('(');
@@ -150,8 +302,6 @@ namespace OCC.Client.ViewModels.Notifications
                         await _userRepository.UpdateAsync(user);
                         
                         Notifications.Remove(notification);
-                        
-                        // Notify system
                         WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Update", user.Id));
                     }
                 }

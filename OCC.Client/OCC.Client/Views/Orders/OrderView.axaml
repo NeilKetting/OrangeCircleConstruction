@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:OCC.Client.ViewModels.Orders"
+			 xmlns:local="using:OCC.Client.Views.Orders"
+			 mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+			 x:Class="OCC.Client.Views.Orders.OrderView"
+			 x:DataType="vm:OrderViewModel">
+
+	<Design.DataContext>
+		<vm:OrderViewModel/>
+	</Design.DataContext>
+
+	<!-- Content Area -->
+	<Grid Grid.Column="1" RowDefinitions="Auto, Auto, *">
+
+		<!-- Header Section -->
+		<Border Grid.Row="0" CornerRadius="10,10,0,0" ClipToBounds="True" Margin="30,30,30,0">
+			<Border.Background>
+				<LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+					<GradientStop Color="#0F172A" Offset="0.0" />
+					<GradientStop Color="#1E293B" Offset="1.0" />
+				</LinearGradientBrush>
+			</Border.Background>
+			<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="30,30,30,30">
+				<StackPanel Grid.Column="0" Spacing="5">
+					<TextBlock Text="Procurement Overview" FontSize="26" FontWeight="Bold" Foreground="White" />
+					<TextBlock Text="Track purchases, deliveries, and site inventory." Foreground="#94A3B8" FontSize="14" />
+				</StackPanel>
+				<PathIcon Grid.Column="1" Data="{StaticResource IconCart}" Width="48" Height="48" Foreground="#FFFFFF"/>
+			</Grid>
+		</Border>
+
+		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="30,0,0,0">
+				<Button Classes="MenuButton" Command="{Binding NavigateToDashboardCommand}">
+					<StackPanel Orientation="Horizontal" Spacing="10">
+						<PathIcon Data="{StaticResource IconStats}" Width="16"/>
+						<TextBlock Text="Dashboard"/>
+					</StackPanel>
+				</Button>
+
+				<Button Classes="MenuButton" Command="{Binding NavigateToAllOrdersCommand}">
+					<StackPanel Orientation="Horizontal" Spacing="10">
+						<PathIcon Data="{StaticResource IconCart}" Width="16"/>
+						<TextBlock Text="All Orders"/>
+					</StackPanel>
+				</Button>
+
+				<Button Classes="MenuButton" Command="{Binding NavigateToInventoryCommand}">
+					<StackPanel Orientation="Horizontal" Spacing="10">
+						<PathIcon Data="{StaticResource IconBox}" Width="16"/>
+						<TextBlock Text="Inventory"/>
+					</StackPanel>
+				</Button>
+
+				<Rectangle Height="1" Fill="#30FFFFFF" Margin="0,15"/>
+
+				<Button Classes="MenuButton" Command="{Binding NavigateToCreateOrderCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+					<StackPanel Orientation="Horizontal" Spacing="8">
+						<PathIcon Data="{StaticResource IconAdd}" Width="16"/>
+						<TextBlock Text="New Order" FontWeight="SemiBold"/>
+					</StackPanel>
+				</Button>
+		</StackPanel>
+
+		<!-- View Content -->
+        <TransitioningContentControl Grid.Row="2" Content="{Binding CurrentView}">
+            <TransitioningContentControl.PageTransition>
+                <CrossFade Duration="0:00:0.25" />
+            </TransitioningContentControl.PageTransition>
+            <TransitioningContentControl.DataTemplates>
+                <DataTemplate DataType="{x:Type vm:OrderDashboardViewModel}">
+                    <local:OrderDashboardView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderListViewModel}">
+                    <local:OrderListView />
+                </DataTemplate>
+                 <DataTemplate DataType="{x:Type vm:CreateOrderViewModel}">
+                    <local:CreateOrderView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
+                    <local:InventoryView />
+                </DataTemplate>
+            </TransitioningContentControl.DataTemplates>
+        </TransitioningContentControl>
+	</Grid>
+</UserControl>

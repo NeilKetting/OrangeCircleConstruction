@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OCC.Client.ViewModels.Time"
              xmlns:models="using:OCC.Shared.Models"
+             xmlns:conv="clr-namespace:OCC.Client.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OCC.Client.Views.Time.LeaveApplicationView"
              x:DataType="vm:LeaveApplicationViewModel">
@@ -16,18 +17,17 @@
             <StackPanel Spacing="5">
                 <TextBlock Text="Employee" FontWeight="Medium"/>
                 
-                <AutoCompleteBox ItemsSource="{Binding Employees}" 
-                                 SelectedItem="{Binding SelectedEmployee}"
-                                 FilterMode="Contains"                                 
-                                 Watermark="Search and Select Employee..."
-                                 ValueMemberBinding="{Binding DisplayName, x:DataType=models:Employee}"
-                                 HorizontalAlignment="Stretch">
-                    <AutoCompleteBox.Styles>
-                        <Style Selector="AutoCompleteBox /template/ TextBox#PART_TextBox">
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                        </Style>
-                    </AutoCompleteBox.Styles>
-                </AutoCompleteBox>
+                <ComboBox ItemsSource="{Binding Employees}" 
+                          SelectedItem="{Binding SelectedEmployee}"
+                          HorizontalAlignment="Stretch"
+                          PlaceholderText="Search and Select Employee..."
+                          IsTextSearchEnabled="True">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <!-- Dates -->
@@ -68,7 +68,13 @@
                 <TextBlock Text="Leave Type" FontWeight="Medium"/>
                 <ComboBox ItemsSource="{Binding LeaveTypes}" 
                           SelectedItem="{Binding SelectedLeaveType}"
-                          HorizontalAlignment="Stretch"/>
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={x:Static conv:FriendlyEnumConverter.Instance}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
 
             <!-- Evaluation -->

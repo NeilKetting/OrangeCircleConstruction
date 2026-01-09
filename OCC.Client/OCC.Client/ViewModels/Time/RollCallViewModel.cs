@@ -19,6 +19,7 @@ namespace OCC.Client.ViewModels.Time
         #region Private Members
 
         private readonly ITimeService _timeService;
+        private readonly IDialogService _dialogService;
 
         #endregion
 
@@ -55,15 +56,31 @@ namespace OCC.Client.ViewModels.Time
 
         #region Constructors
 
-        public RollCallViewModel(ITimeService timeService)
+        public RollCallViewModel(ITimeService timeService, IDialogService dialogService)
         {
             _timeService = timeService;
+            _dialogService = dialogService;
             _ = LoadStaff();
         }
 
         #endregion
 
         #region Commands
+
+        [RelayCommand]
+        private async Task AttachNote(StaffAttendanceViewModel item)
+        {
+            if (item == null) return;
+            // PDF and Images (jpg, jpeg, png)
+            var extensions = new[] { "*.pdf", "*.jpg", "*.jpeg", "*.png" };
+            
+            var file = await _dialogService.PickFileAsync("Attach Doctor's Note", extensions);
+            if (!string.IsNullOrEmpty(file))
+            {
+                item.DoctorsNotePath = file;
+                // Optionally extract filename for display? "Note Attached"
+            }
+        }
 
         [RelayCommand]
         private async Task Save()
@@ -73,6 +90,15 @@ namespace OCC.Client.ViewModels.Time
             {
                 foreach (var item in StaffList)
                 {
+                    string? serverPath = item.DoctorsNotePath;
+
+                    // If path is local (contains drive separator or not starting with /uploads), upload it
+                    if (!string.IsNullOrEmpty(item.DoctorsNotePath) && 
+                        (item.DoctorsNotePath.Contains(":") || !item.DoctorsNotePath.Replace("\\", "/").StartsWith("/uploads")))
+                    {
+                         serverPath = await _timeService.UploadDoctorNoteAsync(item.DoctorsNotePath);
+                    }
+
                     var record = new AttendanceRecord
                     {
                         Id = item.Id == Guid.Empty ? Guid.NewGuid() : item.Id,
@@ -80,7 +106,7 @@ namespace OCC.Client.ViewModels.Time
                         Date = Date,
                         Status = item.Status,
                         LeaveReason = item.LeaveReason ?? string.Empty,
-                        DoctorsNoteImagePath = item.DoctorsNotePath ?? string.Empty,
+                        DoctorsNoteImagePath = serverPath ?? string.Empty,
                         // New Fields
                         Branch = item.Branch,
                         ClockInTime = item.ClockInTime

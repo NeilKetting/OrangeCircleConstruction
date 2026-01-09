@@ -41,6 +41,10 @@ namespace OCC.API.Data
         public DbSet<TaskComment> TaskComments { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
 
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
+        public DbSet<InventoryItem> InventoryItems { get; set; }
+
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var auditEntries = OnBeforeSaveChanges();

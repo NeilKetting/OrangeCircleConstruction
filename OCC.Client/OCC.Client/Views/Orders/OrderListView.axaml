@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Orders"
+             xmlns:conv="using:OCC.Client.Converters"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="OCC.Client.Views.Orders.OrderListView"
+             x:DataType="vm:OrderListViewModel">
+
+    <UserControl.Resources>
+        <conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="30">
+            <TextBlock Text="All Orders" FontSize="24" FontWeight="Bold" />
+             
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                <TextBox Width="250" Watermark="Search orders..." Text="{Binding SearchQuery}" Classes="FormInput">
+                    <TextBox.InnerRightContent>
+                         <PathIcon Data="{StaticResource IconSearch}" Width="14" Height="14" Margin="0,0,10,0" Foreground="{DynamicResource ThemeForegroundLow}"/>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+                <Button Classes="Secondary" Content="Filter" />
+                <Button Classes="Primary" Content="Export" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Grid -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" Margin="30,0,30,30"
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True" 
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  Background="White">
+            
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ORDER #" Binding="{Binding OrderNumber}" Width="*" FontWeight="SemiBold"/>
+                <DataGridTextColumn Header="SUPPLIER" Binding="{Binding SupplierName}" Width="1.5*" />
+                <DataGridTextColumn Header="DATE" Binding="{Binding OrderDate, StringFormat='{}{0:dd MMM yyyy}'}" Width="*" />
+                <DataGridTextColumn Header="DESTINATION" Binding="{Binding DestinationDisplay}" Width="1.5*" />
+                <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

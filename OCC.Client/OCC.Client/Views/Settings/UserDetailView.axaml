@@ -6,7 +6,12 @@
              xmlns:conv="clr-namespace:OCC.Client.Converters"
              mc:Ignorable="d"
              x:Class="OCC.Client.Views.Settings.UserDetailView"
-             x:DataType="vm:UserDetailViewModel">
+             x:DataType="vm:UserDetailViewModel"
+             Focusable="True">
+             
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+    </UserControl.KeyBindings>
 
     <Design.DataContext>
         <vm:UserDetailViewModel/>
@@ -54,7 +59,7 @@
                         <StackPanel Grid.Column="0" Spacing="10">
                             <StackPanel>
                                 <TextBlock Text="First Name" Classes="FormLabel"/>
-                                <TextBox Text="{Binding FirstName}" Classes="FormInput" Watermark="e.g. Alice"/>
+                                <TextBox x:Name="FirstNameInput" Text="{Binding FirstName}" Classes="FormInput" Watermark="e.g. Alice"/>
                             </StackPanel>
                             <StackPanel>
                                 <TextBlock Text="Last Name" Classes="FormLabel"/>

@@ -21,5 +21,35 @@ namespace OCC.Client.Views.Home
                 }
             }
         }
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                if (DataContext is HomeViewModel vm && vm.IsTaskDetailVisible)
+                {
+                    vm.CloseTaskDetailCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                }
+            }
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+            var taskDetail = this.FindControl<List.Widgets.TaskDetailView>("TaskDetailView");
+            if (taskDetail != null)
+            {
+                taskDetail.PropertyChanged += async (s, args) =>
+                {
+                    if (args.Property.Name == nameof(Avalonia.Visual.IsEffectivelyVisible) && args.NewValue is true)
+                    {
+                        await System.Threading.Tasks.Task.Delay(50);
+                        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => taskDetail.FocusInput(), Avalonia.Threading.DispatcherPriority.Background);
+                    }
+                };
+            }
+        }
     }
 }

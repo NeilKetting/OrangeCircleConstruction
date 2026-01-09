@@ -10,7 +10,7 @@ using Avalonia.Threading;
 
 namespace OCC.Client.ViewModels.Time
 {
-    public partial class HistoryViewModel : ViewModelBase
+    public partial class HistoryViewModel : ViewModelBase, CommunityToolkit.Mvvm.Messaging.IRecipient<ViewModels.Messages.EntityUpdatedMessage>
     {
         private readonly ITimeService _timeService;
         private readonly IExportService _exportService;
@@ -95,6 +95,19 @@ namespace OCC.Client.ViewModels.Time
             
             // Initial Load
             InitializeCommand.Execute(null);
+
+            // Register for Messages
+            CommunityToolkit.Mvvm.Messaging.IMessengerExtensions.RegisterAll(CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default, this);
+        }
+
+        public void Receive(ViewModels.Messages.EntityUpdatedMessage message)
+        {
+            if (message.Value.EntityType == "AttendanceRecord")
+            {
+                // Delay slightly to allow DB to commit if needed, though usually sequential.
+                // Reload Data
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () => await LoadData());
+            }
         }
 
         [RelayCommand]

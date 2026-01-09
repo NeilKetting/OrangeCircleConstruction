@@ -1,0 +1,123 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:OCC.Client.ViewModels.Orders"
+			 mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+			 x:Class="OCC.Client.Views.Orders.OrderDashboardView"
+			 x:DataType="vm:OrderDashboardViewModel">
+
+	<Design.DataContext>
+		<vm:OrderDashboardViewModel/>
+	</Design.DataContext>
+
+	<ScrollViewer>
+		<StackPanel Spacing="30" Margin="30">
+
+
+			<!-- Stats Grid -->
+			<Grid ColumnDefinitions="*, 20, *, 20, *">
+				<!-- Stat 1 -->
+				<Border Grid.Column="0" Classes="Card" Padding="20">
+					<StackPanel Spacing="10">
+						<Grid ColumnDefinitions="*, Auto">
+							<TextBlock Text="ORDERS THIS MONTH" Classes="Label" />
+							<PathIcon Data="{StaticResource IconStats}" Width="16" Foreground="{DynamicResource ThemeAccent}" />
+						</Grid>
+						<TextBlock Text="{Binding OrdersThisMonth}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource ThemeForeground}" />
+						<TextBlock Text="+12% from last month" FontSize="12" Foreground="Green" />
+					</StackPanel>
+				</Border>
+
+				<!-- Stat 2 -->
+				<Border Grid.Column="2" Classes="Card" Padding="20">
+					<StackPanel Spacing="10">
+						<Grid ColumnDefinitions="*, Auto">
+							<TextBlock Text="PENDING DELIVERIES" Classes="Label" />
+							<PathIcon Data="{StaticResource IconTruck}" Width="16" Foreground="Orange" />
+						</Grid>
+						<TextBlock Text="{Binding PendingDeliveries}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource ThemeForeground}" />
+						<TextBlock Text="2 Arriving Today" FontSize="12" Foreground="Orange" />
+					</StackPanel>
+				</Border>
+
+				<!-- Stat 3 -->
+				<Border Grid.Column="4" Classes="Card" Padding="20" Background="#20EF4444" BorderBrush="#EF4444" BorderThickness="1">
+					<StackPanel Spacing="10">
+						<Grid ColumnDefinitions="*, Auto">
+							<TextBlock Text="LOW STOCK ALERTS" Classes="Label" Foreground="#EF4444" />
+							<PathIcon Data="{StaticResource IconAlert}" Width="16" Foreground="#EF4444" />
+						</Grid>
+						<TextBlock Text="{Binding LowStockItems.Count}" FontSize="32" FontWeight="Bold" Foreground="#EF4444" />
+						<TextBlock Text="Requires Action" FontSize="12" Foreground="#EF4444" />
+					</StackPanel>
+				</Border>
+			</Grid>
+
+			<!-- Main Content Grid -->
+			<Grid ColumnDefinitions="2*, 30, *">
+
+				<!-- Recent Orders List -->
+				<StackPanel Grid.Column="0" Spacing="15">
+					<TextBlock Text="Recent Orders" FontSize="18" FontWeight="SemiBold" />
+					<Border Classes="Card" Padding="0">
+						<ItemsControl ItemsSource="{Binding RecentOrders}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Border BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,0,0,1" Padding="20,15">
+										<Grid ColumnDefinitions="Auto, *, Auto, Auto">
+											<!-- Icon -->
+											<Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#103B82F6" Margin="0,0,15,0">
+												<PathIcon Data="{StaticResource IconCart}" Width="16" Foreground="{DynamicResource ThemeAccent}" />
+											</Border>
+
+											<!-- Info -->
+											<StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+												<TextBlock Text="{Binding SupplierName}" FontWeight="Bold" />
+												<TextBlock Text="{Binding OrderNumber}" FontSize="12" Foreground="{DynamicResource ThemeForegroundLow}" />
+											</StackPanel>
+
+											<!-- Destination -->
+											<Border Grid.Column="2" Background="#1064748B" CornerRadius="4" Padding="8,4" VerticalAlignment="Center" Margin="0,0,20,0">
+												<TextBlock Text="{Binding DestinationDisplay}" FontSize="12" Foreground="{DynamicResource ThemeForegroundLow}" />
+											</Border>
+
+											<!-- Status -->
+											<Border Grid.Column="3" Background="#1022C55E" CornerRadius="12" Padding="12,4" VerticalAlignment="Center">
+												<TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" Foreground="#22C55E" />
+											</Border>
+										</Grid>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</Border>
+				</StackPanel>
+
+				<!-- Low Stock Sidebar -->
+				<StackPanel Grid.Column="2" Spacing="15">
+					<TextBlock Text="Low Stock" FontSize="18" FontWeight="SemiBold" />
+					<ItemsControl ItemsSource="{Binding LowStockItems}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Border Classes="Card" Margin="0,0,0,10" Padding="15">
+									<StackPanel Spacing="5">
+										<StackPanel Spacing="5">
+											<TextBlock Text="{Binding ProductName}" FontWeight="Bold" />
+											<TextBlock Text="{Binding Location}" FontSize="11" Foreground="{DynamicResource ThemeForegroundLow}" Margin="0"/>
+										</StackPanel>
+										<StackPanel Grid.Row="1" Spacing="5">
+											<ProgressBar Margin="0" Height="4" Maximum="{Binding ReorderPoint}" Value="{Binding QuantityOnHand}" Foreground="#EF4444" Background="#20EF4444" />
+											<TextBlock Text="{Binding QuantityOnHand, StringFormat='{}On Hand: {0}'}" FontSize="10" Foreground="#EF4444" Margin="0" />
+										</StackPanel>
+									</StackPanel>
+								</Border>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+
+			</Grid>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>

@@ -4,33 +4,31 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using OCC.Client.Services;
-using OCC.Client.Services.Interfaces; // Added
-using OCC.Client.Services.Infrastructure; // Added
 using OCC.Client.Services.ApiServices;
-using OCC.Client.ViewModels;
+using OCC.Client.Services.Infrastructure; // Added
+using OCC.Client.Services.Interfaces; // Added
 using OCC.Client.ViewModels.Core; // Added for ViewModelBase/Core VMs
-using OCC.Client.ViewModels.Login; // Added
 using OCC.Client.ViewModels.EmployeeManagement;
+using OCC.Client.ViewModels.HealthSafety;
 using OCC.Client.ViewModels.Home;
+using OCC.Client.ViewModels.Home.Calendar;
 using OCC.Client.ViewModels.Home.Dashboard;
 using OCC.Client.ViewModels.Home.ProjectSummary;
 using OCC.Client.ViewModels.Home.Shared;
 using OCC.Client.ViewModels.Home.Tasks;
+using OCC.Client.ViewModels.Login; // Added
 using OCC.Client.ViewModels.Notifications; // Added
+using OCC.Client.ViewModels.Orders;
 using OCC.Client.ViewModels.Projects;
+using OCC.Client.ViewModels.Projects.Shared;
+using OCC.Client.ViewModels.Settings;
 using OCC.Client.ViewModels.Shared;
-using OCC.Client.Views;
+using OCC.Client.ViewModels.Time;
 using OCC.Client.Views.Core;
+using OCC.Shared.Models;
+using Serilog;
 using System;
 using System.Linq;
-using Serilog;
-using OCC.Shared.Models;
-using OCC.Client.ViewModels.Home.Calendar;
-using OCC.Client.ViewModels.Time;
-using OCC.Client.ViewModels.HealthSafety;
-using OCC.Client.ViewModels.Settings;
-using OCC.Client.ViewModels.Projects.Shared;
-using OCC.Client.ViewModels.Projects.Dashboard;
 
 
 namespace OCC.Client
@@ -114,9 +112,11 @@ namespace OCC.Client
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
-            services.AddSingleton<LocalSettingsService>();
             services.AddSingleton(ConnectionSettings.Instance);
-            services.AddSingleton<ILeaveService, LeaveService>();
+            services.AddHttpClient<ILeaveService, LeaveService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddHttpClient<IOrderService, OrderService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddHttpClient<IInventoryService, InventoryService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddSingleton<IDialogService, DialogService>();
 
             // Logging
             services.AddLogging(l => l.AddSerilog());
@@ -139,7 +139,7 @@ namespace OCC.Client
             services.AddTransient<SummaryViewModel>();
             services.AddTransient<TasksWidgetViewModel>();
             services.AddTransient<PulseViewModel>();
-            services.AddTransient<NotificationViewModel>();
+            services.AddSingleton<NotificationViewModel>();
             
             // Project
             
@@ -178,6 +178,13 @@ namespace OCC.Client
             // Health Safety
             services.AddTransient<HealthSafetyViewModel>();
             services.AddTransient<HealthSafetyDashboardViewModel>();
+
+            // Orders
+            services.AddTransient<OrderViewModel>();
+            services.AddTransient<InventoryViewModel>();
+            services.AddTransient<CreateOrderViewModel>();
+            services.AddTransient<OrderListViewModel>();
+            services.AddTransient<OrderDashboardViewModel>();
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

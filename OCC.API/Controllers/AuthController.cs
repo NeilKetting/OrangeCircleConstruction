@@ -4,6 +4,7 @@ using OCC.API.Services;
 using OCC.Shared.Models;
 using OCC.Shared.DTOs;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 
 namespace OCC.API.Controllers
 {
@@ -12,10 +13,12 @@ namespace OCC.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<OCC.API.Hubs.NotificationHub> _hubContext;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, Microsoft.AspNetCore.SignalR.IHubContext<OCC.API.Hubs.NotificationHub> hubContext)
         {
             _authService = authService;
+            _hubContext = hubContext;
         }
 
         [HttpPost("login")]
@@ -55,6 +58,11 @@ namespace OCC.API.Controllers
             {
                 return Conflict(error);
             }
+
+            // Notify Admins (broadcasting to all for now, client filters)
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"New User Registration: {createdUser.Email}");
+            // Also generic entity update
+            await _hubContext.Clients.All.SendAsync("EntityUpdate", "User", "Create", createdUser.Id);
 
             return Ok(createdUser);
         }

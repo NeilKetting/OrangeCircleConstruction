@@ -85,10 +85,7 @@
                   BorderThickness="0"
                   DoubleTapped="DataGrid_DoubleTapped">
 
-            <DataGrid.Styles>
-                 <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
-                     <Setter Property="Fill" Value="{DynamicResource HomeMenuGradient}"/>
-                 </Style>
+             <DataGrid.Styles>
                  <Style Selector="DataGridRow" x:DataType="models:Employee">
                      <Setter Property="ContextMenu">
                          <ContextMenu>

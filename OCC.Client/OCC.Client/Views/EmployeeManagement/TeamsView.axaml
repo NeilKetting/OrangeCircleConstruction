@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OCC.Client.ViewModels.EmployeeManagement"
+             xmlns:models="using:OCC.Shared.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OCC.Client.Views.EmployeeManagement.TeamsView"
              x:DataType="vm:TeamManagementViewModel">
@@ -32,7 +33,19 @@
         <!-- Grid -->
         <DataGrid Grid.Row="2" ItemsSource="{Binding Teams}" SelectedItem="{Binding SelectedTeam}"
                   AutoGenerateColumns="False" IsReadOnly="True"
-                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White">
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" Background="White"
+                  DoubleTapped="DataGrid_DoubleTapped">
+            
+            <DataGrid.Styles>
+                 <Style Selector="DataGridRow" x:DataType="models:Team">
+                     <Setter Property="ContextMenu">
+                         <ContextMenu>
+                            <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:TeamManagementViewModel)DataContext).EditTeamCommand}" CommandParameter="{Binding .}"/>
+                            <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:TeamManagementViewModel)DataContext).DeleteTeamCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+                         </ContextMenu>
+                     </Setter>
+                 </Style>
+            </DataGrid.Styles>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="2*"/>

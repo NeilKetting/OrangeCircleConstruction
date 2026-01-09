@@ -92,7 +92,8 @@
                   IsReadOnly="True"
                   HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal"
-                  Background="White">
+                  Background="White"
+                  DoubleTapped="DataGrid_DoubleTapped">
             
             <DataGrid.Styles>
                  <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
@@ -110,8 +111,8 @@
             </DataGrid.Styles>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="NAME" Binding="{Binding DisplayName}" Width="*"/>
-                <DataGridTextColumn Header="EMAIL" Binding="{Binding Email}" Width="1.5*"/>
+                <DataGridTextColumn Header="NAME" Binding="{Binding DisplayName, Converter={x:Static conv:StringToTitleCaseConverter.Instance}, Mode=OneWay}" Width="*"/>
+                <DataGridTextColumn Header="EMAIL" Binding="{Binding Email, Converter={x:Static conv:StringToLowerCaseConverter.Instance}, Mode=OneWay}" Width="1.5*"/>
                 <DataGridTextColumn Header="ROLE" Binding="{Binding UserRole}" Width="*"/>
                 
                 <DataGridTemplateColumn Header="STATUS" Width="*">
@@ -148,7 +149,7 @@
         <!-- Popup Overlay -->
         <Grid Grid.Row="0" Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsUserPopupVisible}">
             <Grid Background="#50000000">
-                <views:UserDetailView DataContext="{Binding UserPopup}"
+                <views:UserDetailView x:Name="UserDetailView" DataContext="{Binding UserPopup}"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
             </Grid>

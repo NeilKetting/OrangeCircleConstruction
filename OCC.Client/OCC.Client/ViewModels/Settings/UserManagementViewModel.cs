@@ -138,6 +138,15 @@ namespace OCC.Client.ViewModels.Settings
 
         #region Methods
 
+        public void OpenUser(Guid userId)
+        {
+            var user = _allUsers.FirstOrDefault(u => u.Id == userId);
+            if (user != null)
+            {
+                EditUser(user);
+            }
+        }
+
         public async void LoadData()
         {
             try

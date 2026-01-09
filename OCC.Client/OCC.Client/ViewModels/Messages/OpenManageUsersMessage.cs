@@ -2,9 +2,9 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace OCC.Client.ViewModels.Messages
 {
-    public class OpenManageUsersMessage : ValueChangedMessage<bool>
+    public class OpenManageUsersMessage : ValueChangedMessage<System.Guid?>
     {
-        public OpenManageUsersMessage(bool value = true) : base(value)
+        public OpenManageUsersMessage(System.Guid? userId = null) : base(userId)
         {
         }
     }
