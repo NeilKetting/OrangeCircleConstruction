@@ -6,6 +6,7 @@
 			 xmlns:conv="clr-namespace:OCC.Client.Converters;assembly=OCC.Client"
 			 xmlns:local="clr-namespace:OCC.Client.Views.Shared"
 			 xmlns:menus="clr-namespace:OCC.Client.Views.Core.PopupMenus;assembly=OCC.Client"
+			 xmlns:converters="using:Avalonia.Data.Converters"
 			 mc:Ignorable="d" d:DesignWidth="250" d:DesignHeight="800"
 			 x:Class="OCC.Client.Views.Core.SideMenuView"
 			 x:DataType="vm:SideMenuViewModel"
@@ -37,31 +38,31 @@
 			<Setter Property="Margin" Value="20,0,0,0"/>
 			<Setter Property="HorizontalAlignment" Value="Left"/>
 		</Style>
-		
+
 		<!-- Collapsed State: Remove margin and center content -->
 		<Style Selector="StackPanel.LogoContainer.Collapsed">
 			<Setter Property="Margin" Value="0"/>
 			<Setter Property="HorizontalAlignment" Value="Center"/>
 		</Style>
 
-        <!-- Fade Text Class -->
-        <Style Selector="TextBlock.FadeText">
-            <Setter Property="Opacity" Value="0"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="0:0:0.5"/>
-                </Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="TextBlock.FadeText.Visible">
-            <Setter Property="Opacity" Value="1"/>
-        </Style>
+		<!-- Fade Text Class -->
+		<Style Selector="TextBlock.FadeText">
+			<Setter Property="Opacity" Value="0"/>
+			<Setter Property="Transitions">
+				<Transitions>
+					<DoubleTransition Property="Opacity" Duration="0:0:0.5"/>
+				</Transitions>
+			</Setter>
+		</Style>
+		<Style Selector="TextBlock.FadeText.Visible">
+			<Setter Property="Opacity" Value="1"/>
+		</Style>
 	</UserControl.Styles>
 
 	<Border Background="{DynamicResource SurfaceLightGray}"
 			Width="{Binding IsCollapsed, Converter={StaticResource CollapseWidthConverter}}">
 		<Grid>
-	<!-- Main Sidebar Layout -->
+			<!-- Main Sidebar Layout -->
 			<Grid.RowDefinitions>
 				<!-- Logo area -->
 				<RowDefinition Height="60"/>
@@ -71,11 +72,11 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
-			
+
 			<!-- Logo area -->
 			<StackPanel Grid.Row="0" Classes="LogoContainer" Classes.Collapsed="{Binding IsCollapsed}"
-						Orientation="Horizontal" Spacing="10" 
-						DoubleTapped="Sidebar_DoubleTapped" 
+						Orientation="Horizontal" Spacing="10"
+						DoubleTapped="Sidebar_DoubleTapped"
 						Background="Transparent">
 				<!--<Image Source="/Assets/Images/occ-logo.jpg" Stretch="UniformToFill"/>-->
 				<Ellipse Width="40" Height="40" Stroke="{DynamicResource AccentOrange}" StrokeThickness="8"/>
@@ -96,6 +97,7 @@
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconHome}" Classes="IconStyle"/>
 							<TextBlock Text="Home" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+
 						</StackPanel>
 					</Button>
 
@@ -104,6 +106,13 @@
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle" Foreground="{Binding NotificationIconColor}"/>
 							<TextBlock Text="Notifications" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+							<Border Background="Red" CornerRadius="10" MinWidth="16" Height="16"
+									HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,10"
+									IsVisible="{Binding NotificationVM.NotificationCount, Converter={x:Static converters:ObjectConverters.IsNotNull}}">
+
+								<TextBlock Text="{Binding NotificationVM.NotificationCount, FallbackValue=5}" Foreground="White" FontSize="10" FontWeight="Bold"
+										   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,.5"/>
+							</Border>
 						</StackPanel>
 					</Button>
 
@@ -112,6 +121,7 @@
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconTime}" Classes="IconStyle"/>
 							<TextBlock Text="Time &amp; Attendance" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+							
 						</StackPanel>
 					</Button>
 
@@ -174,17 +184,17 @@
 
 				<!-- Settings Navigation Button -->
 				<!-- Settings Navigation Button -->
-                <Grid>
-				    <Button x:Name="SettingsNavButton" Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding ToggleSettingsCommand}" HorizontalAlignment="Stretch">
-					    <StackPanel Orientation="Horizontal" Spacing="15">
-						    <PathIcon Data="{StaticResource IconGear}" Classes="IconStyle"/>
-						    <TextBlock Text="Settings" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
-					    </StackPanel>
-				    </Button>
-                    <Popup IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=SettingsNavButton}" Placement="RightEdgeAlignedBottom" HorizontalOffset="10" IsLightDismissEnabled="True">
+				<Grid>
+					<Button x:Name="SettingsNavButton" Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding ToggleSettingsCommand}" HorizontalAlignment="Stretch">
+						<StackPanel Orientation="Horizontal" Spacing="15">
+							<PathIcon Data="{StaticResource IconGear}" Classes="IconStyle"/>
+							<TextBlock Text="Settings" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>
+						</StackPanel>
+					</Button>
+					<Popup IsOpen="{Binding IsSettingsOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=SettingsNavButton}" Placement="RightEdgeAlignedBottom" HorizontalOffset="10" IsLightDismissEnabled="True">
 						<menus:SettingsMenuView/>
 					</Popup>
-                </Grid>
+				</Grid>
 
 				<!-- User Profile Button with Settings Popup -->
 				<!-- User Profile Button with Preferences Popup -->
@@ -209,8 +219,8 @@
 
 
 				<TextBlock Text="{Binding LastActionMessage}"
-                           Classes="FadeText"
-                           Classes.Visible="{Binding IsMessageVisible}"
+						   Classes="FadeText"
+						   Classes.Visible="{Binding IsMessageVisible}"
 						   IsVisible="{Binding !IsCollapsed}"
 						   FontSize="11"
 						   Foreground="{DynamicResource TextTertiarySlate}"

@@ -47,24 +47,6 @@
 			</StackPanel>
 
 			<StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center" Margin="20,0">
-				<Grid>
-					<Button Classes="IconButton" Command="{Binding OpenNotificationsCommand}" ToolTip.Tip="Notifications">
-						<PathIcon Data="{StaticResource IconNotifications}" Classes="IconStyle" Width="20" Height="20"/>
-					</Button>
-					<Border Background="Red" CornerRadius="10" MinWidth="16" Height="16" 
-							HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,-4,0"
-							IsVisible="{Binding NotificationVM.NotificationCount, Converter={x:Static ObjectConverters.IsNotNull}}">
-						<Border.IsVisible>
-							<MultiBinding Converter="{x:Static BoolConverters.And}">
-								<Binding Path="NotificationVM.NotificationCount" Converter="{x:Static ObjectConverters.IsNotNull}"/>
-								<Binding Path="NotificationVM.HasNotifications"/>
-							</MultiBinding>
-						</Border.IsVisible>
-						<TextBlock Text="{Binding NotificationVM.NotificationCount}" Foreground="White" FontSize="10" FontWeight="Bold" 
-								   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0"/>
-					</Border>
-				</Grid>
-				
 				<TextBox Width="200" Classes="FormInput" Watermark="Search..."/>
 				<PathIcon Data="{StaticResource IconSearch}" Classes="IconStyle" Width="18" Height="18"/>
 			</StackPanel>

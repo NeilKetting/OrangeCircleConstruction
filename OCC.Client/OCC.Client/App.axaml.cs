@@ -123,7 +123,7 @@ namespace OCC.Client
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
             services.AddSingleton(ConnectionSettings.Instance);
-            services.AddHttpClient<ILeaveService, LeaveService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddTransient<ILeaveService, LeaveService>();
             services.AddHttpClient<IOrderService, OrderService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddHttpClient<IInventoryService, InventoryService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddSingleton<IDialogService, DialogService>();

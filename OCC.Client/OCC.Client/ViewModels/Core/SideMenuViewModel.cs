@@ -134,6 +134,7 @@ namespace OCC.Client.ViewModels.Core
         /// Main constructor with dependency injection.
         /// </summary>
         private readonly NotificationViewModel _notificationViewModel;
+        public NotificationViewModel NotificationVM => _notificationViewModel;
 
         public SideMenuViewModel(
             IAuthService authService, 
