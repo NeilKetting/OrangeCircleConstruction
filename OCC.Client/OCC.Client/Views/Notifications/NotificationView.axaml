@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OCC.Client.ViewModels.Notifications;assembly=OCC.Client"
              xmlns:conv="using:OCC.Client.Converters"
+             xmlns:converters="using:Avalonia.Data.Converters"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
              x:Class="OCC.Client.Views.Notifications.NotificationView"
              x:DataType="vm:NotificationViewModel">
@@ -59,7 +60,7 @@
                                             <Button Classes="IconButton"
                                                     Command="{Binding $parent[UserControl].((vm:NotificationViewModel)DataContext).ApproveActionCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    IsVisible="{Binding TargetAction, Converter={StaticResource StringEqualityConverter}, ConverterParameter='UserRegistration'}"
+                                                    IsVisible="{Binding TargetAction, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}"
                                                     ToolTip.Tip="Approve">
                                                 <PathIcon Data="{StaticResource IconYes}" Foreground="#22C55E" Width="16" Height="16"/>
                                             </Button>
@@ -68,7 +69,7 @@
                                             <Button Classes="IconButton"
                                                     Command="{Binding $parent[UserControl].((vm:NotificationViewModel)DataContext).DenyActionCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    IsVisible="{Binding TargetAction, Converter={StaticResource StringEqualityConverter}, ConverterParameter='UserRegistration'}"
+                                                    IsVisible="{Binding TargetAction, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}"
                                                     ToolTip.Tip="Deny">
                                                 <PathIcon Data="{StaticResource IconNo}" Foreground="#EF4444" Width="16" Height="16"/>
                                             </Button>
@@ -77,7 +78,7 @@
                                             <Button Classes="IconButton"
                                                     Command="{Binding $parent[UserControl].((vm:NotificationViewModel)DataContext).NavigateCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    IsVisible="{Binding TargetAction, Converter={StaticResource StringEqualityConverter}, ConverterParameter='UserRegistration'}"
+                                                    IsVisible="{Binding TargetAction, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}"
                                                     ToolTip.Tip="View Details">
                                                 <PathIcon Data="{StaticResource IconLiveView}" Foreground="{DynamicResource TextPrimary}" Width="16" Height="16"/>
                                             </Button>

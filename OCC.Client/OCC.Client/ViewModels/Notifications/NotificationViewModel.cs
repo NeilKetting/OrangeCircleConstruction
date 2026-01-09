@@ -12,6 +12,7 @@ using System.Linq;
 using OCC.Client.Services.Interfaces;
 using OCC.Client.Services.Infrastructure;
 using OCC.Client.ViewModels.Core;
+using OCC.Client.ViewModels.Messages;
 
 namespace OCC.Client.ViewModels.Notifications
 {
@@ -136,7 +137,9 @@ namespace OCC.Client.ViewModels.Notifications
                                 Title = "Status: Leave Request",
                                 Message = msg,
                                 Timestamp = req.StartDate, 
-                                IsRead = false
+                                IsRead = false,
+                                TargetAction = "LeaveRequest",
+                                UserId = req.Id // Storing RequestId
                             });
                          }
                     }
@@ -164,7 +167,9 @@ namespace OCC.Client.ViewModels.Notifications
                                 Title = "Status: Overtime Request",
                                 Message = msg,
                                 Timestamp = req.Date,
-                                IsRead = false
+                                IsRead = false,
+                                TargetAction = "OvertimeRequest",
+                                UserId = req.Id // Storing RequestId
                             });
                          }
                     }
@@ -268,7 +273,35 @@ namespace OCC.Client.ViewModels.Notifications
                     await _userRepository.UpdateAsync(user);
                     
                     Notifications.Remove(notification);
-                    WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Update", user.Id));
+                    WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("User", "Update", user.Id));
+                }
+            }
+            else if (notification.TargetAction == "LeaveRequest" && notification.UserId.HasValue)
+            {
+                // UserId here holds the Request Id
+                var request = await _leaveRepository.GetByIdAsync(notification.UserId.Value);
+                if (request != null)
+                {
+                    request.Status = LeaveStatus.Approved;
+                    request.ApproverId = _authService.CurrentUser?.Id;
+                    request.ActionedDate = DateTime.Now;
+                    await _leaveRepository.UpdateAsync(request);
+                    Notifications.Remove(notification);
+                    WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("LeaveRequest", "Update", request.Id));
+                }
+            }
+            else if (notification.TargetAction == "OvertimeRequest" && notification.UserId.HasValue)
+            {
+                var request = await _overtimeRepository.GetByIdAsync(notification.UserId.Value);
+                if (request != null)
+                {
+                    request.Status = LeaveStatus.Approved;
+                    request.ApproverId = _authService.CurrentUser?.Id; // Assuming OvertimeRequest has ApproverId? 
+                    // Note: OvertimeRequest might likely inherit from or share structure, but checking model might be good. 
+                    // Assuming yes for now based on context.
+                    await _overtimeRepository.UpdateAsync(request);
+                     Notifications.Remove(notification);
+                    WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("OvertimeRequest", "Update", request.Id));
                 }
             }
             // Fallback for old string-only notifications
@@ -285,13 +318,34 @@ namespace OCC.Client.ViewModels.Notifications
 
              if (notification.TargetAction == "UserRegistration" && notification.UserId.HasValue)
             {
-                // Delete user? Or Reject? User requested "Deny".
-                // Be safe: Just remove notification for now, or ask confirmation?
-                // Request says "small approve and small deny buttons".
-                // I'll assume Deny = Reject/Delete for registration.
                 await _userRepository.DeleteAsync(notification.UserId.Value);
                 Notifications.Remove(notification);
-                 WeakReferenceMessenger.Default.Send(new Messages.EntityUpdatedMessage("User", "Delete", notification.UserId.Value));
+                 WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("User", "Delete", notification.UserId.Value));
+            }
+            else if (notification.TargetAction == "LeaveRequest" && notification.UserId.HasValue)
+            {
+                var request = await _leaveRepository.GetByIdAsync(notification.UserId.Value);
+                if (request != null)
+                {
+                    request.Status = LeaveStatus.Rejected;
+                    request.ApproverId = _authService.CurrentUser?.Id;
+                    request.ActionedDate = DateTime.Now;
+                    await _leaveRepository.UpdateAsync(request);
+                    Notifications.Remove(notification);
+                    WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("LeaveRequest", "Update", request.Id));
+                }
+            }
+            else if (notification.TargetAction == "OvertimeRequest" && notification.UserId.HasValue)
+            {
+                var request = await _overtimeRepository.GetByIdAsync(notification.UserId.Value);
+                if (request != null)
+                {
+                    request.Status = LeaveStatus.Rejected;
+                    // request.ApproverId ...
+                    await _overtimeRepository.UpdateAsync(request);
+                    Notifications.Remove(notification);
+                    WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("OvertimeRequest", "Update", request.Id));
+                }
             }
         }
 
@@ -300,7 +354,15 @@ namespace OCC.Client.ViewModels.Notifications
         {
              if (notification.TargetAction == "UserRegistration" && notification.UserId.HasValue)
              {
-                 WeakReferenceMessenger.Default.Send(new Messages.OpenManageUsersMessage(notification.UserId.Value));
+                 WeakReferenceMessenger.Default.Send(new OpenManageUsersMessage(notification.UserId.Value));
+             }
+             else if (notification.TargetAction == "LeaveRequest")
+             {
+                 WeakReferenceMessenger.Default.Send(new SwitchTabMessage("LeaveApprovals"));
+             }
+             else if (notification.TargetAction == "OvertimeRequest")
+             {
+                 WeakReferenceMessenger.Default.Send(new SwitchTabMessage("OvertimeApproval"));
              }
         }
 
