@@ -26,6 +26,9 @@ namespace OCC.Shared.Models
 
         public string Branch { get; set; } = string.Empty;
         public TimeSpan? ClockInTime { get; set; } // Default 07:00 logic in VM
+        
+        // Snapshot to preserve historical wage data if employee rate changes
+        public decimal? CachedHourlyRate { get; set; }
     }
 
     public enum AttendanceStatus

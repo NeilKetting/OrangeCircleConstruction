@@ -35,23 +35,11 @@ namespace OCC.Client.Services
             // Admin has access to everything
             if (user.UserRole == UserRole.Admin) return true;
 
-            // Site Manager Access
-            // Can access all core operational modules but restricted from User Management
-            if (user.UserRole == UserRole.SiteManager)
+            // Special Check for Wage Visibility
+            if (route == "WageViewing")
             {
-                return route switch
-                {
-                    "HealthSafety" => true,
-                    "RollCall" => true,
-                    "ClockOut" => true,
-                    "LeaveApproval" => true,
-                    "OvertimeRequest" => true,
-                    "OvertimeApproval" => true,
-                    "Teams" => true, 
-                    "EmployeeManagement" => true,
-                    "Orders" => true,
-                    _ => false
-                };
+                // Only Admin can see wages
+                return false;
             }
 
             // Office Staff Access
@@ -59,19 +47,41 @@ namespace OCC.Client.Services
             {
                 return route switch
                 {
+                    "Home" => true, // Home is essential
+                    "Time" => true, // Restore Time Access
                     "HealthSafety" => true,
                     "LeaveApproval" => true,
                     "OvertimeRequest" => true,
                     "OvertimeApproval" => true,
-                    "EmployeeManagement" => true,
                     "Orders" => true,
+                    // "EmployeeManagement" => false, // Now Restricted
+                    _ => false
+                };
+            }
+
+            // Site Manager Access
+            if (user.UserRole == UserRole.SiteManager)
+            {
+                // Site Manager also loses EmployeeManagement based on user request
+                return route switch
+                {
+                    "Home" => true, 
+                    "Time" => true, // Restore Time Access
+                    "HealthSafety" => true,
+                    "RollCall" => true,
+                    "ClockOut" => true,
+                    "LeaveApproval" => true,
+                    "OvertimeRequest" => true,
+                    "OvertimeApproval" => true,
+                    "Teams" => true, 
+                    "Orders" => true,
+                    // "EmployeeManagement" => false, // Now Restricted
                     _ => false
                 };
             }
 
             // Contractor/Guest Access
-            // Restricted access to specific modules (Home, Projects, Time, Calendar)
-            // No access to Staff or User Management
+            // ... (No change needed, valid logic)
             if (user.UserRole == UserRole.ExternalContractor || user.UserRole == UserRole.Guest)
             {
                  return route switch
@@ -82,9 +92,6 @@ namespace OCC.Client.Services
                     NavigationRoutes.Calendar => true,
                     NavigationRoutes.Notifications => true,
                     "Orders" => true,
-                    NavigationRoutes.StaffManagement => false,
-                    "UserManagement" => false,
-                    "OvertimeRequest" => false,
                     _ => false
                 };
             }

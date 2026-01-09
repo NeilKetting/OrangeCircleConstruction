@@ -63,11 +63,17 @@ namespace OCC.Client.ViewModels.Time
         private readonly DispatcherTimer _timer;
 
         #endregion
+        
+        // Permission Property for UI Binding
+        public bool IsWageVisible { get; }
 
-        public HistoryViewModel(ITimeService timeService, IExportService exportService)
+        public HistoryViewModel(ITimeService timeService, IExportService exportService, IPermissionService permissionService)
         {
             _timeService = timeService;
             _exportService = exportService;
+            
+            // Check Permission
+            IsWageVisible = permissionService.CanAccess("WageViewing");
             
             // Timer for Live Updates
             _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
@@ -87,7 +93,7 @@ namespace OCC.Client.ViewModels.Time
                      TotalWages = Records.Sum(r => r.Wage);
                      TotalHours = Records.Sum(r => r.HoursWorked);
                  }
-            };
+             };
             _timer.Start();
 
             // Set default range logic (This Week)

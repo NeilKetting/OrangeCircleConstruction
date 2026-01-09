@@ -10,7 +10,7 @@ namespace OCC.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin,SiteManager")] // Admins and Site Managers can manage employees
+    [Authorize] // Allow any authenticated user to READ (Get)
     public class EmployeesController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -63,6 +63,7 @@ namespace OCC.API.Controllers
 
         // POST: api/Employees
         [HttpPost]
+        [Authorize(Roles = "Admin")] // Strict: Admin Only
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
             try
@@ -83,6 +84,7 @@ namespace OCC.API.Controllers
 
         // PUT: api/Employees/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")] // Strict: Admin Only
         public async Task<IActionResult> PutEmployee(Guid id, Employee employee)
         {
             if (id != employee.Id)
@@ -119,6 +121,7 @@ namespace OCC.API.Controllers
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] // Strict: Admin Only
         public async Task<IActionResult> DeleteEmployee(Guid id)
         {
             try

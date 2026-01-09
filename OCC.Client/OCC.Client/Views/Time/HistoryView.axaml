@@ -5,7 +5,8 @@
              xmlns:vm="clr-namespace:OCC.Client.ViewModels.Time"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
              x:Class="OCC.Client.Views.Time.HistoryView"
-             x:DataType="vm:HistoryViewModel">
+             x:DataType="vm:HistoryViewModel"
+             x:Name="Root">
 
 	<Grid RowDefinitions="Auto, Auto, *">
 		<!-- Top Bar -->
@@ -30,7 +31,8 @@
 						<TextBlock Text="{Binding TotalHours, StringFormat='{}{0:F2}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBlue}" HorizontalAlignment="Center"/>
 					</StackPanel>
 				</Border>
-				<Border Classes="Card" Padding="15,10" Width="150" Background="#E8F5E9" BorderBrush="#81C784"> <!-- Green tint -->
+				<Border Classes="Card" Padding="15,10" Width="150" Background="#E8F5E9" BorderBrush="#81C784"
+                        IsVisible="{Binding IsWageVisible}"> <!-- Green tint -->
 					<StackPanel>
 						<TextBlock Text="Est. Wages" Classes="LabelText" HorizontalAlignment="Center" Foreground="#388E3C"/>
 						<TextBlock Text="{Binding TotalWages, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Center"/>
@@ -67,7 +69,10 @@
 				<DataGridTextColumn Header="In" Binding="{Binding InTime}" Width="80"/>
 				<DataGridTextColumn Header="Out" Binding="{Binding OutTime}" Width="80"/>
 				<DataGridTextColumn Header="Hours" Binding="{Binding HoursWorkedDisplay}" Width="80"/>
-				<DataGridTextColumn Header="Wage (Est.)" Binding="{Binding WageDisplay}" Width="120" Foreground="#2E7D32" FontWeight="Bold"/>
+				<!-- Wage Column Hidden via Binding -->
+				<DataGridTextColumn Header="Wage (Est.)" Binding="{Binding WageDisplay}" Width="120" 
+                                    Foreground="#2E7D32" FontWeight="Bold"
+                                    IsVisible="{Binding #Root.DataContext.IsWageVisible}"/>
 			</DataGrid.Columns>
 		</DataGrid>
         

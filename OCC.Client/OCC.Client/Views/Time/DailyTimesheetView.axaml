@@ -107,14 +107,9 @@
                                             <StackPanel Spacing="4" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <!-- Status Badge -->
-                                                    <Border CornerRadius="4" Padding="6,2" 
-                                                            Background="{Binding Status, Converter={x:Static conv:AttendanceStatusToBrushConverter.Instance}}" 
-                                                            Opacity="0.15" IsHitTestVisible="False">
-                                                    </Border>
+                                                    <!-- Status Badge (Text Only, Removed Background "Circle") -->
                                                     <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="Bold" 
-                                                               Foreground="{Binding Status, Converter={x:Static conv:AttendanceStatusToBrushConverter.Instance}}"
-                                                               Margin="-30,0,0,0"/> <!-- Hack for overlay? No let's use DataTemplate selector or Trigger later. For now just text. -->
+                                                               Foreground="{Binding Status, Converter={x:Static conv:AttendanceStatusToBrushConverter.Instance}}"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             
@@ -122,11 +117,11 @@
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center" Margin="20,0">
                                                 <StackPanel>
                                                     <TextBlock Text="IN" FontSize="9" Foreground="Gray"/>
-                                                    <TextBlock Text="{Binding ClockInTime, TargetNullValue=--:--}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding ClockInTime, StringFormat='{}{0:hh\\:mm}', TargetNullValue=--:--}" FontWeight="Medium"/>
                                                 </StackPanel>
                                                 <StackPanel>
                                                     <TextBlock Text="OUT" FontSize="9" Foreground="Gray"/>
-                                                    <TextBlock Text="{Binding ClockOutTime, TargetNullValue=--:--}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding ClockOutTime, StringFormat='{}{0:hh\\:mm}', TargetNullValue=--:--}" FontWeight="Medium"/>
                                                 </StackPanel>
                                             </StackPanel>
 

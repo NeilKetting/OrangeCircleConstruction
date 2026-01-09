@@ -73,6 +73,7 @@ namespace OCC.Client.ViewModels.Time
                 // 1. Fetch Staff, Attendance, Leaves
                 var allStaff = await _timeService.GetAllStaffAsync();
                 var todayRecords = await _timeService.GetDailyAttendanceAsync(Date);
+                var activeRecords = await _timeService.GetActiveAttendanceAsync(); // NEW: Check ALL active, not just today's
                 var approvedLeave = await _leaveService.GetApprovedRequestsForDateAsync(Date);
 
                 _allPendingCache.Clear();
@@ -80,50 +81,60 @@ namespace OCC.Client.ViewModels.Time
 
                 foreach (var emp in allStaff.OrderBy(e => e.FirstName))
                 {
-                    // Check if record exists for TODAY
-                    var record = todayRecords.FirstOrDefault(r => r.EmployeeId == emp.Id);
-                    
-                    var vm = new StaffAttendanceViewModel(emp);
-                    
                     // Leave Mapping
                     var leave = approvedLeave.FirstOrDefault(l => l.EmployeeId == emp.Id);
-                    if (leave != null)
+                    
+                    // NEW LOGIC: Filter out if they have ANY ACTIVE shift (from today OR yesterday)
+                    // We check activeRecords (which lists anyone with CheckOutTime == null)
+                    var isActive = activeRecords.Any(r => r.EmployeeId == emp.Id);
+                    
+                    // ALSO filter out if they have a *completed* record for TODAY (so they don't appear in Pending if they finished a shift today)
+                    // Wait, previous logic was: "If currently clocked out, appear in Pending".
+                    // So we ONLY care about isActive.
+                    
+                    // Re-read requirement: "Employee clocked out... should lie on the left".
+                    // So:
+                    // - Is Active? -> NOT Pending (they are working).
+                    // - Not Active? -> Pending (Ready to work).
+                    
+                    if (!isActive)
                     {
-                        vm.IsOnLeave = true;
-                        vm.LeaveType = leave.LeaveType.ToString();
-                    }
-
-                    if (record == null)
-                    {
-                        // Pending
+                        var vm = new StaffAttendanceViewModel(emp);
+                        if (leave != null)
+                        {
+                            vm.IsOnLeave = true;
+                            vm.LeaveType = leave.LeaveType.ToString();
+                        }
                         _allPendingCache.Add(vm);
                     }
-                    else
-                    {
-                        // Logged (Already actioned)
-                        vm.Id = record.Id;
-                        vm.Status = record.Status;
-                        // Map times
-                        if (record.ClockInTime.HasValue) 
-                        {
-                            vm.ClockInTime = record.ClockInTime; 
-                        }
-                        else if (record.CheckInTime != DateTime.MinValue && record.CheckInTime != null) 
-                        {
-                            vm.ClockInTime = record.CheckInTime.Value.TimeOfDay;
-                        }
-                        else 
-                        {
-                            vm.ClockInTime = null; // Explicitly clear default 07:00
-                        }
-                        
-                        if (record.CheckOutTime != null && record.CheckOutTime != DateTime.MinValue)
-                            vm.ClockOutTime = record.CheckOutTime.Value.TimeOfDay;
-                        else
-                            vm.ClockOutTime = null; // Still clocked in
+                }
 
-                        _allLoggedCache.Add(vm);
-                    }
+                // 3. Populate Logged (All records, supporting multiple per employee)
+                // We iterate records instead of staff to allow multiple rows
+                // SORT: Descending (Newest First) per user request "be at the top"
+                foreach (var record in todayRecords.OrderByDescending(r => r.ClockInTime))
+                {
+                    var emp = allStaff.FirstOrDefault(e => e.Id == record.EmployeeId);
+                    if (emp == null) continue; // Should not happen
+
+                    var vm = new StaffAttendanceViewModel(emp);
+                    vm.Id = record.Id;
+                    vm.Status = record.Status;
+                    
+                    // Map times
+                    if (record.ClockInTime.HasValue) 
+                        vm.ClockInTime = record.ClockInTime; 
+                    else if (record.CheckInTime != DateTime.MinValue && record.CheckInTime != null) 
+                        vm.ClockInTime = record.CheckInTime.Value.TimeOfDay;
+                    else 
+                        vm.ClockInTime = null;
+                    
+                    if (record.CheckOutTime != null && record.CheckOutTime != DateTime.MinValue)
+                        vm.ClockOutTime = record.CheckOutTime.Value.TimeOfDay;
+                    else
+                        vm.ClockOutTime = null; // Still clocked in
+
+                    _allLoggedCache.Add(vm);
                 }
 
                 ApplyFilters();
@@ -132,6 +143,66 @@ namespace OCC.Client.ViewModels.Time
             {
                 IsLoading = false;
             }
+        }
+
+        [RelayCommand]
+        private async Task ReClockIn(StaffAttendanceViewModel item)
+        {
+             if (item == null) return;
+             
+             // 1. Prevent Multiple Active Shifts
+             // Check if this employee ALREADY has an active record (CheckOutTime is null) - checking GLOBAL active list to catch yesterday's shifts
+             var activeRecords = await _timeService.GetActiveAttendanceAsync();
+             bool hasActiveShift = activeRecords.Any(x => x.EmployeeId == item.EmployeeId);
+             
+             if (hasActiveShift)
+             {
+                 await _dialogService.ShowAlertAsync("Active Shift Exists", $"{item.Name} is already clocked in. Please clock them out before starting a new shift.");
+                 return;
+             }
+
+             // Logic: Create a BRAND NEW record for this employee.
+             // We can fetch the employee details from the viewmodel item.
+             var emp = await _timeService.GetAllStaffAsync(); 
+             var staff = emp.FirstOrDefault(e => e.Id == item.EmployeeId);
+             
+             if (staff == null) return;
+
+             IsSaving = true;
+             try
+             {
+                 var now = DateTime.Now;
+                 var record = new AttendanceRecord
+                 {
+                     Id = Guid.NewGuid(),
+                     EmployeeId = staff.Id,
+                     Date = Date,
+                     Branch = staff.Branch,
+                     Status = AttendanceStatus.Present,
+                     CheckInTime = now,
+                     ClockInTime = now.TimeOfDay,
+                     CheckOutTime = null, // Open shift
+                     CachedHourlyRate = (decimal?)staff.HourlyRate // SNAPSHOT RATE
+                 };
+
+                 await _timeService.SaveAttendanceRecordAsync(record);
+
+                 // Create a new VM for this new record
+                 var newVm = new StaffAttendanceViewModel(staff)
+                 {
+                     Id = record.Id,
+                     Status = AttendanceStatus.Present,
+                     ClockInTime = now.TimeOfDay,
+                     ClockOutTime = null
+                 };
+
+                 // Add to cache (at TOP) and refresh
+                 _allLoggedCache.Insert(0, newVm); // Insert at 0 to keep "Newest Top" order consistent
+                 ApplyFilters();
+                 
+                 WeakReferenceMessenger.Default.Send(new UpdateStatusMessage($"{staff.FirstName} started a new shift."));
+             }
+             finally { IsSaving = false; }
         }
 
         private void ApplyFilters()
@@ -152,6 +223,7 @@ namespace OCC.Client.ViewModels.Time
                                  .OrderBy(x => x.IsOnLeave)
                                  .ThenBy(x => x.Name));
              
+             // Ensure LoggedStaff maintains the cache order (which we set to Descending)
              LoggedStaff = new ObservableCollection<StaffAttendanceViewModel>(_allLoggedCache.Where(Filter));
         }
 
@@ -176,6 +248,14 @@ namespace OCC.Client.ViewModels.Time
                 // For now, assume we proceed. Ideally we should API call to Cancel Leave.
             }
 
+            // CONFLICT CHECK: Global Active
+            var activeRecords = await _timeService.GetActiveAttendanceAsync();
+            if (activeRecords.Any(r => r.EmployeeId == item.EmployeeId))
+            {
+                await _dialogService.ShowAlertAsync("Already Clocked In", $"{item.Name} has an active shift (possibly from yesterday). Please clock them out first.");
+                return;
+            }
+
             IsSaving = true;
             try
             {
@@ -188,7 +268,9 @@ namespace OCC.Client.ViewModels.Time
                     Branch = item.Branch,
                     Status = AttendanceStatus.Present,
                     CheckInTime = now,
-                    ClockInTime = now.TimeOfDay
+                    ClockInTime = now.TimeOfDay,
+                    CheckOutTime = null, // Explicitly null
+                    CachedHourlyRate = (decimal?)item.Staff.HourlyRate // SNAPSHOT RATE
                 };
 
                 await _timeService.SaveAttendanceRecordAsync(record);
@@ -281,6 +363,10 @@ namespace OCC.Client.ViewModels.Time
                         record.LeaveReason = leaveReason;
                         record.Notes = !string.IsNullOrEmpty(leaveNote) ? $"[Leave Early Note] {leaveNote}" : null;
                     }
+                    else
+                    {
+                        record.Status = AttendanceStatus.Present; // Ensure status reverts to Present if normal clock out
+                    }
                     
                     await _timeService.SaveAttendanceRecordAsync(record);
                     
@@ -294,6 +380,8 @@ namespace OCC.Client.ViewModels.Time
                         loggedItem.ClockOutTime = item.ClockOutTime;
                         loggedItem.Status = item.Status;
                     }
+                    // AND NOW: Move back to Pending (Left) because they are inactive!
+                    MoveToPending(item);
                 }
             }
             finally { IsSaving = false; }
@@ -373,10 +461,36 @@ namespace OCC.Client.ViewModels.Time
 
         private void MoveToLogged(StaffAttendanceViewModel item)
         {
-            _allPendingCache.Remove(item);
-            _allLoggedCache.Add(item); // Add to local cache
+            // Use RemoveAll for safety to ensure it's gone even if references differ
+            _allPendingCache.RemoveAll(x => x.EmployeeId == item.EmployeeId);
             
-            // Re-apply filter to update UI list safely
+            // Insert at 0 to match "Newest First" view
+            _allLoggedCache.Insert(0, item); 
+            
+            // Re-apply filter
+            ApplyFilters(); 
+        }
+
+        private void MoveToPending(StaffAttendanceViewModel item)
+        {
+            // When clocking out, we want this employee to appear in the Pending list again
+            // so they can be clocked in for a new shift if needed.
+            
+            // Safety check: is he already in pending?
+            if (_allPendingCache.Any(x => x.EmployeeId == item.EmployeeId)) return;
+            
+            // Create a fresh VM for the Pending list
+            var pendingVm = new StaffAttendanceViewModel(item.Staff)
+            {
+                // Reset fields for "New Shift" state
+                ClockInTime = null,
+                ClockOutTime = null,
+                Status = AttendanceStatus.Present
+            };
+            
+            _allPendingCache.Add(pendingVm);
+            
+            // Re-apply filter
             ApplyFilters(); 
         }
     }

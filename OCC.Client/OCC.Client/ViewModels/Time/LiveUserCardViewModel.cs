@@ -32,6 +32,21 @@ namespace OCC.Client.ViewModels.Time
         [ObservableProperty]
         private string _clockOutTimeDisplay = "--:--";
 
+        [ObservableProperty]
+        private double _totalMonthHours;
+        
+        [ObservableProperty]
+        private string _totalMonthHoursDisplay = "0h";
+
+        [ObservableProperty]
+        private bool _isOvertimeActive;
+
+        [ObservableProperty]
+        private string _overtimeText = string.Empty; // e.g., "OVERTIME 1.5x"
+
+        [ObservableProperty]
+        private IBrush _overtimeColor = Brushes.Transparent;
+
         public LiveUserCardViewModel()
         {
             // Default State

@@ -109,27 +109,34 @@ namespace OCC.Client.ViewModels.Time
             {
                 var allStaff = await _timeService.GetAllStaffAsync();
                 
-                // Fetch today's records (for historical 'today' view) AND any active records (including yesterday's carry-over)
-                var todayAttendance = await _timeService.GetDailyAttendanceAsync(DateTime.Today);
+                // Fetch today's records (for historical 'today' view) AND any active records
+                var today = DateTime.Today;
+                var todayAttendance = await _timeService.GetDailyAttendanceAsync(today);
                 var activeAttendance = await _timeService.GetActiveAttendanceAsync();
                 
-                // Combine and distinct by ID
                 var mergedAttendance = todayAttendance.Concat(activeAttendance)
                                                       .DistinctBy(x => x.Id)
                                                       .ToList();
 
+                // === NEW: Monthly Hours Calculation ===
+                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+                var monthlyRecords = await _timeService.GetAttendanceByRangeAsync(startOfMonth, today);
+                
                 var userViewModels = new List<LiveUserCardViewModel>();
 
-                // Only show employees that have an attendance record for today (meaning Roll Call was done)
+                // Only show employees that have an ACTIVE attendance record (Live means "Currently Here")
                 foreach (var attendance in mergedAttendance)
                 {
+                    // FILTER: Active Only
+                    if (attendance.CheckOutTime != null) continue;
+
                     var employee = allStaff.FirstOrDefault(e => e.Id == attendance.EmployeeId);
                     if (employee == null) continue;
 
                     // Determine status
                     bool isPresent = attendance.Status == AttendanceStatus.Present || attendance.Status == AttendanceStatus.Late;
                     TimeSpan? clockIn = attendance.CheckInTime?.TimeOfDay ?? attendance.ClockInTime;
-                    TimeSpan? clockOut = attendance.CheckOutTime?.TimeOfDay; // Extract clock out time
+                    TimeSpan? clockOut = attendance.CheckOutTime?.TimeOfDay;
 
                     string FormatName(string name) => 
                         System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name?.ToLower() ?? "");
@@ -141,14 +148,71 @@ namespace OCC.Client.ViewModels.Time
                     };
                     vm.SetStatus(isPresent, clockIn, clockOut, employee.Branch ?? "Unknown");
 
+                    // === Monthly Hours ===
+                    var empRecords = monthlyRecords.Where(r => r.EmployeeId == employee.Id);
+                    double totalHours = 0;
+                    foreach (var record in empRecords)
+                    {
+                         if (record.CheckInTime.HasValue && record.CheckOutTime.HasValue)
+                         {
+                             totalHours += (record.CheckOutTime.Value - record.CheckInTime.Value).TotalHours;
+                         }
+                         else if (record.CheckInTime.HasValue && record.CheckOutTime == null && record.Date.Date == today)
+                         {
+                             // Currently active session: Count hours so far
+                              totalHours += (DateTime.Now - record.CheckInTime.Value).TotalHours;
+                         }
+                    }
+                    vm.TotalMonthHours = totalHours;
+                    vm.TotalMonthHoursDisplay = $"{totalHours:F1}h";
+
+                    // === Overtime Logic ===
+                    // Requirements:
+                    // Weekdays / Normal: 1.5x (Implied > Normal hours, but simpler for Live view: Is today a special day?)
+                    // Saturday: 1.5x
+                    // Sunday / Public Holiday: 2.0x
+                    
+                    var dow = today.DayOfWeek;
+                    bool isWeekend = dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday;
+                    // TODO: Public Holiday Check (Hardcoded MVP list?)
+                    bool isHoliday = false; // Add list if needed. Assuming user handles manual override if not.
+
+                    if (dow == DayOfWeek.Sunday || isHoliday)
+                    {
+                        vm.IsOvertimeActive = true;
+                        vm.OvertimeText = "OVERTIME 2.0x";
+                        vm.OvertimeColor = Avalonia.Media.Brushes.Red;
+                    }
+                    else if (dow == DayOfWeek.Saturday)
+                    {
+                        vm.IsOvertimeActive = true;
+                        vm.OvertimeText = "OVERTIME 1.5x";
+                        vm.OvertimeColor = Avalonia.Media.SolidColorBrush.Parse("#F97316"); // Orange-500
+                    }
+                    // TODO: Weekday Overtime? (e.g. > 17:00)
+                    // "Normal hours from employee start/end time"
+                    // If Now > EndTime, trigger Overtime.
+                    // Need Start/End time on Employee or Branch default.
+                    else 
+                    {
+                        // Check Employee Hours?
+                        // Assuming 17:00 default for now if generic.
+                        // Implied from previous conversation: JHB(16:00), CPT(17:00).
+                        int paramEndHour = (employee.Branch?.Contains("Cape") == true) ? 17 : 16;
+                        if (DateTime.Now.Hour >= paramEndHour)
+                        {
+                             vm.IsOvertimeActive = true;
+                             vm.OvertimeText = "OVERTIME 1.5x";
+                             vm.OvertimeColor = Avalonia.Media.SolidColorBrush.Parse("#F97316"); // Orange
+                        }
+                    }
+
                     userViewModels.Add(vm);
                 }
 
-                // Update Collection on UI Thread to be safe, though usually this runs on UI context
                 Dispatcher.UIThread.Post(() =>
                 {
                     LiveUsers.Clear();
-                    // Sort by Name for nicer display
                     foreach (var u in userViewModels.OrderBy(x => x.DisplayName))
                     {
                         LiveUsers.Add(u);

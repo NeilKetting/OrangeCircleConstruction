@@ -49,7 +49,8 @@ namespace OCC.Client.ViewModels.Time
         #endregion
 
         #region Properties
-
+        
+        public Employee Staff => _staff; // Exposed for cloning/re-queueing
         public Guid EmployeeId => _staff.Id;
         public string Name => $"{_staff.FirstName} {_staff.LastName}";
         public string Role => _staff.Role.ToString();
