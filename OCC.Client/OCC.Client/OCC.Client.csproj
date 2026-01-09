@@ -47,4 +47,10 @@
     <Folder Include="Views\HealthSafety\" />
     <Folder Include="Views\Order\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Update="Assets\Images\occ-logo.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
+  </ItemGroup>
 </Project>

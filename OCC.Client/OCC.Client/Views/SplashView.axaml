@@ -20,7 +20,7 @@
             <!-- Logo area -->
             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="20">
                 <!-- Placeholder for Logo if available, using Text for now -->
-                <Image Source="Assets/Images/occ-logo.jpg"/>
+                <Image Source="avares://OCC.Client/Assets/Images/occ-logo.jpg" Width="300"/>
             </StackPanel>
 
             <!-- Status -->
