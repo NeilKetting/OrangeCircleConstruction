@@ -16,11 +16,8 @@
 		<DataTemplate DataType="{x:Type vm:TimeLiveViewModel}">
 			<viewTime:TimeLiveView/>
 		</DataTemplate>
-		<DataTemplate DataType="{x:Type vm:RollCallViewModel}">
-			<viewTime:RollCallView/>
-		</DataTemplate>
-		<DataTemplate DataType="{x:Type vm:ClockOutViewModel}">
-			<viewTime:ClockOutView/>
+		<DataTemplate DataType="{x:Type vm:DailyTimesheetViewModel}">
+			<viewTime:DailyTimesheetView/>
 		</DataTemplate>
 		<DataTemplate DataType="{x:Type vm:HistoryViewModel}">
 			<viewTime:HistoryView/>

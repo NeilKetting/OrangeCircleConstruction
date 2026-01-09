@@ -1,18 +1,38 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using OCC.Shared.Models;
+using OCC.Client.Services.Interfaces;
 using System;
 
 namespace OCC.Client.ViewModels.Time
 {
     public partial class HistoryRecordViewModel : ObservableObject
     {
+        private readonly IHolidayService _holidayService;
         private readonly AttendanceRecord _attendance;
         private readonly Employee _employee;
+        private bool _isPublicHoliday = false;
 
-        public HistoryRecordViewModel(AttendanceRecord attendance, Employee employee)
+        public HistoryRecordViewModel(AttendanceRecord attendance, Employee employee, IHolidayService holidayService)
         {
             _attendance = attendance;
             _employee = employee;
+            _holidayService = holidayService;
+            
+            // Async check for holiday status
+            CheckHolidayStatus();
+        }
+
+        private async void CheckHolidayStatus()
+        {
+            if (_attendance.CheckInTime.HasValue || _attendance.ClockInTime.HasValue)
+            {
+                var d = _attendance.CheckInTime.HasValue ? _attendance.CheckInTime.Value.Date : _attendance.Date;
+                _isPublicHoliday = await _holidayService.IsHolidayAsync(d);
+                if (_isPublicHoliday)
+                {
+                    Refresh(); // Trigger data update if holiday status confirmed
+                }
+            }
         }
 
         public DateTime Date => _attendance.Date;
@@ -118,16 +138,16 @@ namespace OCC.Client.ViewModels.Time
 
         private double GetMultiplier(DateTime time, string branch)
         {
+            // 0. Public Holidays = 2.0x (Highest Priority)
+            if (_isPublicHoliday) return 2.0;
+
             // 1. Sundays = 2.0x
             if (time.DayOfWeek == DayOfWeek.Sunday) return 2.0;
 
             // 2. Saturdays = 1.5x
             if (time.DayOfWeek == DayOfWeek.Saturday) return 1.5;
 
-            // 3. Public Holidays (TODO: Inject Holiday Service or hardcode known list for now)
-            // if (IsHoliday(time)) return 2.0;
-
-            // 4. Weekday Overtime (After 16:00 JHB / 17:00 CPT) = 1.5x
+            // 3. Weekday Overtime (After 16:00 JHB / 17:00 CPT) = 1.5x
             int endHour = branch.Contains("Cape", StringComparison.OrdinalIgnoreCase) ? 17 : 16;
             
             // If before 07:00 start? Usually early starts are also OT, but focused on late for now.

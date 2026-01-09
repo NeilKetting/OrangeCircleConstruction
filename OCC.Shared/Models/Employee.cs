@@ -22,6 +22,21 @@ namespace OCC.Shared.Models
         public Guid? LinkedUserId { get; set; }
 
         /// <summary>
+        /// Determines if the rate is Hourly or a Monthly Salary.
+        /// </summary>
+        public RateType RateType { get; set; } = RateType.Hourly; // Hourly or Monthly
+        /// <summary>
+        /// Hourly pay rate in local currency.
+        /// </summary>
+        public double HourlyRate { get; set; } // Current Rate
+        public string TaxNumber { get; set; } = string.Empty;
+        
+        // Leave Balances (BCEA)
+        public double AnnualLeaveBalance { get; set; } // Accrues 1 day per 17 days worked
+        public double SickLeaveBalance { get; set; } = 30; // 30 days per 36-month cycle
+        public DateTime? LeaveCycleStartDate { get; set; } // To track the 3-year cycle
+
+        /// <summary>
         /// Employee's first name.
         /// </summary>
         public string FirstName { get; set; } = string.Empty;
@@ -62,10 +77,7 @@ namespace OCC.Shared.Models
         /// </summary>
         public EmployeeRole Role { get; set; } = EmployeeRole.GeneralWorker;
 
-        /// <summary>
-        /// Hourly pay rate in local currency.
-        /// </summary>
-        public double HourlyRate { get; set; }
+
 
         /// <summary>
         /// Computed full name of the employee.
@@ -119,10 +131,7 @@ namespace OCC.Shared.Models
         /// </summary>
         public double LeaveBalance { get; set; } = 15.0; // Default Logic? 
         
-        /// <summary>
-        /// Determines if the rate is Hourly or a Monthly Salary.
-        /// </summary>
-        public RateType RateType { get; set; } = RateType.Hourly;
+
         public override string ToString()
         {
             return DisplayName;

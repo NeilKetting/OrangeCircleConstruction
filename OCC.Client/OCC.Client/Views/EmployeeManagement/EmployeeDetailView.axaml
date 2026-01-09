@@ -264,7 +264,31 @@
 								<TextBlock Text="Branch Code" Classes="FormLabel"/>
 								<TextBox Text="{Binding BranchCode}" Classes="FormInput" Watermark="Code"/>
 							</StackPanel>
-						</StackPanel>
+
+                        <Separator Background="{DynamicResource SurfaceBorder}"/>
+
+                        <!-- Leave Balances -->
+                        <StackPanel Grid.Column="4" Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <PathIcon Data="{StaticResource IconCalendar}" Width="20" Height="20" Foreground="{DynamicResource PrimaryTeal}"/>
+                                <TextBlock Text="Initial Leave Balances (Days)" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                            </StackPanel>
+                            
+                            <Grid ColumnDefinitions="*, 10, *">
+                                <!-- Annual Leave -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Annual Leave" Classes="FormLabel"/>
+                                    <TextBox Text="{Binding AnnualLeaveBalance}" Classes="FormInput" Watermark="0.0"/>
+                                </StackPanel>
+                                
+                                <!-- Sick Leave -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Sick Leave" Classes="FormLabel"/>
+                                    <TextBox Text="{Binding SickLeaveBalance}" Classes="FormInput" Watermark="30.0"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+					</StackPanel>
 					</Grid>
 					<Separator Background="{DynamicResource SurfaceBorder}" Margin="0,15"/>
 				</StackPanel>

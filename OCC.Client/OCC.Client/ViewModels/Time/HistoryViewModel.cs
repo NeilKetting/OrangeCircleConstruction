@@ -65,12 +65,15 @@ namespace OCC.Client.ViewModels.Time
         #endregion
         
         // Permission Property for UI Binding
+        // Permission and Holiday Services
         public bool IsWageVisible { get; }
+        private readonly IHolidayService _holidayService;
 
-        public HistoryViewModel(ITimeService timeService, IExportService exportService, IPermissionService permissionService)
+        public HistoryViewModel(ITimeService timeService, IExportService exportService, IPermissionService permissionService, IHolidayService holidayService)
         {
             _timeService = timeService;
             _exportService = exportService;
+            _holidayService = holidayService;
             
             // Check Permission
             IsWageVisible = permissionService.CanAccess("WageViewing");
@@ -296,7 +299,7 @@ namespace OCC.Client.ViewModels.Time
                     var emp = allEmployee.FirstOrDefault(em => em.Id == rec.EmployeeId);
                     if (emp == null) continue;
 
-                    var vm = new HistoryRecordViewModel(rec, emp);
+                    var vm = new HistoryRecordViewModel(rec, emp, _holidayService);
                     list.Add(vm);
                 }
 

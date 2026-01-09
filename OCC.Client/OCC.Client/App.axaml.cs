@@ -143,6 +143,7 @@ namespace OCC.Client
             services.AddSingleton<SignalRNotificationService>();
             services.AddSingleton<UserActivityService>();
             services.AddSingleton<IPermissionService, PermissionService>();
+            services.AddTransient<IHolidayService, HolidayService>();
             services.AddSingleton<LocalSettingsService>();
             services.AddSingleton(ConnectionSettings.Instance);
             services.AddTransient<ILeaveService, LeaveService>();
@@ -194,9 +195,9 @@ namespace OCC.Client
             services.AddTransient<TimeLiveViewModel>();
             services.AddTransient<TimeMenuViewModel>();
             services.AddTransient<TimeAttendanceViewModel>();
-            services.AddTransient<RollCallViewModel>(); // Added
+
             services.AddTransient<DailyTimesheetViewModel>(); // Unified View
-            services.AddTransient<ClockOutViewModel>();
+
             services.AddTransient<HistoryViewModel>();
             services.AddTransient<LeaveApplicationViewModel>();
             services.AddTransient<LeaveApprovalViewModel>();

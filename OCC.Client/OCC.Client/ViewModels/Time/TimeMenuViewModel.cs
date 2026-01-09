@@ -17,7 +17,7 @@ namespace OCC.Client.ViewModels.Time
         [NotifyPropertyChangedFor(nameof(IsOvertimeActive))]
         private string _activeTab = "Live";
 
-        public bool IsClockSystemActive => ActiveTab is "Daily Roll Call" or "Clock Out" or "History";
+        public bool IsClockSystemActive => ActiveTab is "Timesheet" or "History";
         public bool IsLeaveActive => ActiveTab is "Leave Application" or "LeaveApprovals";
         public bool IsOvertimeActive => ActiveTab is "Overtime" or "OvertimeApproval";
 

@@ -34,14 +34,9 @@
                     </StackPanel>
                     <Button.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuItem Header="Daily Roll Call" Command="{Binding SetActiveTabCommand}" CommandParameter="Daily Roll Call">
+                            <MenuItem Header="Daily Timesheet" Command="{Binding SetActiveTabCommand}" CommandParameter="Timesheet">
                                 <MenuItem.Icon>
                                     <PathIcon Data="{StaticResource IconDailyRollCall}" Classes="IconStyle" Width="16" Height="16"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Clock Out" Command="{Binding SetActiveTabCommand}" CommandParameter="Clock Out">
-                                <MenuItem.Icon>
-                                    <PathIcon Data="{StaticResource IconLeavingEarly}" Classes="IconStyle" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="Attendance History" Command="{Binding SetActiveTabCommand}" CommandParameter="History">

@@ -109,6 +109,14 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         [ObservableProperty]
         private RateType _selectedRateType = RateType.Hourly;
 
+        // Leave Balances
+        [ObservableProperty]
+        private double _annualLeaveBalance;
+
+        [ObservableProperty]
+        private double _sickLeaveBalance = 30; // Default SA Limit
+
+
         #endregion
 
         #region Properties
@@ -257,7 +265,13 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             staff.ContractDuration = ContractDuration;
             staff.Branch = Branch;
             staff.ShiftStartTime = ShiftStartTime;
+            staff.Branch = Branch;
+            staff.ShiftStartTime = ShiftStartTime;
             staff.ShiftEndTime = ShiftEndTime;
+            
+            // Leave Balances
+            staff.AnnualLeaveBalance = AnnualLeaveBalance;
+            staff.SickLeaveBalance = SickLeaveBalance;
             
             // Banking
             // Banking
@@ -333,7 +347,12 @@ namespace OCC.Client.ViewModels.EmployeeManagement
             ContractDuration = staff.ContractDuration ?? string.Empty;
             Branch = staff.Branch;
             ShiftStartTime = staff.ShiftStartTime;
+            ShiftStartTime = staff.ShiftStartTime;
             ShiftEndTime = staff.ShiftEndTime;
+
+            // Leave Balances
+            AnnualLeaveBalance = staff.AnnualLeaveBalance;
+            SickLeaveBalance = staff.SickLeaveBalance;
 
             // Banking
             AccountNumber = staff.AccountNumber ?? string.Empty;

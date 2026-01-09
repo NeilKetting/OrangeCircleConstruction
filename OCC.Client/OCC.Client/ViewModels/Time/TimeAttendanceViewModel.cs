@@ -26,8 +26,7 @@ namespace OCC.Client.ViewModels.Time
 
         // Sub-ViewModels
         [ObservableProperty] private TimeLiveViewModel _liveView;
-        [ObservableProperty] private RollCallViewModel _dailyRollCallView;
-        [ObservableProperty] private ClockOutViewModel _clockOutView;
+        [ObservableProperty] private DailyTimesheetViewModel _dailyTimesheetView;
         [ObservableProperty] private HistoryViewModel _historyView;
         [ObservableProperty] private LeaveApplicationViewModel _leaveApplicationView;
         [ObservableProperty] private LeaveApprovalViewModel _leaveApprovalVM;
@@ -49,8 +48,7 @@ namespace OCC.Client.ViewModels.Time
             // Design-time
             _timeMenu = null!;
             _liveView = null!;
-            _dailyRollCallView = null!;
-            _clockOutView = null!;
+            _dailyTimesheetView = null!;
             _historyView = null!;
             _leaveApplicationView = null!;
             _leaveApprovalVM = null!;
@@ -64,8 +62,7 @@ namespace OCC.Client.ViewModels.Time
         public TimeAttendanceViewModel(
             TimeMenuViewModel timeMenu,
             TimeLiveViewModel liveView,
-            RollCallViewModel dailyRollCallView,
-            ClockOutViewModel clockOutView,
+            DailyTimesheetViewModel dailyTimesheetView,
             HistoryViewModel historyView,
             LeaveApplicationViewModel leaveApplicationView,
             LeaveApprovalViewModel leaveApprovalViewModel,
@@ -75,8 +72,7 @@ namespace OCC.Client.ViewModels.Time
         {
             _timeMenu = timeMenu;
             _liveView = liveView;
-            _dailyRollCallView = dailyRollCallView;
-            _clockOutView = clockOutView;
+            _dailyTimesheetView = dailyTimesheetView;
             _historyView = historyView;
             _leaveApplicationView = leaveApplicationView;
             _leaveApprovalVM = leaveApprovalViewModel;
@@ -92,9 +88,9 @@ namespace OCC.Client.ViewModels.Time
 
             _timeMenu.PropertyChanged += TimeMenu_PropertyChanged;
             
-            // Handle Close/Save from Daily Roll Call tab
-            _dailyRollCallView.CloseRequested += (s, e) => { TimeMenu.ActiveTab = "Live"; };
-            _dailyRollCallView.SaveCompleted += (s, e) => { TimeMenu.ActiveTab = "Live"; };
+            // Handle Close/Save from Daily Timesheet tab
+            // _dailyTimesheetView events if needed or just handle navigation
+            // _dailyTimesheetView.CloseRequested += (s, e) => { TimeMenu.ActiveTab = "Live"; };
 
             Initialize();
         }
@@ -123,13 +119,8 @@ namespace OCC.Client.ViewModels.Time
         {
             switch (TimeMenu.ActiveTab)
             {
-                case "Daily Roll Call":
-                    CurrentView = DailyRollCallView;
-                    break;
-                case "Clock Out":
-                    CurrentView = ClockOutView;
-                    // Trigger refresh if needed
-                    ClockOutView.InitializeCommand.Execute(null);
+                case "Timesheet":
+                    CurrentView = DailyTimesheetView;
                     break;
                 case "History":
                     CurrentView = HistoryView;
