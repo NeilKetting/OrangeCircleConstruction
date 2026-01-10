@@ -105,7 +105,7 @@ namespace OCC.Client.ViewModels.Orders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing receipt for order {OrderNumber}", Order?.OrderNumber);
-                await _dialogService.ShowAlertAsync("Error", "Failed to process receipt.");
+                await _dialogService.ShowAlertAsync("Error", $"Failed to process receipt: {ex.Message}");
             }
             finally
             {

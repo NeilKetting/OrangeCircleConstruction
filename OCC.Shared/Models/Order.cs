@@ -39,7 +39,7 @@ namespace OCC.Shared.Models
         public string Notes { get; set; } = string.Empty;
 
         // --- Content ---
-        public List<OrderLine> Lines { get; set; } = new();
+        public System.Collections.ObjectModel.ObservableCollection<OrderLine> Lines { get; set; } = new();
 
         // --- Validation / Display Helpers ---
         public string DestinationDisplay => DestinationType == OrderDestinationType.Site 
@@ -57,7 +57,7 @@ namespace OCC.Shared.Models
     public enum OrderType
     {
         PurchaseOrder,     // Buying from Supplier
-        SalesOrder,        // Selling to Customer
+        SalesOrder,        // Selling to Customer / Site / Project
         ReturnToInventory  // Returning leftover material from Project to Stock
     }
 

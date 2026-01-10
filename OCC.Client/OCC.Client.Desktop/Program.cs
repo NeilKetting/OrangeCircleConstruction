@@ -24,7 +24,12 @@ namespace OCC.Client.Desktop
             // Global Exception Handlers
             AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
             {
-                Log.Fatal(error.ExceptionObject as Exception, "AppDomain Unhandled Exception");
+                var ex = error.ExceptionObject as Exception;
+                Log.Fatal(ex, "AppDomain Unhandled Exception");
+                if (ex != null)
+                {
+                    ShowFatalError("An unhandled exception occurred.", ex);
+                }
                 Log.CloseAndFlush();
             };
 
@@ -44,6 +49,7 @@ namespace OCC.Client.Desktop
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Application StartWithClassicDesktopLifetime Crash");
+                ShowFatalError("The application failed to start.", ex);
             }
             finally
             {
@@ -51,11 +57,20 @@ namespace OCC.Client.Desktop
             }
         }
 
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern int MessageBox(IntPtr hWnd, String text, String caption, int options);
+
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .WithInterFont()
                 .LogToTrace();
+
+        private static void ShowFatalError(string message, Exception ex)
+        {
+            var fullMessage = $"{message}\n\n{ex.Message}\n\nSee log for details.";
+            MessageBox(IntPtr.Zero, fullMessage, "Critical Error", 0x10); // 0x10 = MB_ICONHAND (Error)
+        }
     }
 }

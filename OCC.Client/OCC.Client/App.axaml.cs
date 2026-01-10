@@ -152,6 +152,7 @@ namespace OCC.Client
             services.AddHttpClient<ISupplierService, SupplierService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddHttpClient<ISettingsService, SettingsService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IPdfService, PdfService>();
 
             // Logging
             services.AddLogging(l => l.AddSerilog());
@@ -217,12 +218,14 @@ namespace OCC.Client
             services.AddTransient<HealthSafetyDashboardViewModel>();
 
             // Orders
+            services.AddTransient<OrderMenuViewModel>();
             services.AddTransient<OrderViewModel>();
             services.AddTransient<InventoryViewModel>();
             services.AddTransient<CreateOrderViewModel>();
             services.AddTransient<OrderListViewModel>();
             services.AddTransient<SupplierListViewModel>();
             services.AddTransient<SupplierDetailViewModel>();
+            services.AddTransient<ReceiveOrderViewModel>();
             services.AddTransient<OrderDashboardViewModel>();
 
             // Settings

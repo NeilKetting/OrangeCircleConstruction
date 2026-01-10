@@ -18,5 +18,7 @@ namespace OCC.Shared.Models
         public string BankName { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
         public string BranchCode { get; set; } = string.Empty;
+        
+        public override string ToString() => Name;
     }
 }

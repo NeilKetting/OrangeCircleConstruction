@@ -1,92 +1,156 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:OCC.Client.ViewModels.Orders"
-             xmlns:conv="using:OCC.Client.Converters"
-             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
-             x:Class="OCC.Client.Views.Orders.SupplierDetailView"
-             x:DataType="vm:SupplierDetailViewModel">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:OCC.Client.ViewModels.Orders"
+			 xmlns:conv="using:OCC.Client.Converters"
+			 xmlns:models="using:OCC.Shared.Models"
+			 mc:Ignorable="d"
+			 d:DesignHeight="600"
+			 d:DesignWidth="600"
+			 Height="700"
+			 x:Name="Root"
 
-    <UserControl.Resources>
-        <conv:BoolToTextConverter x:Key="BoolToTextConverter" />
-    </UserControl.Resources>
+			 x:Class="OCC.Client.Views.Orders.SupplierDetailView"
+			 x:DataType="vm:SupplierDetailViewModel">
 
-    <Border Background="White" CornerRadius="8" BoxShadow="0 4 15 0 #40000000" Margin="20" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="1" MaxWidth="600" MaxHeight="700">
-        <Grid RowDefinitions="Auto, *, Auto">
-            
-            <!-- Header -->
-            <Border Grid.Row="0" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,0,0,1" Padding="20">
-                <Grid ColumnDefinitions="*, Auto">
-                    <TextBlock Text="{Binding IsEditMode, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Edit Supplier|New Supplier'}" 
-                               FontSize="18" FontWeight="Bold"/> <!-- Missing converter, assume fallback or text change -->
-                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="IconButton">
-                        <PathIcon Data="{StaticResource IconClose}" Width="16"/>
-                    </Button>
-                </Grid>
-            </Border>
+	<UserControl.Resources>
+		<conv:BoolToTextConverter x:Key="BoolToTextConverter" />
+		<conv:FriendlyEnumConverter x:Key="FriendlyEnumConverter" />
+		<conv:MathConverter x:Key="MathConverter" />
+	</UserControl.Resources>
 
-            <!-- Form -->
-            <ScrollViewer Grid.Row="1" Padding="30">
-                <StackPanel Spacing="20">
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Company Name" Classes="Label"/>
-                        <TextBox Text="{Binding Supplier.Name}" Classes="FormInput"/>
-                    </StackPanel>
+	<UserControl.Styles>
+		<!-- Compact Styles -->
+		<Style Selector="TextBox.FormInput">
+			<Setter Property="MinHeight" Value="32"/>
+			<Setter Property="Padding" Value="8,5"/>
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="CornerRadius" Value="4"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="ComboBox">
+			<Setter Property="MinHeight" Value="32"/>
+			<Setter Property="Padding" Value="8,5"/>
+			<Setter Property="FontSize" Value="13"/>
+			<Setter Property="CornerRadius" Value="4"/>
+		</Style>
+		<Style Selector="TextBlock.Label">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="Foreground" Value="{DynamicResource TextSecondaryGray}"/>
+			<Setter Property="Margin" Value="0,0,0,3"/>
+		</Style>
+	</UserControl.Styles>
 
-                    <Grid ColumnDefinitions="*, 15, *">
-                        <StackPanel Grid.Column="0" Spacing="5">
-                            <TextBlock Text="Contact Person" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.ContactPerson}" Classes="FormInput"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Spacing="5">
-                            <TextBlock Text="VAT Number" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.VatNumber}" Classes="FormInput"/>
-                        </StackPanel>
-                    </Grid>
+	<Border Background="White" Width="600" Height="550" CornerRadius="8" BoxShadow="0 4 15 0 #40000000" Margin="20" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="1"
+			VerticalAlignment="Center" HorizontalAlignment="Center">
+		<Grid RowDefinitions="Auto, *, Auto">
 
-                    <Grid ColumnDefinitions="*, 15, *">
-                        <StackPanel Grid.Column="0" Spacing="5">
-                            <TextBlock Text="Email Address" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.Email}" Classes="FormInput"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Spacing="5">
-                            <TextBlock Text="Phone Number" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.Phone}" Classes="FormInput"/>
-                        </StackPanel>
-                    </Grid>
-                    
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Physical Address" Classes="Label"/>
-                        <TextBox Text="{Binding Supplier.Address}" Classes="FormInput" Height="60" AcceptsReturn="True"/>
-                    </StackPanel>
-                    
-                    <TextBlock Text="Banking Details" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"/>
-                     <Grid ColumnDefinitions="*, 15, *">
-                        <StackPanel Grid.Column="0" Spacing="5">
-                            <TextBlock Text="Bank Name" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.BankName}" Classes="FormInput"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Spacing="5">
-                            <TextBlock Text="Branch Code" Classes="Label"/>
-                            <TextBox Text="{Binding Supplier.BranchCode}" Classes="FormInput"/>
-                        </StackPanel>
-                    </Grid>
-                    <StackPanel Spacing="5">
-                        <TextBlock Text="Account Number" Classes="Label"/>
-                        <TextBox Text="{Binding Supplier.AccountNumber}" Classes="FormInput"/>
-                    </StackPanel>
+			<!-- Header -->
+			<Border Grid.Row="0" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,0,0,1" Padding="15">
+				<Grid ColumnDefinitions="*, Auto">
+					<TextBlock Text="{Binding IsEditMode, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Edit Supplier|New Supplier'}"
+							   FontSize="18" FontWeight="Bold"/>
+					<Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="IconButton">
+						<PathIcon Data="{StaticResource IconClose}" Width="16"/>
+					</Button>
+				</Grid>
+			</Border>
 
-                </StackPanel>
-            </ScrollViewer>
+			<!-- Form -->
+			<ScrollViewer Grid.Row="1" Padding="20">
+				<Grid ColumnDefinitions="*, 20, *, 20, *">
+					<!-- Left Column: Company Info -->
+					<StackPanel Grid.Column="0" Spacing="15">
+						<StackPanel Spacing="5">
+							<TextBlock Text="Company Name" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.Name}" Classes="FormInput" Watermark="e.g. Acme Corp"/>
+						</StackPanel>
 
-            <!-- Footer -->
-            <Border Grid.Row="2" Background="#F8FAFC" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,1,0,0" Padding="20">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="15">
-                    <Button Command="{Binding CancelCommand}" Content="Cancel" Classes="Secondary" Width="100"/>
-                    <Button Command="{Binding SaveCommand}" Content="Save Supplier" Classes="Primary" Width="150" />
-                </StackPanel>
-            </Border>
-        </Grid>
-    </Border>
+						<StackPanel Spacing="5">
+							<TextBlock Text="Contact Person" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.ContactPerson}" Classes="FormInput" Watermark="e.g. John Doe"/>
+						</StackPanel>
+
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="Email Address" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.Email}" Classes="FormInput" Watermark="e.g. contact@acme.com"/>
+						</StackPanel>
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="Phone Number" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.Phone}" Classes="FormInput" Watermark="e.g. +27 12 345 6789"/>
+						</StackPanel>
+
+					</StackPanel>
+
+					<!-- Middel Column: Banking Info -->
+					<StackPanel Grid.Column="2" Spacing="15">
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="VAT Number" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.VatNumber}" Classes="FormInput" Watermark="e.g. 4012345678"/>
+						</StackPanel>
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="Physical Address" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.Address}" Classes="FormInput" Height="60" AcceptsReturn="True" Watermark="Physical address..."/>
+						</StackPanel>
+					</StackPanel>
+
+					<!-- Right Column: Additional Info -->
+					<StackPanel Grid.Column="4" Spacing="15">
+						<StackPanel Spacing="5">
+							<TextBlock Text="Banking Details" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,5"/>
+							<TextBlock Text="Bank Name" Classes="Label"/>
+
+							<!-- Dropdown for standard banks -->
+							<ComboBox ItemsSource="{Binding AvailableBanks}"
+									  SelectedItem="{Binding SelectedBank}"
+									  HorizontalAlignment="Stretch"
+									  IsVisible="{Binding !IsOtherBankSelected}"
+									  IsTextSearchEnabled="True">
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Converter={StaticResource FriendlyEnumConverter}}"/>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+
+							<!-- Text input for 'Other' -->
+							<Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsOtherBankSelected}">
+								<TextBox Text="{Binding CustomBankName}" Classes="FormInput" Watermark="Enter Bank Name"/>
+								<Button Grid.Column="1" Classes="IconButton" Margin="5,0,0,0"
+										Command="{Binding SetSelectedBankCommand}"
+										CommandParameter="{x:Static models:BankName.FNB_RMB}"
+										ToolTip.Tip="Select from list">
+									<PathIcon Data="{StaticResource IconClose}" Width="12" Height="12"/>
+								</Button>
+							</Grid>
+						</StackPanel>
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="Branch Code" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.BranchCode}" Classes="FormInput" Watermark="e.g. 250655"/>
+						</StackPanel>
+
+						<StackPanel Spacing="5">
+							<TextBlock Text="Account Number" Classes="Label"/>
+							<TextBox Text="{Binding Supplier.AccountNumber}" Classes="FormInput" Watermark="Account number"/>
+						</StackPanel>
+					</StackPanel>
+				</Grid>
+			</ScrollViewer>
+
+			<!-- Footer -->
+			<Border Grid.Row="2" Background="#F8FAFC" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,1,0,0" Padding="15">
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="15">
+					<Button Command="{Binding CancelCommand}" Content="Cancel" Classes="Secondary"/>
+					<Button Command="{Binding SaveCommand}" Content="Save Supplier" Classes="Primary" />
+				</StackPanel>
+			</Border>
+		</Grid>
+	</Border>
 </UserControl>

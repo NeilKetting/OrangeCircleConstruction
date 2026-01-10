@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.ComponentModel.DataAnnotations;
 using System.Collections.ObjectModel;
 using OCC.Shared.Models;
 using OCC.Client.ViewModels.Core;
@@ -21,10 +22,17 @@ namespace OCC.Client.ViewModels.Orders
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<Project> _projectRepository;
         private readonly IDialogService _dialogService;
+
         private readonly ILogger<CreateOrderViewModel> _logger;
+        private readonly IPdfService _pdfService;
 
         [ObservableProperty]
         private Order _newOrder = new();
+
+        // Proxy Properties for Order Totals (Model doesn't implement INPC)
+        public decimal OrderSubTotal => NewOrder?.SubTotal ?? 0;
+        public decimal OrderVat => NewOrder?.VatTotal ?? 0;
+        public decimal OrderTotal => NewOrder?.TotalAmount ?? 0;
 
         [ObservableProperty]
         private OrderLine _newLine = new();
@@ -39,6 +47,7 @@ namespace OCC.Client.ViewModels.Orders
         
         // Selected Items
         [ObservableProperty]
+        [property: CustomValidation(typeof(CreateOrderViewModel), nameof(ValidateSupplierSelection))]
         private Supplier? _selectedSupplier;
         
         [ObservableProperty]
@@ -57,8 +66,59 @@ namespace OCC.Client.ViewModels.Orders
         [ObservableProperty]
         private bool _isReturnOrder;
 
-        public event EventHandler? CloseRequested;
+        // Validation Test Proxy
 
+
+
+        [ObservableProperty]
+        private bool _isAddingNewProduct;
+        
+        [ObservableProperty]
+        private string _newProductName = string.Empty;
+
+        [ObservableProperty]
+        private string _newProductUOM = "ea";
+        
+        [ObservableProperty]
+        private bool _isAddingNewSupplier;
+        
+        [ObservableProperty]
+        private string _newSupplierName = string.Empty;
+
+        // --- Logic ---
+        
+        [ObservableProperty]
+        private bool _isOfficeDelivery = true; // Default
+        
+        [ObservableProperty]
+        private bool _isSiteDelivery;
+        
+        [ObservableProperty]
+        [property: CustomValidation(typeof(CreateOrderViewModel), nameof(ValidateProjectSelection))]
+        private ProjectBase? _selectedProject;
+
+        // Validation Logic
+        public static ValidationResult? ValidateSupplierSelection(Supplier? supplier, ValidationContext context)
+        {
+            var vm = (CreateOrderViewModel)context.ObjectInstance;
+            if (vm.IsPurchaseOrder && supplier == null)
+            {
+                return new ValidationResult("Supplier is required for Purchase Orders.");
+            }
+            return ValidationResult.Success;
+        }
+
+        public static ValidationResult? ValidateProjectSelection(ProjectBase? project, ValidationContext context)
+        {
+            var vm = (CreateOrderViewModel)context.ObjectInstance;
+            if (vm.IsSalesOrder && project == null)
+            {
+                return new ValidationResult("Project is required for Sales Orders.");
+            }
+            return ValidationResult.Success;
+        }
+
+        public event EventHandler? CloseRequested;
 
         public CreateOrderViewModel(
             IOrderService orderService, 
@@ -67,7 +127,8 @@ namespace OCC.Client.ViewModels.Orders
             IRepository<Customer> customerRepository,
             IRepository<Project> projectRepository, 
             IDialogService dialogService,
-            ILogger<CreateOrderViewModel> logger)
+            ILogger<CreateOrderViewModel> logger,
+            IPdfService pdfService)
         {
             _orderService = orderService;
             _inventoryService = inventoryService;
@@ -76,6 +137,7 @@ namespace OCC.Client.ViewModels.Orders
             _projectRepository = projectRepository;
             _dialogService = dialogService;
             _logger = logger;
+            _pdfService = pdfService;
             
             InitializeOrder();
         }
@@ -89,6 +151,7 @@ namespace OCC.Client.ViewModels.Orders
             _projectRepository = null!;
             _dialogService = null!;
             _logger = null!;
+            NewOrder.OrderNumber = "DEMO-0000";
         } // Design-time support
 
         public async void LoadData()
@@ -117,8 +180,11 @@ namespace OCC.Client.ViewModels.Orders
                 OrderDate = DateTime.Now,
                 OrderNumber = $"PO-{DateTime.Now:yyMM}-{new Random().Next(1000, 9999)}",
                 OrderType = OrderType.PurchaseOrder, // Default
-                TaxRate = 0.15m
+                TaxRate = 0.15m,
+                DestinationType = OrderDestinationType.Stock
             };
+            IsOfficeDelivery = true;
+            NewOrder.Attention = null; // Ensure null for validation test
             UpdateOrderTypeFlags();
         }
 
@@ -151,6 +217,58 @@ namespace OCC.Client.ViewModels.Orders
             IsReturnOrder = NewOrder.OrderType == OrderType.ReturnToInventory;
         }
 
+        partial void OnIsOfficeDeliveryChanged(bool value)
+        {
+            if (value)
+            {
+                NewOrder.DestinationType = OrderDestinationType.Stock;
+                IsSiteDelivery = false;
+                // Maybe reset address to default office address here if needed
+                // NewOrder.EntityAddress = "Office Address...";
+            }
+        }
+
+        partial void OnIsSiteDeliveryChanged(bool value)
+        {
+            if (value)
+            {
+                NewOrder.DestinationType = OrderDestinationType.Site;
+                IsOfficeDelivery = false;
+                // If Project already selected, update address
+                if (SelectedProject != null)
+                {
+                    NewOrder.EntityAddress = SelectedProject.Location;
+                }
+            }
+        }
+        
+        partial void OnSelectedProjectChanged(ProjectBase? value)
+        {
+             if (value != null)
+             {
+                 NewOrder.ProjectId = value.Id;
+                 NewOrder.ProjectName = value.Name;
+
+                 // If Sales Order, this is the "Customer"
+                 if (IsSalesOrder)
+                 {
+                     NewOrder.CustomerId = value.Id; // Using Project ID as Customer ID for tracking
+                     NewOrder.EntityAddress = value.Location;
+                 }
+                 // If Purchase Order AND Site Delivery, this is destination
+                 else if (IsPurchaseOrder && IsSiteDelivery)
+                 {
+                     NewOrder.EntityAddress = value.Location;
+                 }
+                 // If Return Order, this is source
+                 else if (IsReturnOrder)
+                 {
+                     // Typically source address logic would go here
+                 }
+                 OnPropertyChanged(nameof(NewOrder)); // Notify NewOrder changes (Address etc)
+             }
+        }
+
         private async Task LoadSuppliers()
         {
              var list = await _supplierService.GetSuppliersAsync();
@@ -169,7 +287,7 @@ namespace OCC.Client.ViewModels.Orders
         {
              var list = await _projectRepository.GetAllAsync();
              Projects.Clear();
-             foreach(var i in list) Projects.Add(new ProjectBase { Id = i.Id, Name = i.Name });
+             foreach(var i in list) Projects.Add(new ProjectBase { Id = i.Id, Name = i.Name, Location = i.Location });
         }
         
         private async Task LoadInventory()
@@ -179,15 +297,24 @@ namespace OCC.Client.ViewModels.Orders
              foreach(var i in list) InventoryItems.Add(i);
         }
 
+        [ObservableProperty]
+        private bool _shouldPrintOrder;
+
+        [ObservableProperty]
+        private bool _shouldEmailOrder;
+
         partial void OnSelectedSupplierChanged(Supplier? value)
         {
             if (value != null)
             {
+
                 NewOrder.SupplierId = value.Id;
                 NewOrder.SupplierName = value.Name;
                 NewOrder.EntityAddress = value.Address;
                 NewOrder.EntityTel = value.Phone;
                 NewOrder.EntityVatNo = value.VatNumber;
+                NewOrder.Attention = value.ContactPerson; 
+                OnPropertyChanged(nameof(NewOrder)); // Notify NewOrder changes
             }
         }
 
@@ -198,7 +325,7 @@ namespace OCC.Client.ViewModels.Orders
                 NewOrder.CustomerId = value.Id;
                 NewOrder.EntityAddress = value.Address;
                 NewOrder.EntityTel = value.Phone;
-                // Customer might not have VAT logic in same way, but reuse fields
+                OnPropertyChanged(nameof(NewOrder)); // Notify NewOrder changes
             }
         }
         
@@ -206,11 +333,14 @@ namespace OCC.Client.ViewModels.Orders
         {
             if (value != null)
             {
-                NewLine.InventoryItemId = value.Id;
-                NewLine.Description = value.ProductName;
-                NewLine.ItemCode = value.ProductName; // Or Id?
-                NewLine.UnitOfMeasure = value.UnitOfMeasure;
-                // NewLine.UnitPrice = value.Price; // InventoryItem needs Price? Not in model yet.
+                // Create a NEW instance to ensure UI updates all properties (like UOM)
+                NewLine = new OrderLine
+                {
+                    InventoryItemId = value.Id,
+                    Description = value.ProductName,
+                    ItemCode = value.ProductName,
+                    UnitOfMeasure = value.UnitOfMeasure
+                };
             }
         }
 
@@ -221,6 +351,9 @@ namespace OCC.Client.ViewModels.Orders
 
             // Calculate Checks
             NewLine.CalculateTotal(NewOrder.TaxRate);
+            
+            // Debugging: Log what we are trying to add
+            System.Diagnostics.Debug.WriteLine($"AddLine: Qty={NewLine.QuantityOrdered}, Price={NewLine.UnitPrice}, Total={NewLine.LineTotal}");
 
             var line = new OrderLine
             {
@@ -228,18 +361,28 @@ namespace OCC.Client.ViewModels.Orders
                 ItemCode = NewLine.ItemCode,
                 Description = NewLine.Description,
                 QuantityOrdered = NewLine.QuantityOrdered,
-                QuantityReceived = NewLine.QuantityReceived, // For Returns/Immediate
+                QuantityReceived = NewLine.QuantityReceived,
                 UnitOfMeasure = NewLine.UnitOfMeasure,
                 UnitPrice = NewLine.UnitPrice,
                 VatAmount = NewLine.VatAmount,
                 LineTotal = NewLine.LineTotal
             };
             
+            // Double check total - if R0 but we have qty/price, force logic
+            if (line.LineTotal == 0 && line.QuantityOrdered > 0 && line.UnitPrice > 0)
+            {
+                 line.CalculateTotal(NewOrder.TaxRate);
+            }
+
             NewOrder.Lines.Add(line);
             
-            // Trigger property change for Totals on Order?
-            // Order Model handles Sums via computed properties, so we just need to notify UI
+            // Trigger property change for Totals on Order
             OnPropertyChanged(nameof(NewOrder));
+            
+            // Notify Totals
+            OnPropertyChanged(nameof(OrderSubTotal));
+            OnPropertyChanged(nameof(OrderVat));
+            OnPropertyChanged(nameof(OrderTotal));
 
             // Reset Line
             NewLine = new OrderLine();
@@ -252,6 +395,84 @@ namespace OCC.Client.ViewModels.Orders
             if (line == null) return;
             NewOrder.Lines.Remove(line);
             OnPropertyChanged(nameof(NewOrder));
+            
+            // Notify Totals
+            OnPropertyChanged(nameof(OrderSubTotal));
+            OnPropertyChanged(nameof(OrderVat));
+            OnPropertyChanged(nameof(OrderTotal));
+        }
+        
+        // --- Quick Add Commands ---
+        
+        [RelayCommand]
+        public void ToggleQuickAddProduct()
+        {
+            IsAddingNewProduct = !IsAddingNewProduct;
+            if (IsAddingNewProduct)
+            {
+                NewProductName = "";
+                NewProductUOM = "ea";
+            }
+        }
+        
+        [RelayCommand]
+        public void ToggleQuickAddSupplier()
+        {
+            IsAddingNewSupplier = !IsAddingNewSupplier;
+            if (IsAddingNewSupplier)
+            {
+                NewSupplierName = "";
+            }
+        }
+
+        [RelayCommand]
+        public async Task QuickCreateProduct()
+        {
+            if (string.IsNullOrWhiteSpace(NewProductName)) return;
+            
+            try
+            {
+                var item = new InventoryItem 
+                { 
+                    ProductName = NewProductName, 
+                    UnitOfMeasure = NewProductUOM 
+                };
+                
+                var created = await _inventoryService.CreateItemAsync(item);
+                
+                InventoryItems.Add(created);
+                SelectedInventoryItem = created;
+                IsAddingNewProduct = false;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Failed to quick create product");
+                await _dialogService.ShowAlertAsync("Error", "Failed to create product.");
+            }
+        }
+        
+        [RelayCommand]
+        public async Task QuickCreateSupplier()
+        {
+            if (string.IsNullOrWhiteSpace(NewSupplierName)) return;
+            
+            try
+            {
+                 var supplier = new Supplier { Name = NewSupplierName };
+                 var created = await _supplierService.CreateSupplierAsync(supplier);
+                 
+                 // If the service returns the object (which it should, checking interface return type)
+                 // NOTE: Interface says Task<Supplier>, so yes.
+                 
+                 Suppliers.Add(created);
+                 SelectedSupplier = created;
+                 IsAddingNewSupplier = false;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Failed to quick create supplier");
+                await _dialogService.ShowAlertAsync("Error", "Failed to create supplier.");
+            }
         }
 
         [RelayCommand]
@@ -259,20 +480,55 @@ namespace OCC.Client.ViewModels.Orders
         {
             try
             {
+                // Force validation on key selection properties
+                ValidateProperty(SelectedSupplier, nameof(SelectedSupplier));
+                ValidateProperty(SelectedProject, nameof(SelectedProject));
+
+                ValidateAllProperties();
+
+                if (HasErrors)
+                {
+                    await _dialogService.ShowAlertAsync("Validation", "Please correct the errors before submitting.");
+                    return;
+                }
+
                 if (NewOrder.Lines.Count == 0) 
                 {
                     await _dialogService.ShowAlertAsync("Validation", "Please add at least one item.");
                     return;
                 }
 
-                await _orderService.CreateOrderAsync(NewOrder);
+                var createdOrder = await _orderService.CreateOrderAsync(NewOrder);
                 
+                if (ShouldPrintOrder)
+                {
+                    try
+                    {
+                        var path = await _pdfService.GenerateOrderPdfAsync(createdOrder);
+                        
+                        // Open PDF
+                        new System.Diagnostics.Process
+                        {
+                            StartInfo = new System.Diagnostics.ProcessStartInfo(path)
+                            {
+                                UseShellExecute = true
+                            }
+                        }.Start();
+                    }
+                    catch(Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to print order");
+                        await _dialogService.ShowAlertAsync("Warning", "Order created, but failed to generate PDF.");
+                    }
+                }
+
                 CloseRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error submitting order: {ex.Message}");
-                await _dialogService.ShowAlertAsync("Error", "Failed to submit order.");
+                // Show detailed error
+                await _dialogService.ShowAlertAsync("Error", $"Failed to submit order: {ex.Message}");
             }
         }
         
@@ -287,6 +543,8 @@ namespace OCC.Client.ViewModels.Orders
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
+        public string Location { get; set; } = "";
+        
         public override string ToString() => Name;
     }
 }

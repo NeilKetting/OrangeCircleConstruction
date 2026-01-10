@@ -3,10 +3,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OCC.Client.ViewModels.Orders"
+             xmlns:models="using:OCC.Shared.Models"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             xmlns:conv="clr-namespace:OCC.Client.Converters"
              x:Class="OCC.Client.Views.Orders.InventoryView"
              x:DataType="vm:InventoryViewModel">
              
+    <UserControl.Resources>
+        <conv:StatusColorConverter x:Key="StatusColorConverter" />
+    </UserControl.Resources>
+
     <Grid RowDefinitions="Auto, *">
         <!-- Header / Tools -->
         <Border Grid.Row="0" Classes="TopHeader">
@@ -17,8 +23,8 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                    <Button Classes="Secondary" Content="Adjustment" IsEnabled="False"/>
-                    <Button Classes="Primary" Content="Add Item" Command="{Binding RefreshInventoryCommand}"/> <!-- Temp Command or Add logic -->
+                    <Button Classes="Secondary" Content="Adjustment" IsVisible="False"/> <!-- Hidden per user feedback -->
+                    <Button Classes="Primary" Content="Add Item" Command="{Binding AddInventoryItemCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -31,15 +37,26 @@
                   GridLinesVisibility="Horizontal"
                   Background="White"
                   BorderThickness="0">
+
+            <DataGrid.Styles>
+                 <Style Selector="DataGridRow" x:DataType="models:InventoryItem">
+                     <Setter Property="ContextMenu">
+                         <ContextMenu>
+                            <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:InventoryViewModel)DataContext).EditInventoryItemCommand}" CommandParameter="{Binding .}"/>
+                            <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:InventoryViewModel)DataContext).DeleteInventoryItemCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+                         </ContextMenu>
+                     </Setter>
+                 </Style>
+            </DataGrid.Styles>
             
             <DataGrid.Columns>
-                <DataGridTextColumn Header="PRODUCT" Binding="{Binding ProductName}" Width="2*" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
-                <DataGridTextColumn Header="CATEGORY" Binding="{Binding Category}" Width="*" Foreground="{DynamicResource TextSecondaryDark}"/>
-                <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" Width="*" Foreground="{DynamicResource TextSecondaryDark}"/>
-                <DataGridTextColumn Header="ON HAND" Binding="{Binding QuantityOnHand}" Width="0.8*" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
-                <DataGridTextColumn Header="UNIT" Binding="{Binding UnitOfMeasure}" Width="0.5*" Foreground="{DynamicResource TextSecondaryDark}"/>
+                <DataGridTextColumn Header="PRODUCT" Binding="{Binding ProductName}" Width="*" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                <DataGridTextColumn Header="CATEGORY" Binding="{Binding Category}" Width="Auto" Foreground="{DynamicResource TextSecondaryDark}"/>
+                <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" Width="Auto" Foreground="{DynamicResource TextSecondaryDark}"/>
+                <DataGridTextColumn Header="ON HAND" Binding="{Binding QuantityOnHand}" Width="Auto" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                <DataGridTextColumn Header="UNIT" Binding="{Binding UnitOfMeasure}" Width="Auto" Foreground="{DynamicResource TextSecondaryDark}"/>
                 
-                <DataGridTemplateColumn Header="STATUS" Width="1.2*">
+                <DataGridTemplateColumn Header="STATUS" Width="*">
                      <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border CornerRadius="4" Padding="8,2" VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -50,6 +67,23 @@
                             </Border>
                         </DataTemplate>
                      </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Actions -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Classes="IconButton" Margin="0,0,20,0">
+                                <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:InventoryViewModel)DataContext).EditInventoryItemCommand}" CommandParameter="{Binding .}"/>
+                                        <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:InventoryViewModel)DataContext).DeleteInventoryItemCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                                <PathIcon Data="{StaticResource IconMoreHorizontal}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>

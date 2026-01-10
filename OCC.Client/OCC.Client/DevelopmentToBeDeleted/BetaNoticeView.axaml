@@ -68,6 +68,19 @@
                                  <TextBlock Text="• Detailed Profiles &amp; Team Allocation" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
                              </StackPanel>
                         </Border>
+
+                        <!-- Order System -->
+                        <Border Background="#F3F4F6" CornerRadius="8" Padding="15">
+                             <StackPanel Spacing="5">
+                                 <StackPanel Orientation="Horizontal" Spacing="10">
+                                     <PathIcon Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="Green"/>
+                                     <TextBlock Text="Order System (New)" FontWeight="Bold"/>
+                                 </StackPanel>
+                                 <TextBlock Text="• Improved Supplier Detail View (2-Column Layout)" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Bank Selection Dropdown &amp; Validation" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                                 <TextBlock Text="• Fixed Pop-up Scrolling &amp; Z-Index Issues" Margin="26,0,0,0" FontSize="12" Foreground="#6B7280"/>
+                             </StackPanel>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
 

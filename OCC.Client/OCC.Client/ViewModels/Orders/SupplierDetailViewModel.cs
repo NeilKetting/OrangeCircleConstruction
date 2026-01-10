@@ -46,18 +46,81 @@ namespace OCC.Client.ViewModels.Orders
                     Phone = supplier.Phone,
                     Address = supplier.Address,
                     VatNumber = supplier.VatNumber,
-                    BankName = supplier.BankName,
+                    // BankName will be set via logic below
                     AccountNumber = supplier.AccountNumber,
                     BranchCode = supplier.BranchCode
                 };
                 IsEditMode = true;
+
+                // Map Bank Name
+                var dbBankName = supplier.BankName;
+                var matched = false;
+                
+                if (!string.IsNullOrEmpty(dbBankName))
+                {
+                    foreach (var bank in AvailableBanks)
+                    {
+                        if (bank == OCC.Shared.Models.BankName.None || bank == OCC.Shared.Models.BankName.Other) continue;
+
+                        if (GetEnumDescription(bank).Equals(dbBankName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            SelectedBank = bank;
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!matched && !string.IsNullOrEmpty(dbBankName))
+                {
+                    SelectedBank = OCC.Shared.Models.BankName.Other;
+                    CustomBankName = dbBankName;
+                }
+                else if (!matched)
+                {
+                    SelectedBank = OCC.Shared.Models.BankName.None;
+                    CustomBankName = string.Empty;
+                }
             }
             else
             {
                 // Add
                 Supplier = new Supplier();
                 IsEditMode = false;
+                
+                // Default to None
+                SelectedBank = OCC.Shared.Models.BankName.None;
+                CustomBankName = string.Empty;
             }
+        }
+
+        [ObservableProperty]
+        private OCC.Shared.Models.BankName _selectedBank = OCC.Shared.Models.BankName.None;
+
+        [ObservableProperty]
+        private string _customBankName = string.Empty;
+
+        public bool IsOtherBankSelected => SelectedBank == OCC.Shared.Models.BankName.Other;
+
+        // Expose Bank Enum
+        public OCC.Shared.Models.BankName[] AvailableBanks { get; } = Enum.GetValues<OCC.Shared.Models.BankName>();
+
+        partial void OnSelectedBankChanged(OCC.Shared.Models.BankName value)
+        {
+             OnPropertyChanged(nameof(IsOtherBankSelected));
+        }
+        
+        [RelayCommand]
+        private void SetSelectedBank(OCC.Shared.Models.BankName bank)
+        {
+            SelectedBank = bank;
+        }
+        
+        private string GetEnumDescription(Enum value)
+        {
+            var field = value.GetType().GetField(value.ToString());
+            var attribute = (System.ComponentModel.DescriptionAttribute?)Attribute.GetCustomAttribute(field!, typeof(System.ComponentModel.DescriptionAttribute));
+            return attribute?.Description ?? value.ToString();
         }
 
         [RelayCommand]
@@ -67,6 +130,16 @@ namespace OCC.Client.ViewModels.Orders
             {
                 // Simple validation
                 return; 
+            }
+
+            // Map Bank Name Back
+            if (SelectedBank == OCC.Shared.Models.BankName.None)
+            {
+                 Supplier.BankName = null;
+            }
+            else
+            {
+                 Supplier.BankName = IsOtherBankSelected ? CustomBankName : GetEnumDescription(SelectedBank);
             }
 
             try

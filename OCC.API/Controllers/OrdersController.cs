@@ -129,14 +129,31 @@ namespace OCC.API.Controllers
                 // 2. Update scalar properties
                 _context.Entry(existingOrder).CurrentValues.SetValues(order);
 
-                // 3. Simple Child Reconciliation: Clear old, add new (simplistic approach for Lines)
-                // Note: In a real system, we should diff lines to avoid ID churn, but for this prototype it's acceptable.
-                _context.OrderLines.RemoveRange(existingOrder.Lines);
+                // 3. Reconcile Lines (Smart Merge)
                 foreach (var line in order.Lines)
                 {
-                    line.OrderId = order.Id;
-                    if (line.Id == Guid.Empty) line.Id = Guid.NewGuid();
-                    existingOrder.Lines.Add(line);
+                    var existingLine = existingOrder.Lines.FirstOrDefault(l => l.Id == line.Id);
+                    if (existingLine != null)
+                    {
+                        // Update existing
+                        _context.Entry(existingLine).CurrentValues.SetValues(line);
+                    }
+                    else
+                    {
+                        // Add new
+                        line.OrderId = order.Id;
+                        _context.OrderLines.Add(line);
+                    }
+                }
+
+                // Remove deleted lines
+                var linesToRemove = existingOrder.Lines
+                    .Where(l => !order.Lines.Any(ol => ol.Id == l.Id))
+                    .ToList();
+
+                if (linesToRemove.Any())
+                {
+                    _context.OrderLines.RemoveRange(linesToRemove);
                 }
 
                 // 4. Inventory Logic: If Status changes to Completed (or specific trigger)

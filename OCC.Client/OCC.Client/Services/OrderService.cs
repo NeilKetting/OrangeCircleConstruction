@@ -13,25 +13,39 @@ namespace OCC.Client.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IInventoryService _inventoryService;
+        private readonly IAuthService _authService;
 
-        public OrderService(HttpClient httpClient, IInventoryService inventoryService)
+        public OrderService(HttpClient httpClient, IInventoryService inventoryService, IAuthService authService)
         {
             _httpClient = httpClient;
             _inventoryService = inventoryService;
+            _authService = authService;
+        }
+
+        private void EnsureAuthorization()
+        {
+            var token = _authService.AuthToken;
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<List<Order>> GetOrdersAsync()
         {
+            EnsureAuthorization();
             return await _httpClient.GetFromJsonAsync<List<Order>>("api/Orders") ?? new List<Order>();
         }
 
         public async Task<Order?> GetOrderAsync(Guid id)
         {
+             EnsureAuthorization();
              return await _httpClient.GetFromJsonAsync<Order>($"api/Orders/{id}");
         }
 
         public async Task<Order> CreateOrderAsync(Order order)
         {
+            EnsureAuthorization();
             var response = await _httpClient.PostAsJsonAsync("api/Orders", order);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<Order>() ?? order;
@@ -39,6 +53,7 @@ namespace OCC.Client.Services
 
         public async Task UpdateOrderAsync(Order order)
         {
+             EnsureAuthorization();
              var response = await _httpClient.PutAsJsonAsync($"api/Orders/{order.Id}", order);
              response.EnsureSuccessStatusCode();
         }
@@ -51,7 +66,7 @@ namespace OCC.Client.Services
 
             foreach (var updatedLine in updatedLines)
             {
-                var originalLine = order.Lines.Find(l => l.Id == updatedLine.Id);
+                var originalLine = order.Lines.FirstOrDefault(l => l.Id == updatedLine.Id);
                 if (originalLine == null) continue;
 
                 double delta = updatedLine.QuantityReceived - originalLine.QuantityReceived;

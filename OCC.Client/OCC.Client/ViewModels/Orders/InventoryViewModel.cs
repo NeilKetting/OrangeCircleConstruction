@@ -80,5 +80,22 @@ namespace OCC.Client.ViewModels.Orders
         {
             await LoadInventoryAsync();
         }
+        [RelayCommand]
+        public async Task AddInventoryItem()
+        {
+             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Add Item feature is under construction.");
+        }
+
+        [RelayCommand]
+        public async Task EditInventoryItem(InventoryItem item)
+        {
+             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Edit Item feature is under construction.");
+        }
+
+        [RelayCommand]
+        public async Task DeleteInventoryItem(InventoryItem item)
+        {
+             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Delete Item feature is under construction.");
+        }
     }
 }

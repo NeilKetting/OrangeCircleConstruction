@@ -134,7 +134,7 @@
                     <!-- Right Column: Departments -->
                     <StackPanel Grid.Column="4" Spacing="20">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <PathIcon Data="{StaticResource IconBell}" Width="20" Height="20" Foreground="{DynamicResource PrimaryTeal}"/> <!-- IconBell or similar -->
+                            <PathIcon Data="{StaticResource IconEmail}" Width="20" Height="20" Foreground="{DynamicResource PrimaryTeal}"/> <!-- IconBell or similar -->
                             <TextBlock Text="Department Emails" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
                         </StackPanel>
 

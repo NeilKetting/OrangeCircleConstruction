@@ -1,102 +1,73 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:OCC.Client.ViewModels.Orders"
-             xmlns:views="using:OCC.Client.Views.Orders"
-             xmlns:local="using:OCC.Client.Views.Orders"
-             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
-             x:Class="OCC.Client.Views.Orders.OrderView"
-             x:DataType="vm:OrderViewModel">
+			 xmlns:client="using:OCC.Client"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:OCC.Client.ViewModels.Orders"
+			 xmlns:views="using:OCC.Client.Views.Orders"
+			 xmlns:local="using:OCC.Client.Views.Orders"
+			 mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+			 x:Class="OCC.Client.Views.Orders.OrderView"
+			 x:DataType="vm:OrderViewModel">
+
+	<Design.DataContext>
+		<vm:CreateOrderViewModel/>
+	</Design.DataContext>
 
 	<Grid RowDefinitions="Auto, Auto, *">
-		<!-- Header -->
-		<Border Grid.Row="0" Padding="0,20" Margin="0,0,0,20">
-			<Border.Background>
-				<LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-					<GradientStop Color="#0F172A" Offset="0.0" />
-					<GradientStop Color="#1E293B" Offset="1.0" />
-				</LinearGradientBrush>
-			</Border.Background>
-			<Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="30,30,30,30">
+		<!-- Menu Bar -->
+		<client:OrderMenuView Grid.Row="0" DataContext="{Binding OrderMenu}"/>
+		<Border Grid.Row="1" Classes="TopHeader">
+			<Grid ColumnDefinitions="*, Auto" Margin="0">
 				<StackPanel Grid.Column="0" Spacing="5">
-					<TextBlock Text="Procurement Overview" FontSize="26" FontWeight="Bold" Foreground="White" />
-					<TextBlock Text="Track purchases, deliveries, and site inventory." Foreground="#94A3B8" FontSize="14" />
+					<TextBlock Text="Procurement Overview" FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold" />
+					<TextBlock Text="Track purchases, deliveries, and site inventory." Foreground="#94A3B8" FontSize="{StaticResource FontsizeMedium}" />
 				</StackPanel>
-				<PathIcon Grid.Column="1" Data="{StaticResource IconCart}" Width="48" Height="48" Foreground="#FFFFFF"/>
+				<PathIcon Grid.Column="1" Data="{StaticResource IconCart}" Width="48" Height="48" Foreground="#000000" Margin="20,0"/>
 			</Grid>
 		</Border>
+		<!-- Content -->
+		<!-- Content Area -->
 
-		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="30,0,0,0">
-				<Button Classes="MenuButton" Command="{Binding NavigateToDashboardCommand}">
-					<StackPanel Orientation="Horizontal" Spacing="10">
-						<PathIcon Data="{StaticResource IconStats}" Width="16"/>
-						<TextBlock Text="Dashboard"/>
-					</StackPanel>
-				</Button>
-
-				<Button Classes="MenuButton" Command="{Binding NavigateToAllOrdersCommand}">
-					<StackPanel Orientation="Horizontal" Spacing="10">
-						<PathIcon Data="{StaticResource IconCart}" Width="16"/>
-						<TextBlock Text="All Orders"/>
-					</StackPanel>
-				</Button>
-
-				<Button Classes="MenuButton" Command="{Binding NavigateToInventoryCommand}">
-					<StackPanel Orientation="Horizontal" Spacing="10">
-						<PathIcon Data="{StaticResource IconBox}" Width="16"/>
-						<TextBlock Text="Inventory"/>
-					</StackPanel>
-				</Button>
-
-				<Rectangle Height="1" Fill="#30FFFFFF" Margin="0,15"/>
-
-				<Button Classes="MenuButton" Command="{Binding NavigateToCreateOrderCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
-					<StackPanel Orientation="Horizontal" Spacing="8">
-						<PathIcon Data="{StaticResource IconAdd}" Width="16"/>
-						<TextBlock Text="New Order" FontWeight="SemiBold"/>
-					</StackPanel>
-				</Button>
-		</StackPanel>
-
-		        <!-- Popup Overlay -->
-        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsOrderDetailVisible}">
-            <Grid Background="Transparent">
-                <views:CreateOrderView DataContext="{Binding OrderDetailVM}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
-        </Grid>
-
-        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsSupplierDetailVisible}">
-            <Grid Background="Transparent">
-                <views:SupplierDetailView DataContext="{Binding SupplierDetailVM}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
-        </Grid>
-
-        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsReceiveOrderVisible}">
-             <Grid Background="Transparent">
-                <views:ReceiveOrderView DataContext="{Binding ReceiveOrderVM}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
-        </Grid>
 
 		<!-- View Content -->
-        <TransitioningContentControl Grid.Row="2" Content="{Binding CurrentView}">
-            <TransitioningContentControl.PageTransition>
-                <CrossFade Duration="0:00:0.25" />
-            </TransitioningContentControl.PageTransition>
-            <TransitioningContentControl.DataTemplates>
-                <DataTemplate DataType="{x:Type vm:OrderDashboardViewModel}">
-                    <local:OrderDashboardView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:OrderListViewModel}">
-                    <local:OrderListView />
-                 </DataTemplate>
-                 <DataTemplate DataType="{x:Type vm:CreateOrderViewModel}">
-                    <local:CreateOrderView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
-                    <local:InventoryView />
-                </DataTemplate>
-            </TransitioningContentControl.DataTemplates>
-        </TransitioningContentControl>
+		<TransitioningContentControl Grid.Row="2" Content="{Binding CurrentView}">
+			<TransitioningContentControl.PageTransition>
+				<CrossFade Duration="0:00:0.25" />
+			</TransitioningContentControl.PageTransition>
+			<TransitioningContentControl.DataTemplates>
+				<DataTemplate DataType="{x:Type vm:OrderDashboardViewModel}">
+					<local:OrderDashboardView />
+				</DataTemplate>
+				<DataTemplate DataType="{x:Type vm:OrderListViewModel}">
+					<local:OrderListView />
+				</DataTemplate>
+				<DataTemplate DataType="{x:Type vm:CreateOrderViewModel}">
+					<local:CreateOrderView />
+				</DataTemplate>
+				<DataTemplate DataType="{x:Type vm:InventoryViewModel}">
+					<local:InventoryView />
+				</DataTemplate>
+			</TransitioningContentControl.DataTemplates>
+		</TransitioningContentControl>
+
+		<!-- Popup Overlay -->
+		<Grid Grid.Row="0" Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsOrderDetailVisible}">
+			<Grid Background="Transparent">
+				<views:CreateOrderView DataContext="{Binding OrderDetailVM}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+			</Grid>
+		</Grid>
+
+		<Grid Grid.Row="0" Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsSupplierDetailVisible}">
+			<Grid Background="Transparent">
+				<views:SupplierDetailView DataContext="{Binding SupplierDetailVM}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+			</Grid>
+		</Grid>
+
+		<Grid Grid.Row="0" Grid.RowSpan="3" Background="#80000000" IsVisible="{Binding IsReceiveOrderVisible}">
+			<Grid Background="Transparent">
+				<views:ReceiveOrderView DataContext="{Binding ReceiveOrderVM}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+			</Grid>
+		</Grid>
 	</Grid>
 </UserControl>
