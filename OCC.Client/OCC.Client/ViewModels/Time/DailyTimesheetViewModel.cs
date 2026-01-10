@@ -351,7 +351,7 @@ namespace OCC.Client.ViewModels.Time
 
             string? leaveReason = null;
             string? leaveNote = null;
-            var finalStatus = AttendanceStatus.Present;
+            // var finalStatus = AttendanceStatus.Present; // Removed unused variable
 
             // 2. Check if Early
             if (now.TimeOfDay < endTime)
@@ -365,7 +365,7 @@ namespace OCC.Client.ViewModels.Time
 
                     leaveReason = result.Reason;
                     leaveNote = result.Note;
-                    finalStatus = AttendanceStatus.LeaveEarly; // Or keep Present? Requirement implies flagging it.
+                    // finalStatus = AttendanceStatus.LeaveEarly; // Unused
                 }
             }
 

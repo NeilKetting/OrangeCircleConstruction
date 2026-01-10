@@ -23,7 +23,7 @@ using OCC.Client.ViewModels.Notifications;
 using OCC.Client.ViewModels.Core;
 using OCC.Client.Views.Core; // Added
 using OCC.Client.Views.Login; // Added
-using OCC.Client.Views.Login; // Added
+// using OCC.Client.Views.Login; // Removed Duplicate
 using OCC.Client.ViewModels.Login; // Added
 using OCC.Shared.Models; // Added for Employee
 
@@ -84,6 +84,8 @@ namespace OCC.Client.ViewModels.Core
             _currentPage = null!;
             _signalRService = null!;
             _notificationVM = null!;
+            _authService = null!;
+            _dialogService = null!;
         }
 
         public ShellViewModel(
@@ -204,7 +206,7 @@ namespace OCC.Client.ViewModels.Core
                  var names = string.Join(", ", birthdayPeople.Select(b => b.FirstName));
                  if (!string.IsNullOrEmpty(names))
                  {
-                     _notificationVM.AddSystemNotification("Birthdays", $"Happy Birthday to: {names} 🎂");
+                     NotificationVM.AddSystemNotification("Birthdays", $"Happy Birthday to: {names} 🎂");
                  }
              }
              catch (Exception ex)
@@ -261,7 +263,7 @@ namespace OCC.Client.ViewModels.Core
                  "Best Regards,\n OCC Management");
                  
              // Also simulate notification
-             _notificationVM.AddSystemNotification("Birthdays", $"Happy Birthday to: {name} 🎂");
+             NotificationVM.AddSystemNotification("Birthdays", $"Happy Birthday to: {name} 🎂");
         }
 
         #endregion
@@ -327,6 +329,9 @@ namespace OCC.Client.ViewModels.Core
                 case "AuditLog":
                     CurrentPage = _serviceProvider.GetRequiredService<AuditLogViewModel>();
                     break;
+                case "CompanySettings":
+                    CurrentPage = _serviceProvider.GetRequiredService<CompanySettingsViewModel>();
+                    break;
                  default:
                     CurrentPage = _serviceProvider.GetRequiredService<HomeViewModel>();
                     break;
@@ -349,9 +354,9 @@ namespace OCC.Client.ViewModels.Core
             }
         }
 
-        public void Receive(TestBirthdayMessage message)
+        public async void Receive(TestBirthdayMessage message)
         {
-            TestBirthday();
+            await TestBirthday();
         }
 
         [RelayCommand]

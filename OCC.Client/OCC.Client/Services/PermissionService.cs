@@ -74,7 +74,6 @@ namespace OCC.Client.Services
                     "OvertimeRequest" => true,
                     "OvertimeApproval" => true,
                     "Teams" => true, 
-                    "Orders" => true,
                     // "EmployeeManagement" => false, // Now Restricted
                     _ => false
                 };
@@ -91,7 +90,6 @@ namespace OCC.Client.Services
                     NavigationRoutes.Time => true, 
                     NavigationRoutes.Calendar => true,
                     NavigationRoutes.Notifications => true,
-                    "Orders" => true,
                     _ => false
                 };
             }

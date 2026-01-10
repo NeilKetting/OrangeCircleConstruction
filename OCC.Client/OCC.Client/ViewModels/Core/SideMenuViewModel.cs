@@ -111,7 +111,13 @@ namespace OCC.Client.ViewModels.Core
         /// <summary>
         /// Gets whether the current user has permission to view staff management.
         /// </summary>
+        /// <summary>
+        /// Gets whether the current user has permission to view staff management.
+        /// </summary>
         public bool CanViewStaff => _permissionService.CanAccess(NavigationRoutes.StaffManagement);
+
+        public bool CanAccessOrders => _permissionService.CanAccess("Orders");
+        public bool CanAccessCompanySettings => _permissionService.CanAccess("CompanySettings");
 
         #endregion
 
@@ -398,7 +404,17 @@ namespace OCC.Client.ViewModels.Core
             IsQuickActionsOpen = false;
             IsSettingsOpen = false;
             ActiveSection = "AuditLog";
+            ActiveSection = "AuditLog";
             UpdateLastActionMessage("Navigating to Audit Log");
+        }
+
+        [RelayCommand]
+        private void CompanySettings()
+        {
+            IsQuickActionsOpen = false;
+            IsSettingsOpen = false;
+            ActiveSection = "CompanySettings";
+            UpdateLastActionMessage("Navigating to Company Settings");
         }
 
         [RelayCommand]

@@ -60,6 +60,7 @@ namespace OCC.Client.ViewModels.Settings
         {
             // Designer support
             _userRepository = null!;
+            _dialogService = null!;
         }
 
         public UserManagementViewModel(IRepository<User> userRepository, IDialogService dialogService)

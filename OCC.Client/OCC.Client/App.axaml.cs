@@ -149,6 +149,8 @@ namespace OCC.Client
             services.AddTransient<ILeaveService, LeaveService>();
             services.AddHttpClient<IOrderService, OrderService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddHttpClient<IInventoryService, InventoryService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddHttpClient<ISupplierService, SupplierService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddHttpClient<ISettingsService, SettingsService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddSingleton<IDialogService, DialogService>();
 
             // Logging
@@ -219,7 +221,12 @@ namespace OCC.Client
             services.AddTransient<InventoryViewModel>();
             services.AddTransient<CreateOrderViewModel>();
             services.AddTransient<OrderListViewModel>();
+            services.AddTransient<SupplierListViewModel>();
+            services.AddTransient<SupplierDetailViewModel>();
             services.AddTransient<OrderDashboardViewModel>();
+
+            // Settings
+            services.AddTransient<CompanySettingsViewModel>();
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

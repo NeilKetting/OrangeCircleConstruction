@@ -1,22 +1,17 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:OCC.Client.ViewModels.Orders"
-			 xmlns:local="using:OCC.Client.Views.Orders"
-			 mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
-			 x:Class="OCC.Client.Views.Orders.OrderView"
-			 x:DataType="vm:OrderViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Orders"
+             xmlns:views="using:OCC.Client.Views.Orders"
+             xmlns:local="using:OCC.Client.Views.Orders"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             x:Class="OCC.Client.Views.Orders.OrderView"
+             x:DataType="vm:OrderViewModel">
 
-	<Design.DataContext>
-		<vm:OrderViewModel/>
-	</Design.DataContext>
-
-	<!-- Content Area -->
-	<Grid Grid.Column="1" RowDefinitions="Auto, Auto, *">
-
-		<!-- Header Section -->
-		<Border Grid.Row="0" CornerRadius="10,10,0,0" ClipToBounds="True" Margin="30,30,30,0">
+	<Grid RowDefinitions="Auto, Auto, *">
+		<!-- Header -->
+		<Border Grid.Row="0" Padding="0,20" Margin="0,0,0,20">
 			<Border.Background>
 				<LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
 					<GradientStop Color="#0F172A" Offset="0.0" />
@@ -64,6 +59,19 @@
 				</Button>
 		</StackPanel>
 
+		        <!-- Popup Overlay -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsOrderDetailVisible}">
+            <Grid Background="Transparent">
+                <views:CreateOrderView DataContext="{Binding OrderDetailVM}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsSupplierDetailVisible}">
+            <Grid Background="Transparent">
+                <views:SupplierDetailView DataContext="{Binding SupplierDetailVM}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
 		<!-- View Content -->
         <TransitioningContentControl Grid.Row="2" Content="{Binding CurrentView}">
             <TransitioningContentControl.PageTransition>
@@ -75,7 +83,7 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:OrderListViewModel}">
                     <local:OrderListView />
-                </DataTemplate>
+                 </DataTemplate>
                  <DataTemplate DataType="{x:Type vm:CreateOrderViewModel}">
                     <local:CreateOrderView />
                 </DataTemplate>

@@ -58,6 +58,7 @@ namespace OCC.API.Controllers
 
         // POST: api/AppSettings
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<AppSetting>> PostAppSetting(AppSetting setting)
         {
             try
@@ -79,6 +80,7 @@ namespace OCC.API.Controllers
 
         // PUT: api/AppSettings/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutAppSetting(Guid id, AppSetting setting)
         {
             if (id != setting.Id) return BadRequest();
@@ -104,6 +106,7 @@ namespace OCC.API.Controllers
 
         // DELETE: api/AppSettings/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAppSetting(Guid id)
         {
             try

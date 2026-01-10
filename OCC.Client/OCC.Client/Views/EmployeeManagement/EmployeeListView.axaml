@@ -101,7 +101,7 @@
                 <DataGridTextColumn Header="EMPLOYEE NUMBER" Binding="{Binding EmployeeNumber}" Width="Auto" Foreground="{DynamicResource TextPrimaryDark}"/>
 
                 <!-- Name -->
-                <DataGridTextColumn Header="EMPLOYEE" Binding="{Binding DisplayName}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
+                <DataGridTextColumn Header="EMPLOYEE" Binding="{Binding DisplayName, Converter={x:Static conv:StringToTitleCaseConverter.Instance}, Mode=OneWay}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
 
 
                 <!-- Contract or Permanent -->

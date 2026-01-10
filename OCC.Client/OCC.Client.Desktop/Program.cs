@@ -18,7 +18,7 @@ namespace OCC.Client.Desktop
                 "OCC", "logs", "log-.txt");
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2)
                 .CreateLogger();
 
             // Global Exception Handlers

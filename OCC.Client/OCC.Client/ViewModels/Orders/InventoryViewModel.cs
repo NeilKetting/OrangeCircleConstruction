@@ -8,12 +8,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace OCC.Client.ViewModels.Orders
 {
     public partial class InventoryViewModel : ViewModelBase
     {
         private readonly IInventoryService _inventoryService;
+        private readonly IDialogService _dialogService;
+        private readonly Microsoft.Extensions.Logging.ILogger<InventoryViewModel> _logger;
         private List<InventoryItem> _allItems = new();
 
         public ObservableCollection<InventoryItem> InventoryItems { get; } = new();
@@ -24,9 +27,11 @@ namespace OCC.Client.ViewModels.Orders
         [ObservableProperty]
         private bool _isBusy;
 
-        public InventoryViewModel(IInventoryService inventoryService)
+        public InventoryViewModel(IInventoryService inventoryService, IDialogService dialogService, Microsoft.Extensions.Logging.ILogger<InventoryViewModel> logger)
         {
             _inventoryService = inventoryService;
+            _dialogService = dialogService;
+            _logger = logger;
             // Fire and forget initialization
             _ = LoadInventoryAsync();
         }
@@ -43,7 +48,8 @@ namespace OCC.Client.ViewModels.Orders
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading inventory: {ex.Message}");
+                _logger?.LogError(ex, "Error loading inventory");
+                if(_dialogService != null) await _dialogService.ShowAlertAsync("Error", "Failed to load inventory items.");
             }
              finally
             {

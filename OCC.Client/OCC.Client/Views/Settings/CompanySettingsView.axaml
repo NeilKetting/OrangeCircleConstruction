@@ -1,0 +1,148 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Settings"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="OCC.Client.Views.Settings.CompanySettingsView"
+             x:DataType="vm:CompanySettingsViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Classes="Topbar">
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="20,0">
+                <PathIcon Data="{StaticResource IconSettings}" Height="20" Width="20" Foreground="{DynamicResource TextPrimaryDark}"/>
+                <TextBlock Text="COMPANY SETTINGS" Classes="HeaderTitle" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" Padding="40">
+            <StackPanel Spacing="30" MaxWidth="800" HorizontalAlignment="Left">
+                
+                <TextBlock Text="General Information" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                
+                <Border Classes="Card" Padding="30">
+                    <StackPanel Spacing="20">
+                         <StackPanel Spacing="5">
+                            <TextBlock Text="Company Name" Classes="Label"/>
+                            <TextBox Text="{Binding CompanyDetails.CompanyName}" Classes="FormInput"/>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*, 20, *">
+                            <StackPanel Grid.Column="0" Spacing="5">
+                                <TextBlock Text="Registration Number" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.RegistrationNumber}" Classes="FormInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Text="VAT Number" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.VatNumber}" Classes="FormInput"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="*, 20, *">
+                            <StackPanel Grid.Column="0" Spacing="5">
+                                <TextBlock Text="Email Address" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.Email}" Classes="FormInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Text="Phone Number" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.Phone}" Classes="FormInput"/>
+                            </StackPanel>
+                        </Grid>
+                         <StackPanel Spacing="5">
+                            <TextBlock Text="Website" Classes="Label"/>
+                            <TextBox Text="{Binding CompanyDetails.Website}" Classes="FormInput"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Department Emails" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+
+                <Border Classes="Card" Padding="30">
+                    <StackPanel Spacing="10">
+                        <ItemsControl ItemsSource="{Binding Departments}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*, 20, *, 50" Margin="0,0,0,15">
+                                        <StackPanel Grid.Column="0" Spacing="5">
+                                            <TextBlock Text="Department" Classes="Label"/>
+                                            <TextBox Text="{Binding Department}" Classes="FormInput"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Spacing="5">
+                                            <TextBlock Text="Email Address" Classes="Label"/>
+                                            <TextBox Text="{Binding EmailAddress}" Classes="FormInput"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="3" Classes="IconOnly" VerticalAlignment="Bottom" Command="{Binding $parent[UserControl].((vm:CompanySettingsViewModel)DataContext).RemoveDepartmentCommand}" CommandParameter="{Binding}">
+                                            <PathIcon Data="{StaticResource IconDelete}" Height="16" Width="16" Foreground="Red"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <Button Content="Add Department" Classes="Secondary" Command="{Binding AddDepartmentCommand}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Physical Address" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+
+                <Border Classes="Card" Padding="30">
+                    <StackPanel Spacing="20">
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Address Line 1" Classes="Label"/>
+                            <TextBox Text="{Binding CompanyDetails.AddressLine1}" Classes="FormInput"/>
+                        </StackPanel>
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="Address Line 2" Classes="Label"/>
+                            <TextBox Text="{Binding CompanyDetails.AddressLine2}" Classes="FormInput"/>
+                        </StackPanel>
+                        
+                        <Grid ColumnDefinitions="2*, 20, 1*">
+                            <StackPanel Grid.Column="0" Spacing="5">
+                                <TextBlock Text="City" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.City}" Classes="FormInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Text="Postal Code" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.PostalCode}" Classes="FormInput"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Banking Details" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                
+                <Border Classes="Card" Padding="30">
+                    <StackPanel Spacing="20">
+                         <Grid ColumnDefinitions="*, 20, *">
+                            <StackPanel Grid.Column="0" Spacing="5">
+                                <TextBlock Text="Bank Name" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.BankName}" Classes="FormInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Text="Account Name" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.AccountName}" Classes="FormInput"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="*, 20, *">
+                            <StackPanel Grid.Column="0" Spacing="5">
+                                <TextBlock Text="Account Number" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.AccountNumber}" Classes="FormInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Text="Branch Code" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyDetails.BranchCode}" Classes="FormInput"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Right" Margin="0,20,0,50">
+                    <Button Content="Save Changes" Command="{Binding SaveCommand}" Classes="Primary" FontWeight="Bold" Width="200" Height="45"/>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

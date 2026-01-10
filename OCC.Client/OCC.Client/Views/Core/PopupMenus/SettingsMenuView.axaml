@@ -23,6 +23,12 @@
             <Border BorderBrush="{DynamicResource AccentOrange}" BorderThickness="1" Margin="10"/>
 
             <!-- Buttons -->
+            <Button Classes="PopupMenuButton" Command="{Binding CompanySettingsCommand}" IsVisible="{Binding CanAccessCompanySettings}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
+                    <TextBlock Text="Company Profile" VerticalAlignment="Center" FontSize="14"/>
+                </StackPanel>
+            </Button>
             <Button Classes="PopupMenuButton" Command="{Binding UsersTeamsCommand}" IsVisible="{Binding CanManageUsers}">
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <PathIcon Data="{StaticResource IconUserManagement}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>

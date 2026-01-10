@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace OCC.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Office")]
     [ApiController]
     [Route("api/[controller]")]
     public class OrdersController : ControllerBase
@@ -118,13 +118,19 @@ namespace OCC.API.Controllers
                 // typically we'd reconcile)
                 // For MVP/Robust persistence logic, we need to handle child lines carefully.
                 // 1. Load existing
-                var existingOrder = await _context.Orders.Include(o => o.Lines).FirstOrDefaultAsync(o => o.Id == id);
+                var existingOrder = await _context.Orders
+                                            .Include(o => o.Lines)
+                                            .FirstOrDefaultAsync(o => o.Id == id);
+                                            
                 if (existingOrder == null) return NotFound();
 
+                var oldStatus = existingOrder.Status;
+                
                 // 2. Update scalar properties
                 _context.Entry(existingOrder).CurrentValues.SetValues(order);
 
-                // 3. Simple Child Reconciliation: Clear old, add new (Ok for this context)
+                // 3. Simple Child Reconciliation: Clear old, add new (simplistic approach for Lines)
+                // Note: In a real system, we should diff lines to avoid ID churn, but for this prototype it's acceptable.
                 _context.OrderLines.RemoveRange(existingOrder.Lines);
                 foreach (var line in order.Lines)
                 {
@@ -133,12 +139,41 @@ namespace OCC.API.Controllers
                     existingOrder.Lines.Add(line);
                 }
 
+                // 4. Inventory Logic: If Status changes to Completed (or specific trigger)
+                // We assume once Completed, stock is moved. 
+                // Note: NOT handling reversion if status moves BACK from Completed.
+                if (oldStatus != OrderStatus.Completed && order.Status == OrderStatus.Completed)
+                {
+                    foreach (var line in order.Lines)
+                    {
+                        if (line.InventoryItemId.HasValue)
+                        {
+                            var item = await _context.InventoryItems.FindAsync(line.InventoryItemId.Value);
+                            if (item != null)
+                            {
+                                switch(order.OrderType)
+                                {
+                                    case OrderType.PurchaseOrder:
+                                        item.QuantityOnHand += line.QuantityReceived; // Or Ordered if auto-receiving
+                                        break;
+                                    case OrderType.SalesOrder:
+                                        item.QuantityOnHand -= line.QuantityOrdered; // Sales deduct
+                                        break;
+                                    case OrderType.ReturnToInventory:
+                                        item.QuantityOnHand += line.QuantityReceived; // Return adds back
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Order {OrderNumber} updated by {User}", order.OrderNumber, User.FindFirst(ClaimTypes.Name)?.Value);
 
                 // Notify clients
-                await _hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", order); // Or specific update type
+                await _hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", order);
 
                 return NoContent();
             }

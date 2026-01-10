@@ -142,7 +142,7 @@
 					</Button>
 
 					<!-- Orders Link -->
-					<Button Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding NavigateCommand}" CommandParameter="Orders" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Orders'}" HorizontalAlignment="Stretch">
+					<Button Classes="SidebarButton" Classes.Collapsed="{Binding IsCollapsed}" Command="{Binding NavigateCommand}" CommandParameter="Orders" Classes.Active="{Binding ActiveSection, Converter={StaticResource StringEqualityConverter}, ConverterParameter='Orders'}" HorizontalAlignment="Stretch" IsVisible="{Binding CanAccessOrders}">
 						<StackPanel Orientation="Horizontal" Spacing="15">
 							<PathIcon Data="{StaticResource IconDelivery}" Classes="IconStyle"/>
 							<TextBlock Text="Orders" IsVisible="{Binding !IsCollapsed}" VerticalAlignment="Center"/>

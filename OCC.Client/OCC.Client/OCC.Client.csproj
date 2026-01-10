@@ -10,6 +10,13 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <AvaloniaXaml Remove="Views\Order\**" />
+    <Compile Remove="Views\Order\**" />
+    <EmbeddedResource Remove="Views\Order\**" />
+    <None Remove="Views\Order\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
@@ -45,7 +52,6 @@
   <ItemGroup>
     <Folder Include="ModelWrappers\" />
     <Folder Include="Views\HealthSafety\" />
-    <Folder Include="Views\Order\" />
   </ItemGroup>
 
   <ItemGroup>
