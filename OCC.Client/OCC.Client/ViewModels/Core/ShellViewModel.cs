@@ -241,24 +241,9 @@ namespace OCC.Client.ViewModels.Core
                 // 2. Stop SignalR
                 // _signalRService.StopAsync(); // Optional, but good practice
 
-                // 3. Navigate to Login (Assuming MainWindow handles CurrentPage logic or we restart shell)
-                
-                // Let's assume we can replace the Main Window content
-                 if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
-                 {
-                     var loginVM = _serviceProvider.GetRequiredService<LoginViewModel>();
-                     
-                     // Let's try restarting the main window content.
-                     if (desktop.MainWindow is OCC.Client.Views.Core.MainWindow mainWindow)
-                     {
-                         mainWindow.Content = new OCC.Client.Views.Login.LoginView { DataContext = loginVM };
-                     }
-                     else if (desktop.MainWindow != null)
-                     {
-                         // Fallback for any window
-                         desktop.MainWindow.Content = new OCC.Client.Views.Login.LoginView { DataContext = loginVM };
-                     }
-                 }
+                // 3. Navigate to Login via proper Navigation Message
+                var loginVM = _serviceProvider.GetRequiredService<LoginViewModel>();
+                WeakReferenceMessenger.Default.Send(new NavigationMessage(loginVM));
             });
         }
 

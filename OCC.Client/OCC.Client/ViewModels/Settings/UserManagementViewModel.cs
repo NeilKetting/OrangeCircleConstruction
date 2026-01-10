@@ -18,6 +18,7 @@ namespace OCC.Client.ViewModels.Settings
         #region Private Members
 
         private readonly IRepository<User> _userRepository;
+        private readonly IDialogService _dialogService;
         private List<User> _allUsers = new();
 
         #endregion
@@ -61,9 +62,10 @@ namespace OCC.Client.ViewModels.Settings
             _userRepository = null!;
         }
 
-        public UserManagementViewModel(IRepository<User> userRepository)
+        public UserManagementViewModel(IRepository<User> userRepository, IDialogService dialogService)
         {
             _userRepository = userRepository;
+            _dialogService = dialogService;
             LoadData();
             
             CommunityToolkit.Mvvm.Messaging.IMessengerExtensions.RegisterAll(CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default, this);
@@ -114,17 +116,33 @@ namespace OCC.Client.ViewModels.Settings
         public async Task DeleteUser(User user)
         {
             if (user == null) return;
-            await _userRepository.DeleteAsync(user.Id);
-            LoadData();
+            try
+            {
+                await _userRepository.DeleteAsync(user.Id);
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[UserManagementViewModel] Error deleting user: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to delete user: {ex.Message}");
+            }
         }
 
         [RelayCommand]
         public async Task ApproveUser(User user)
         {
             if (user == null) return;
-            user.IsApproved = true;
-            await _userRepository.UpdateAsync(user);
-            LoadData(); // Refresh counts
+            try
+            {
+                user.IsApproved = true;
+                await _userRepository.UpdateAsync(user);
+                LoadData(); // Refresh counts
+            }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[UserManagementViewModel] Error approving user: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to approve user: {ex.Message}");
+            }
         }
 
         [RelayCommand]
@@ -166,6 +184,7 @@ namespace OCC.Client.ViewModels.Settings
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading users: {ex}");
+                if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Critical Error loading users: {ex}");
             }
         }
 

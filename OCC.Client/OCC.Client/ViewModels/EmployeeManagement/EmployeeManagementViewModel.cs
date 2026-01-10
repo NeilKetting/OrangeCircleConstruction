@@ -154,15 +154,27 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         {
             if (employee == null) return;
 
-            AddEmployeePopup = new EmployeeDetailViewModel(_employeeRepository, _dialogService);
-            AddEmployeePopup.Load(employee);
-            AddEmployeePopup.CloseRequested += (s, e) => IsAddEmployeePopupVisible = false;
-            AddEmployeePopup.EmployeeAdded += (s, e) => 
+            try 
             {
-                IsAddEmployeePopupVisible = false;
-                LoadData(); 
-            };
-            IsAddEmployeePopupVisible = true;
+                System.Diagnostics.Debug.WriteLine($"[EmployeeManagementViewModel] Attempting to edit employee: {employee.Id} - {employee.FirstName} {employee.LastName}");
+                
+                AddEmployeePopup = new EmployeeDetailViewModel(_employeeRepository, _dialogService);
+                AddEmployeePopup.Load(employee);
+                
+                AddEmployeePopup.CloseRequested += (s, e) => IsAddEmployeePopupVisible = false;
+                AddEmployeePopup.EmployeeAdded += (s, e) => 
+                {
+                    IsAddEmployeePopupVisible = false;
+                    LoadData(); 
+                };
+                IsAddEmployeePopupVisible = true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[EmployeeManagementViewModel] CRASH in EditEmployee: {ex.GetType().Name} - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[EmployeeManagementViewModel] StackTrace: {ex.StackTrace}");
+                _ = _dialogService.ShowAlertAsync("Error", $"Critical Error opening employee: {ex.Message}");
+            }
         }
 
         [ObservableProperty]

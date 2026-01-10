@@ -17,6 +17,7 @@ namespace OCC.Client.ViewModels.EmployeeManagement
     {
         private readonly IRepository<Team> _teamRepository;
         private readonly IServiceProvider _serviceProvider; 
+        private readonly IDialogService _dialogService; 
 
         public ObservableCollection<Team> Teams { get; } = new();
 
@@ -31,10 +32,11 @@ namespace OCC.Client.ViewModels.EmployeeManagement
 
         public event EventHandler<Team>? EditTeamRequested;
 
-        public TeamManagementViewModel(IRepository<Team> teamRepository, IServiceProvider serviceProvider)
+        public TeamManagementViewModel(IRepository<Team> teamRepository, IServiceProvider serviceProvider, IDialogService dialogService)
         {
             _teamRepository = teamRepository;
             _serviceProvider = serviceProvider;
+            _dialogService = dialogService;
             
             LoadData(); 
             CommunityToolkit.Mvvm.Messaging.IMessengerExtensions.RegisterAll(CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default, this);
@@ -49,6 +51,11 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                 var teams = await _teamRepository.GetAllAsync();
                 Teams.Clear();
                 foreach(var team in teams) Teams.Add(team);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[TeamManagementViewModel] Error loading teams: {ex.Message}");
+                if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Critical Error loading teams: {ex.Message}");
             }
             finally
             {
@@ -93,20 +100,24 @@ namespace OCC.Client.ViewModels.EmployeeManagement
                  if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
                  {
                      ErrorMessage = "Cannot delete: Team has existing members. Please remove members first.";
-                     // Ideally show a popup here
                      System.Diagnostics.Debug.WriteLine($"[TeamManagementViewModel] Delete Conflict: {ex.Message}");
-                     CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new ViewModels.Messages.UpdateStatusMessage(ErrorMessage));
+                     if (_dialogService != null) 
+                         await _dialogService.ShowAlertAsync("Deletion Failed", ErrorMessage);
                  }
                  else
                  {
                      ErrorMessage = $"Error deleting team: {ex.Message}";
                      System.Diagnostics.Debug.WriteLine($"[TeamManagementViewModel] Delete Error: {ex.Message}");
+                     if (_dialogService != null) 
+                         await _dialogService.ShowAlertAsync("Error", ErrorMessage);
                  }
              }
              catch (Exception ex)
              {
                  ErrorMessage = "An unexpected error occurred.";
                  System.Diagnostics.Debug.WriteLine($"[TeamManagementViewModel] General Error: {ex.Message}");
+                 if (_dialogService != null) 
+                      await _dialogService.ShowAlertAsync("Error", $"Unexpected error deleting team: {ex.Message}");
              }
              // SignalR will trigger reload on success
         }

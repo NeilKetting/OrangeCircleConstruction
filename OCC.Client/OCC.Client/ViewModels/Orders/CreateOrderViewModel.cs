@@ -15,6 +15,7 @@ namespace OCC.Client.ViewModels.Orders
     {
         private readonly IOrderService _orderService;
         private readonly IRepository<Project> _projectRepository;
+        private readonly IDialogService _dialogService;
 
         [ObservableProperty]
         private Order _newOrder = new();
@@ -25,10 +26,11 @@ namespace OCC.Client.ViewModels.Orders
         public ObservableCollection<string> Suppliers { get; } = new() { "Builders Warehouse", "Timber City", "Plumb It", "Voltex", "Cashbuild" };
         public ObservableCollection<ProjectBase> Projects { get; } = new();
 
-        public CreateOrderViewModel(IOrderService orderService, IRepository<Project> projectRepository)
+        public CreateOrderViewModel(IOrderService orderService, IRepository<Project> projectRepository, IDialogService dialogService)
         {
             _orderService = orderService;
             _projectRepository = projectRepository;
+            _dialogService = dialogService;
             
             InitializeOrder();
             LoadProjects();
@@ -36,6 +38,14 @@ namespace OCC.Client.ViewModels.Orders
 
         // Default constructor for design-time support if needed, or DI container might need empty one if not configured right (removed for DI enforcement)
         // public CreateOrderViewModel() { } 
+        
+        public CreateOrderViewModel()
+        {
+            // Design-time
+            _orderService = null!;
+            _projectRepository = null!;
+            _dialogService = null!;
+        }
 
         private void InitializeOrder()
         {
@@ -65,6 +75,7 @@ namespace OCC.Client.ViewModels.Orders
             catch(Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading projects: {ex.Message}");
+                if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Error loading projects: {ex.Message}");
             }
         }
 

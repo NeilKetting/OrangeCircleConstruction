@@ -139,6 +139,11 @@ namespace OCC.Client.ViewModels.Time
 
                 ApplyFilters();
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in LoadDataAsync: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to load timesheet: {ex.Message}");
+            }
             finally
             {
                 IsLoading = false;
@@ -201,6 +206,11 @@ namespace OCC.Client.ViewModels.Time
                  ApplyFilters();
                  
                  WeakReferenceMessenger.Default.Send(new UpdateStatusMessage($"{staff.FirstName} started a new shift."));
+             }
+             catch (Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in ReClockIn: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to re-clock in: {ex.Message}");
              }
              finally { IsSaving = false; }
         }
@@ -283,6 +293,11 @@ namespace OCC.Client.ViewModels.Time
                 MoveToLogged(item);
                 WeakReferenceMessenger.Default.Send(new UpdateStatusMessage($"{item.Name} marked Present"));
             }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in MarkPresent: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to mark present: {ex.Message}");
+            }
             finally { IsSaving = false; }
         }
 
@@ -315,6 +330,11 @@ namespace OCC.Client.ViewModels.Time
 
                 MoveToLogged(item);
                 WeakReferenceMessenger.Default.Send(new UpdateStatusMessage($"{item.Name} marked Absent"));
+            }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in MarkAbsent: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to mark absent: {ex.Message}");
             }
             finally { IsSaving = false; }
         }
@@ -384,6 +404,11 @@ namespace OCC.Client.ViewModels.Time
                     MoveToPending(item);
                 }
             }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in ClockOut: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to clock out: {ex.Message}");
+            }
             finally { IsSaving = false; }
         }
 
@@ -449,6 +474,11 @@ namespace OCC.Client.ViewModels.Time
                         loggedItem.Status = item.Status;
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                 System.Diagnostics.Debug.WriteLine($"[DailyTimesheetViewModel] Error in EditEntry: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to edit entry: {ex.Message}");
             }
             finally { IsSaving = false; }
         }

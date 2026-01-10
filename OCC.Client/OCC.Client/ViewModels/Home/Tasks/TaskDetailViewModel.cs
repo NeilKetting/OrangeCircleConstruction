@@ -29,6 +29,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
         private readonly IRepository<Employee> _staffRepository;
         private readonly IRepository<TaskAssignment> _assignmentRepository;
         private readonly IRepository<TaskComment> _commentRepository;
+        private readonly IDialogService _dialogService;
         
         private readonly SemaphoreSlim _updateLock = new(1, 1);
         private Guid _currentTaskId; 
@@ -151,6 +152,7 @@ namespace OCC.Client.ViewModels.Home.Tasks
              _staffRepository = null!;
              _assignmentRepository = null!;
              _commentRepository = null!;
+             _dialogService = null!;
              _task = new ProjectTaskWrapper(new ProjectTask());
         }
 
@@ -161,16 +163,19 @@ namespace OCC.Client.ViewModels.Home.Tasks
         /// <param name="staffRepository">Repository for accessing Employee data.</param>
         /// <param name="assignmentRepository">Repository for managing task assignments.</param>
         /// <param name="commentRepository">Repository for managing task comments.</param>
+        /// <param name="dialogService">Service for showing alerts.</param>
         public TaskDetailViewModel(
             IRepository<ProjectTask> projectTaskRepository,
             IRepository<Employee> staffRepository,
             IRepository<TaskAssignment> assignmentRepository,
-            IRepository<TaskComment> commentRepository)
+            IRepository<TaskComment> commentRepository,
+            IDialogService dialogService)
         {
             _projectTaskRepository = projectTaskRepository;
             _staffRepository = staffRepository;
             _assignmentRepository = assignmentRepository;
             _commentRepository = commentRepository;
+            _dialogService = dialogService;
             _task = new ProjectTaskWrapper(new ProjectTask());
         }
 
@@ -371,11 +376,25 @@ namespace OCC.Client.ViewModels.Home.Tasks
         /// <param name="taskId">The GUID of the task to load.</param>
         public async void LoadTaskById(Guid taskId)
         {
-            _currentTaskId = taskId;
-            var task = await _projectTaskRepository.GetByIdAsync(taskId);
-            if (task != null) LoadTask(task);
-            
-            await LoadAssignableResources();
+            try 
+            {
+                System.Diagnostics.Debug.WriteLine($"[TaskDetailViewModel] Loading Task: {taskId}...");
+                _currentTaskId = taskId;
+                var task = await _projectTaskRepository.GetByIdAsync(taskId);
+                if (task != null) LoadTask(task);
+                
+                await LoadAssignableResources();
+                System.Diagnostics.Debug.WriteLine($"[TaskDetailViewModel] LoadTaskById Complete.");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[TaskDetailViewModel] CRASH in LoadTaskById: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[TaskDetailViewModel] Stack: {ex.StackTrace}");
+                if (_dialogService != null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", $"Critical Error loading task details: {ex.Message}");
+                }
+            }
         }
 
         /// <summary>
@@ -383,12 +402,21 @@ namespace OCC.Client.ViewModels.Home.Tasks
         /// </summary>
         private async Task LoadAssignableResources()
         {
-            AvailableStaff.Clear();
-            var staff = await _staffRepository.GetAllAsync();
-            foreach(var s in staff) AvailableStaff.Add(s);
-            
-            await LoadComments();
-            await LoadAssignments();
+            try 
+            {
+                AvailableStaff.Clear();
+                var staff = await _staffRepository.GetAllAsync();
+                foreach(var s in staff) AvailableStaff.Add(s);
+                
+                await LoadComments();
+                await LoadAssignments();
+            }
+            catch (Exception ex)
+            {
+                // Catch secondary load errors
+                System.Diagnostics.Debug.WriteLine($"[TaskDetailViewModel] Error loading resources: {ex.Message}");
+                throw; // propagate to parent catch
+            }
         }
 
         /// <summary>

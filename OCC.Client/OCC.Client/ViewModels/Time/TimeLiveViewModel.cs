@@ -23,6 +23,7 @@ namespace OCC.Client.ViewModels.Time
         private readonly ITimeService _timeService;
         private readonly IAuthService _authService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IDialogService _dialogService;
 
         #endregion
 
@@ -50,13 +51,15 @@ namespace OCC.Client.ViewModels.Time
             _timeService = null!;
             _authService = null!;
             _serviceProvider = null!;
+            _dialogService = null!;
         }
 
-        public TimeLiveViewModel(ITimeService timeService, IAuthService authService, IServiceProvider serviceProvider)
+        public TimeLiveViewModel(ITimeService timeService, IAuthService authService, IServiceProvider serviceProvider, IDialogService dialogService)
         {
             _timeService = timeService;
             _authService = authService;
             _serviceProvider = serviceProvider;
+            _dialogService = dialogService;
             
             InitializeCommand.Execute(null);
             WeakReferenceMessenger.Default.RegisterAll(this);
@@ -91,12 +94,20 @@ namespace OCC.Client.ViewModels.Time
         [RelayCommand]
         private async Task ClearAttendance()
         {
-            await _timeService.ClearAllAttendanceAsync();
-            // Trigger refresh via message or direct reload
-            await Initialize();
+            try
+            {
+                await _timeService.ClearAllAttendanceAsync();
+                // Trigger refresh via message or direct reload
+                await Initialize();
             
-            // Send message to notify others?
-             WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("AttendanceRecord", "ClearAll", Guid.Empty));
+                // Send message to notify others?
+                 WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage("AttendanceRecord", "ClearAll", Guid.Empty));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[TimeLiveViewModel] Error Clearing Attendance: {ex.Message}");
+                if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Failed to clear attendance: {ex.Message}");
+            }
         }
 
         #endregion
@@ -222,6 +233,15 @@ namespace OCC.Client.ViewModels.Time
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading live data: {ex.Message}");
+                if (_dialogService != null)
+                {
+                    // Use Dispatcher to ensure UI thread if being called from background messager
+                    await Dispatcher.UIThread.InvokeAsync(async () => 
+                        // Don't await inside InvokeAsync lambda for the dialog result if we don't need it, 
+                        // but actually we should warn user.
+                        await _dialogService.ShowAlertAsync("Error", $"Critical Error loading live timesheet: {ex.Message}")
+                    );
+                }
             }
         }
 

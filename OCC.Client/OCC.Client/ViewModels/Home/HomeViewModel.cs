@@ -32,6 +32,7 @@ namespace OCC.Client.ViewModels.Home
         private readonly IRepository<TaskAssignment> _taskAssignmentRepository;
         private readonly IRepository<TaskComment> _commentRepository;
         private readonly IRepository<User> _userRepository;
+        private readonly IDialogService _dialogService;
         private readonly ILoggerFactory _loggerFactory;
 
         #endregion
@@ -111,6 +112,7 @@ namespace OCC.Client.ViewModels.Home
             _taskAssignmentRepository = null!;
             _commentRepository = null!;
             _userRepository = null!;
+            _dialogService = null!;
             _loggerFactory = null!;
         }
 
@@ -130,6 +132,7 @@ namespace OCC.Client.ViewModels.Home
                              IRepository<TaskAssignment> taskAssignmentRepository,
                              IRepository<TaskComment> commentRepository,
                              IRepository<User> userRepository,
+                             IDialogService dialogService,
                              ILoggerFactory loggerFactory)
         {
             _authService = authService;
@@ -144,6 +147,7 @@ namespace OCC.Client.ViewModels.Home
             _taskAssignmentRepository = taskAssignmentRepository;
             _commentRepository = commentRepository;
             _userRepository = userRepository;
+            _dialogService = dialogService;
             _loggerFactory = loggerFactory;
 
             HomeMenu = homeMenu;
@@ -176,7 +180,7 @@ namespace OCC.Client.ViewModels.Home
         [RelayCommand]
         private void OpenTaskDetail(Guid taskId)
         {
-            CurrentTaskDetail = new TaskDetailViewModel(_projectTaskRepository, _staffRepository, _taskAssignmentRepository, _commentRepository);
+            CurrentTaskDetail = new TaskDetailViewModel(_projectTaskRepository, _staffRepository, _taskAssignmentRepository, _commentRepository, _dialogService);
             CurrentTaskDetail.CloseRequested += (s, e) => CloseTaskDetail();
             CurrentTaskDetail.LoadTaskById(taskId);
             IsTaskDetailVisible = true;

@@ -401,92 +401,134 @@ namespace OCC.Client.ViewModels.EmployeeManagement
         {
             if (staff == null) return;
 
-            _existingStaffId = staff.Id;
-            Title = "Edit Employee";
-            SaveButtonText = "Save Changes";
-
-            EmployeeNumber = staff.EmployeeNumber;
-            FirstName = staff.FirstName;
-            LastName = staff.LastName;
-            IdNumber = staff.IdNumber;
-            PermitNumber = staff.PermitNumber ?? string.Empty;
-            SelectedIdType = staff.IdType;
-            Email = staff.Email;
-            Phone = staff.Phone ?? string.Empty;
-            SelectedSkill = staff.Role;
-            HourlyRate = staff.HourlyRate;
-            SelectedEmploymentType = staff.EmploymentType;
-            EmploymentDate = staff.EmploymentDate;
-            ContractDuration = staff.ContractDuration ?? string.Empty;
-            Branch = staff.Branch;
-            ShiftStartTime = staff.ShiftStartTime;
-            ShiftStartTime = staff.ShiftStartTime;
-            ShiftEndTime = staff.ShiftEndTime;
-
-            // Leave Balances
-            AnnualLeaveBalance = staff.AnnualLeaveBalance;
-            AnnualLeaveBalance = staff.AnnualLeaveBalance;
-            SickLeaveBalance = staff.SickLeaveBalance;
-            LeaveCycleStartDate = staff.LeaveCycleStartDate.HasValue ? staff.LeaveCycleStartDate.Value : null;
-
-            // Set Initial Rule Text
-            if (SelectedEmploymentType == EmploymentType.Contract)
+            try 
             {
-                 LeaveAccrualRule = "Accural: 1 day / 17 days (Annual) | 1 day / 26 days (Sick)";
-            }
-            else
-            {
-                 LeaveAccrualRule = "Standard: 15 Working Days Annual / 30 Days Sick Leave Cycle";
-            }
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Loading Employee: {staff.Id}");
 
-            // Banking
-            AccountNumber = staff.AccountNumber ?? string.Empty;
-            TaxNumber = staff.TaxNumber ?? string.Empty;
-            BranchCode = staff.BranchCode ?? string.Empty;
-            AccountType = string.IsNullOrEmpty(staff.AccountType) ? "Select Account Type" : staff.AccountType;
-            SelectedRateType = staff.RateType;
+                _existingStaffId = staff.Id;
+                Title = "Edit Employee";
+                SaveButtonText = "Save Changes";
 
-            // Bank Selection Logic
-            var dbBankName = staff.BankName;
-            var matched = false;
-            
-            if (!string.IsNullOrEmpty(dbBankName))
-            {
-                foreach (var bank in AvailableBanks)
+                EmployeeNumber = staff.EmployeeNumber;
+                FirstName = staff.FirstName;
+                LastName = staff.LastName;
+                IdNumber = staff.IdNumber;
+                PermitNumber = staff.PermitNumber ?? string.Empty;
+                SelectedIdType = staff.IdType;
+                Email = staff.Email;
+                Phone = staff.Phone ?? string.Empty;
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Basic Info Loaded");
+
+                SelectedSkill = staff.Role;
+                HourlyRate = staff.HourlyRate;
+                SelectedEmploymentType = staff.EmploymentType;
+                
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Setting Employment Date: {staff.EmploymentDate}");
+                
+                // Sanitize EmploymentDate
+                if (staff.EmploymentDate < new DateTime(1900, 1, 1) || staff.EmploymentDate == DateTime.MinValue)
                 {
-                    // Skip None/Other during standard matching if desired, but here we just match description
-                    if (bank == OCC.Shared.Models.BankName.None || bank == OCC.Shared.Models.BankName.Other) continue;
+                     System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] INVALID/MIN EmploymentDate detected: {staff.EmploymentDate}. Defaulting to Now.");
+                     EmploymentDate = DateTimeOffset.Now;
+                }
+                else
+                {
+                    EmploymentDate = staff.EmploymentDate;
+                }
 
-                    if (GetEnumDescription(bank).Equals(dbBankName, StringComparison.OrdinalIgnoreCase))
+                ContractDuration = staff.ContractDuration ?? string.Empty;
+                Branch = staff.Branch;
+                
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Setting Shift Times");
+                ShiftStartTime = staff.ShiftStartTime;
+                ShiftEndTime = staff.ShiftEndTime;
+
+                // Leave Balances
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Setting Leave Balances");
+                AnnualLeaveBalance = staff.AnnualLeaveBalance;
+                SickLeaveBalance = staff.SickLeaveBalance;
+                
+                // Sanitize LeaveCycleStartDate
+                if (staff.LeaveCycleStartDate.HasValue && 
+                   (staff.LeaveCycleStartDate.Value < new DateTime(1900, 1, 1) || staff.LeaveCycleStartDate.Value == DateTime.MinValue))
+                {
+                     System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] INVALID/MIN LeaveCycleStartDate detected. Setting to null.");
+                     LeaveCycleStartDate = null;
+                }
+                else
+                {
+                    LeaveCycleStartDate = staff.LeaveCycleStartDate.HasValue ? staff.LeaveCycleStartDate.Value : null;
+                }
+
+                // Set Initial Rule Text
+                if (SelectedEmploymentType == EmploymentType.Contract)
+                {
+                     LeaveAccrualRule = "Accural: 1 day / 17 days (Annual) | 1 day / 26 days (Sick)";
+                }
+                else
+                {
+                     LeaveAccrualRule = "Standard: 15 Working Days Annual / 30 Days Sick Leave Cycle";
+                }
+
+                // Banking
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Setting Banking Details");
+                AccountNumber = staff.AccountNumber ?? string.Empty;
+                TaxNumber = staff.TaxNumber ?? string.Empty;
+                BranchCode = staff.BranchCode ?? string.Empty;
+                AccountType = string.IsNullOrEmpty(staff.AccountType) ? "Select Account Type" : staff.AccountType;
+                SelectedRateType = staff.RateType;
+
+                // Bank Selection Logic
+                var dbBankName = staff.BankName;
+                var matched = false;
+                
+                if (!string.IsNullOrEmpty(dbBankName))
+                {
+                    foreach (var bank in AvailableBanks)
                     {
-                        SelectedBank = bank;
-                        matched = true;
-                        break;
+                        // Skip None/Other during standard matching if desired, but here we just match description
+                        if (bank == OCC.Shared.Models.BankName.None || bank == OCC.Shared.Models.BankName.Other) continue;
+
+                        if (GetEnumDescription(bank).Equals(dbBankName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            SelectedBank = bank;
+                            matched = true;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (!matched && !string.IsNullOrEmpty(dbBankName))
-            {
-                // Custom bank
-                SelectedBank = OCC.Shared.Models.BankName.Other;
-                CustomBankName = dbBankName;
+                if (!matched && !string.IsNullOrEmpty(dbBankName))
+                {
+                    // Custom bank
+                    SelectedBank = OCC.Shared.Models.BankName.Other;
+                    CustomBankName = dbBankName;
+                }
+                else if (!matched)
+                {
+                    // Default to None (Placeholder)
+                    SelectedBank = OCC.Shared.Models.BankName.None;
+                    CustomBankName = string.Empty;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Triggering Property Changes");
+                OnPropertyChanged(nameof(IsRsaId));
+                OnPropertyChanged(nameof(IsPassport));
+                OnPropertyChanged(nameof(IsHourly));
+                OnPropertyChanged(nameof(IsSalary));
+                OnPropertyChanged(nameof(IsPermanent));
+                OnPropertyChanged(nameof(IsContract));
+                OnPropertyChanged(nameof(IsContractVisible));
+                OnPropertyChanged(nameof(IsOtherBankSelected));
+                
+                System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Load Complete");
             }
-            else if (!matched)
+            catch (Exception ex)
             {
-                // Default to None (Placeholder)
-                SelectedBank = OCC.Shared.Models.BankName.None;
-                CustomBankName = string.Empty;
+                 System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] CRASH in Load: {ex.Message}");
+                 System.Diagnostics.Debug.WriteLine($"[EmployeeDetailViewModel] Stack: {ex.StackTrace}");
+                 throw;
             }
-            
-            OnPropertyChanged(nameof(IsRsaId));
-            OnPropertyChanged(nameof(IsPassport));
-            OnPropertyChanged(nameof(IsHourly));
-            OnPropertyChanged(nameof(IsSalary));
-            OnPropertyChanged(nameof(IsPermanent));
-            OnPropertyChanged(nameof(IsContract));
-            OnPropertyChanged(nameof(IsContractVisible));
-            OnPropertyChanged(nameof(IsOtherBankSelected));
         }
 
         private string GetEnumDescription(Enum value)

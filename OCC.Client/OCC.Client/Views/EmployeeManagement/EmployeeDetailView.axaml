@@ -109,6 +109,12 @@
 								<TextBox Text="{Binding PermitNumber}" Classes="FormInput" Watermark="e.g. Work Permit No."
 										 ToolTip.Tip="Enter Work Permit or Visa Number"/>
 							</StackPanel>
+							<!-- Tax Number -->
+							<StackPanel Grid.Column="0" Margin="0,10,0,0">
+								<TextBlock Text="Income Tax Number" Classes="FormLabel"/>
+								<TextBox Text="{Binding TaxNumber}" Classes="FormInput" Watermark="Tax Ref No."
+										 ToolTip.Tip="Employee's Income Tax Reference Number"/>
+							</StackPanel>
 						</StackPanel>
 
 						<!-- Middle Column -->
@@ -271,12 +277,7 @@
 								<TextBlock Text="Branch Code" Classes="FormLabel"/>
 								<TextBox Text="{Binding BranchCode}" Classes="FormInput" Watermark="Code"/>
 							</StackPanel>
-							<!-- Tax Number -->
-							<StackPanel Grid.Column="0" Margin="0,10,0,0">
-								<TextBlock Text="Income Tax Number" Classes="FormLabel"/>
-								<TextBox Text="{Binding TaxNumber}" Classes="FormInput" Watermark="Tax Ref No."
-										 ToolTip.Tip="Employee's Income Tax Reference Number"/>
-							</StackPanel>
+							
 
 							<Separator Background="{DynamicResource SurfaceBorder}"/>
 

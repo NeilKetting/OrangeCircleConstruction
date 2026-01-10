@@ -14,6 +14,7 @@ namespace OCC.Client.ViewModels.Orders
     public partial class OrderListViewModel : ViewModelBase
     {
         private readonly IOrderService _orderService;
+        private readonly IDialogService _dialogService;
         private List<Order> _allOrders = new();
 
         public ObservableCollection<Order> Orders { get; } = new();
@@ -24,9 +25,10 @@ namespace OCC.Client.ViewModels.Orders
         [ObservableProperty]
         private bool _isBusy;
 
-        public OrderListViewModel(IOrderService orderService)
+        public OrderListViewModel(IOrderService orderService, IDialogService dialogService)
         {
             _orderService = orderService;
+            _dialogService = dialogService;
             LoadOrders();
         }
 
@@ -43,6 +45,8 @@ namespace OCC.Client.ViewModels.Orders
             catch(Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading orders: {ex.Message}");
+                if (_dialogService != null) 
+                    await _dialogService.ShowAlertAsync("Error", $"Critical Error loading orders: {ex.Message}");
             }
             finally
             {

@@ -16,6 +16,7 @@ namespace OCC.Client.ViewModels.Projects
         #region Private Members
 
         private readonly IRepository<ProjectTask> _taskRepository;
+        private readonly IDialogService _dialogService;
 
         #endregion
 
@@ -57,11 +58,13 @@ namespace OCC.Client.ViewModels.Projects
         {
             // Parameterless constructor for design-time support
             _taskRepository = null!;
+            _dialogService = null!;
         }
 
-        public ProjectGanttViewModel(IRepository<ProjectTask> taskRepository)
+        public ProjectGanttViewModel(IRepository<ProjectTask> taskRepository, IDialogService dialogService)
         {
             _taskRepository = taskRepository;
+            _dialogService = dialogService;
         }
 
         #endregion
@@ -70,65 +73,80 @@ namespace OCC.Client.ViewModels.Projects
 
         public async void LoadTasks(Guid projectId)
         {
-            var tasks = await _taskRepository.FindAsync(t => t.ProjectId == projectId);
-            GanttTasks.Clear();
-            DateHeaders.Clear();
-            Dependencies.Clear();
-            
-            DateTime minDate = DateTime.MaxValue;
-            DateTime maxDate = DateTime.MinValue;
-
-            var taskList = new List<ProjectTask>(tasks);
-            taskList = taskList.OrderBy(t => t.OrderIndex).ToList();
-
-            foreach (var task in taskList)
+            try
             {
-                 // Ignore unscheduled tasks for range calculation
-                 if (task.StartDate > DateTime.MinValue && task.StartDate < minDate) minDate = task.StartDate;
-                 if (task.FinishDate > DateTime.MinValue && task.FinishDate > maxDate) maxDate = task.FinishDate;
+                System.Diagnostics.Debug.WriteLine($"[ProjectGanttViewModel] Loading Tasks for Project {projectId}...");
+                var tasks = await _taskRepository.FindAsync(t => t.ProjectId == projectId);
+                GanttTasks.Clear();
+                DateHeaders.Clear();
+                Dependencies.Clear();
+                
+                DateTime minDate = DateTime.MaxValue;
+                DateTime maxDate = DateTime.MinValue;
+
+                var taskList = new List<ProjectTask>(tasks);
+                taskList = taskList.OrderBy(t => t.OrderIndex).ToList();
+
+                foreach (var task in taskList)
+                {
+                     // Ignore unscheduled tasks for range calculation
+                     if (task.StartDate > DateTime.MinValue && task.StartDate < minDate) minDate = task.StartDate;
+                     if (task.FinishDate > DateTime.MinValue && task.FinishDate > maxDate) maxDate = task.FinishDate;
+                }
+
+                if (minDate != DateTime.MaxValue)
+                    ProjectStartDate = minDate.AddDays(-7); 
+                else
+                    ProjectStartDate = DateTime.Now.AddDays(-14);
+
+                // If maxDate is still MinValue (no tasks scheduled), set a default lookahead
+                if (maxDate == DateTime.MinValue) maxDate = ProjectStartDate.AddDays(30);
+
+                GenerateHeaders(ProjectStartDate, maxDate.AddDays(30));
+
+                // Calculate Canvas Width
+                var days = (maxDate.AddDays(30) - ProjectStartDate).TotalDays;
+                CanvasWidth = Math.Max(3000, days * PixelsPerDay);
+
+
+                int index = 0;
+                double headerOffset = 4.0; // Centering 16px bar in 24px row
+                
+                // First pass: Create Wrappers
+                var idToWrapperMap = new Dictionary<string, GanttTaskWrapper>();
+                
+                foreach (var task in taskList)
+                {
+                    if (task.StartDate == DateTime.MinValue) continue; // Skip unscheduled tasks
+
+                    var wrapper = new GanttTaskWrapper(task, ProjectStartDate, PixelsPerDay, index, headerOffset, RowHeight);
+                    GanttTasks.Add(wrapper);
+                    idToWrapperMap[task.Id.ToString()] = wrapper;
+                    index++;
+                }
+                
+                CanvasHeight = Math.Max(600, index * RowHeight + 100);
+
+                // Second pass: Generate Dependencies
+                GenerateDependencies(idToWrapperMap);
+                
+                // Third pass: Force Visual Containment (View-Side Fix)
+                // This ensures that if the list shows indentation, the parent BAR physically contains the children
+                // regardless of database values or XML anomalies.
+                HarmonizeVisualDates(GanttTasks.ToList());
+                System.Diagnostics.Debug.WriteLine($"[ProjectGanttViewModel] LoadTasks Complete. {GanttTasks.Count} tasks rendered.");
             }
-
-            if (minDate != DateTime.MaxValue)
-                ProjectStartDate = minDate.AddDays(-7); 
-            else
-                ProjectStartDate = DateTime.Now.AddDays(-14);
-
-            // If maxDate is still MinValue (no tasks scheduled), set a default lookahead
-            if (maxDate == DateTime.MinValue) maxDate = ProjectStartDate.AddDays(30);
-
-            GenerateHeaders(ProjectStartDate, maxDate.AddDays(30));
-
-            // Calculate Canvas Width
-            var days = (maxDate.AddDays(30) - ProjectStartDate).TotalDays;
-            CanvasWidth = Math.Max(3000, days * PixelsPerDay);
-
-
-            int index = 0;
-            double headerOffset = 4.0; // Centering 16px bar in 24px row
-            
-            // First pass: Create Wrappers
-            var idToWrapperMap = new Dictionary<string, GanttTaskWrapper>();
-            
-            foreach (var task in taskList)
+            catch (Exception ex)
             {
-                if (task.StartDate == DateTime.MinValue) continue; // Skip unscheduled tasks
-
-                var wrapper = new GanttTaskWrapper(task, ProjectStartDate, PixelsPerDay, index, headerOffset, RowHeight);
-                GanttTasks.Add(wrapper);
-                idToWrapperMap[task.Id.ToString()] = wrapper;
-                index++;
+                System.Diagnostics.Debug.WriteLine($"[ProjectGanttViewModel] CRASH in LoadTasks: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ProjectGanttViewModel] Stack: {ex.StackTrace}");
+                if (_dialogService != null)
+                {
+                    await _dialogService.ShowAlertAsync("Error", $"Critical Error loading Gantt chart: {ex.Message}");
+                }
             }
-            
-            CanvasHeight = Math.Max(600, index * RowHeight + 100);
-
-            // Second pass: Generate Dependencies
-            GenerateDependencies(idToWrapperMap);
-            
-            // Third pass: Force Visual Containment (View-Side Fix)
-            // This ensures that if the list shows indentation, the parent BAR physically contains the children
-            // regardless of database values or XML anomalies.
-            HarmonizeVisualDates(GanttTasks.ToList());
         }
+
 
         #endregion
 

@@ -16,6 +16,7 @@ namespace OCC.Client.ViewModels.Time
         private readonly ILeaveService _leaveService;
         private readonly IRepository<Employee> _employeeRepository;
         private readonly INotificationService _notificationService;
+        private readonly IDialogService _dialogService;
 
         [ObservableProperty]
         private ObservableCollection<Employee> _employees = new();
@@ -59,11 +60,13 @@ namespace OCC.Client.ViewModels.Time
         public LeaveApplicationViewModel(
             ILeaveService leaveService,
             IRepository<Employee> employeeRepository,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IDialogService dialogService)
         {
             _leaveService = leaveService;
             _employeeRepository = employeeRepository;
             _notificationService = notificationService;
+            _dialogService = dialogService;
             
             LoadDataCommand.Execute(null);
         }
@@ -74,17 +77,26 @@ namespace OCC.Client.ViewModels.Time
              _leaveService = null!;
              _employeeRepository = null!;
              _notificationService = null!;
+             _dialogService = null!;
         }
 
         [RelayCommand]
         private async Task LoadDataAsync()
         {
-             var emps = await _employeeRepository.GetAllAsync();
-             // Sort by Name
-             _allEmployees = emps.OrderBy(e => e.FirstName).ThenBy(e => e.LastName).ToList();
-             Employees = new ObservableCollection<Employee>(_allEmployees);
-             
-             if (Employees.Any()) SelectedEmployee = Employees.First();
+             try
+             {
+                 var emps = await _employeeRepository.GetAllAsync();
+                 // Sort by Name
+                 _allEmployees = emps.OrderBy(e => e.FirstName).ThenBy(e => e.LastName).ToList();
+                 Employees = new ObservableCollection<Employee>(_allEmployees);
+                 
+                 if (Employees.Any()) SelectedEmployee = Employees.First();
+             }
+             catch (Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"[LeaveApplicationViewModel] Error loading employees: {ex.Message}");
+                 if (_dialogService != null) await _dialogService.ShowAlertAsync("Error", $"Critical Error loading employees: {ex.Message}");
+             }
         }
 
         partial void OnStartDateChanged(DateTime? value) => RecalculateDaysCommand.Execute(null);
