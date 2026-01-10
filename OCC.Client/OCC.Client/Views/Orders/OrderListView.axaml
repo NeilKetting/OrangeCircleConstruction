@@ -5,6 +5,8 @@
              xmlns:vm="using:OCC.Client.ViewModels.Orders"
              xmlns:conv="using:OCC.Client.Converters"
              xmlns:models="using:OCC.Shared.Models"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
              x:Class="OCC.Client.Views.Orders.OrderListView"
              x:DataType="vm:OrderListViewModel">
@@ -37,7 +39,14 @@
                   HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal"
                   Background="White"
-                  BorderThickness="0">
+                  BorderThickness="0"
+                  SelectedItem="{Binding SelectedOrder}">
+
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="DoubleTapped">
+                    <InvokeCommandAction Command="{Binding ViewOrderCommand}" CommandParameter="{Binding SelectedOrder}"/>
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
             
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ORDER #" Binding="{Binding OrderNumber}" Width="*" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>

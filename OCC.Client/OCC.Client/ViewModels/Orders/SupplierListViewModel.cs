@@ -15,6 +15,7 @@ namespace OCC.Client.ViewModels.Orders
     public partial class SupplierListViewModel : ViewModelBase
     {
         private readonly ISupplierService _supplierService;
+        private readonly IOrderService _orderService;
         private readonly IDialogService _dialogService;
         private List<Supplier> _allSuppliers = new();
 
@@ -31,9 +32,10 @@ namespace OCC.Client.ViewModels.Orders
 
         private readonly ILogger<SupplierListViewModel> _logger;
 
-        public SupplierListViewModel(ISupplierService supplierService, IDialogService dialogService, ILogger<SupplierListViewModel> logger)
+        public SupplierListViewModel(ISupplierService supplierService, IOrderService orderService, IDialogService dialogService, ILogger<SupplierListViewModel> logger)
         {
             _supplierService = supplierService;
+            _orderService = orderService;
             _dialogService = dialogService;
             _logger = logger;
             // LoadSuppliers(); // Called by Host or explicit init
@@ -59,6 +61,7 @@ namespace OCC.Client.ViewModels.Orders
         }
 
         public event EventHandler? AddSupplierRequested;
+        public event EventHandler<Supplier>? EditSupplierRequested;
 
         [RelayCommand]
         public void AddSupplier()
@@ -86,9 +89,35 @@ namespace OCC.Client.ViewModels.Orders
         }
         
         [RelayCommand]
+        private void EditSupplier(Supplier supplier)
+        {
+             if (supplier == null) return;
+             EditSupplierRequested?.Invoke(this, supplier);
+        }
+
+        [RelayCommand]
         private async Task DeleteSupplier(Supplier supplier)
         {
              if (supplier == null) return;
+
+             // Dependency Check
+             try 
+             {
+                 var allOrders = await _orderService.GetOrdersAsync();
+                 if (allOrders.Any(o => o.SupplierId == supplier.Id))
+                 {
+                     await _dialogService.ShowAlertAsync("Restricted", $"Cannot delete supplier '{supplier.Name}' because they have associated orders.");
+                     return;
+                 }
+             }
+             catch(Exception ex)
+             {
+                  _logger.LogError(ex, "Failed to check orders during supplier delete");
+                  // Fallthrough or stop? Let's safeguard.
+                  await _dialogService.ShowAlertAsync("Error", "Could not verify dependencies. Delete aborted.");
+                  return;
+             }
+
              var confirm = await _dialogService.ShowConfirmationAsync("Confirm Delete", $"Delete supplier '{supplier.Name}'?");
               if (confirm)
               {

@@ -20,6 +20,10 @@
 		<conv:MathConverter x:Key="MathConverter" />
 	</UserControl.Resources>
 
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+    </UserControl.KeyBindings>
+
 	<UserControl.Styles>
 		<!-- Compact Styles -->
 		<Style Selector="TextBox.FormInput">

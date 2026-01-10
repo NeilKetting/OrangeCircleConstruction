@@ -26,6 +26,9 @@ namespace OCC.Client.ViewModels.Orders
 
         [ObservableProperty]
         private bool _isBusy;
+        
+        [ObservableProperty]
+        private Order? _selectedOrder;
 
         public OrderListViewModel(IOrderService orderService, IDialogService dialogService)
         {
@@ -97,6 +100,15 @@ namespace OCC.Client.ViewModels.Orders
         {
             if (order == null) return;
             ReceiveOrderRequested?.Invoke(this, order);
+        }
+
+        public event EventHandler<Order>? ViewOrderRequested;
+
+        [RelayCommand]
+        public void ViewOrder(Order order)
+        {
+            if (order == null) return;
+            ViewOrderRequested?.Invoke(this, order);
         }
     }
 }

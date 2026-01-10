@@ -14,6 +14,8 @@ namespace OCC.Shared.Models
         public double ReorderPoint { get; set; }
         public string UnitOfMeasure { get; set; } = "ea";
         
+        public decimal AverageCost { get; set; }
+
         // Status
         public InventoryStatus Status => QuantityOnHand <= ReorderPoint ? InventoryStatus.Low : InventoryStatus.OK;
         

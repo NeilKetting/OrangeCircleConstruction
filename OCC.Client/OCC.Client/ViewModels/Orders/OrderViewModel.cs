@@ -106,6 +106,14 @@ namespace OCC.Client.ViewModels.Orders
                 IsSupplierDetailVisible = true;
             };
 
+            SupplierListVM.EditSupplierRequested += (s, supplier) =>
+            {
+                SupplierDetailVM.Load(supplier); // Edit Mode
+                IsSupplierDetailVisible = true;
+            };
+
+            OrderListVM.ViewOrderRequested += (s, order) => OpenViewOrder(order);
+
             SupplierDetailVM.CloseRequested += (s, e) => IsSupplierDetailVisible = false;
             SupplierDetailVM.Saved += async (s, e) => await SupplierListVM.LoadData();
         }
@@ -167,10 +175,17 @@ namespace OCC.Client.ViewModels.Orders
         [RelayCommand]
         public void OpenNewOrder()
         {
-            // Determine type based on Active Tab?
-            // For now default to PO or ask user in popup?
-            // Let's assume PO for now.
-            OrderDetailVM.LoadData(); // Reset
+            OrderDetailVM.Reset(); // Reset to fresh state
+            OrderDetailVM.IsReadOnly = false;
+            OrderDetailVM.LoadData(); 
+            IsOrderDetailVisible = true;
+        }
+
+        public void OpenViewOrder(Order order)
+        {
+            OrderDetailVM.LoadData(); // Ensure lists are loaded for mapping
+            OrderDetailVM.LoadExistingOrder(order);
+            OrderDetailVM.IsReadOnly = true;
             IsOrderDetailVisible = true;
         }
 

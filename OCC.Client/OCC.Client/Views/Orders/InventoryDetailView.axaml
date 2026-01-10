@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OCC.Client.ViewModels.Orders"
+             mc:Ignorable="d"
+             x:Class="OCC.Client.Views.Orders.InventoryDetailView"
+             x:DataType="vm:InventoryDetailViewModel">
+
+        <UserControl.Styles>
+		<Style Selector="TextBox.FormInput">
+			<Setter Property="Height" Value="22"/>
+			<Setter Property="Padding" Value="8,3"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="ComboBox">
+			<Setter Property="Height" Value="22"/>
+			<Setter Property="Padding" Value="8,3"/>
+			<Setter Property="FontSize" Value="12"/>
+		</Style>
+		<Style Selector="TextBlock.Label">
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="Foreground" Value="{DynamicResource TextSecondaryDark}"/>
+			<Setter Property="Margin" Value="0,0,0,3"/>
+		</Style>
+    </UserControl.Styles>
+
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+    </UserControl.KeyBindings>
+
+    <Border Background="{DynamicResource SurfaceWhite}"
+            CornerRadius="0"
+            Width="500"
+            Height="600"
+            BoxShadow="0 2 15 5 #292828"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center">
+        <Grid RowDefinitions="Auto, *, Auto, Auto">
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="White"
+                    BorderThickness="0,0,0,2"
+                    BorderBrush="{DynamicResource PrimaryTeal}"
+                    Padding="20,0">
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="*, Auto"
+                      Margin="15">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                        <TextBlock Text="Product Details and Inventory Levels." FontSize="14" Foreground="{DynamicResource TextSecondaryGray}"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="IconButtonClose" Command="{Binding CancelCommand}" VerticalAlignment="Top">
+                        <PathIcon Data="{StaticResource IconClose}" Width="16" Height="16"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" Padding="30">
+                <StackPanel Spacing="10">
+                    
+                    <!-- Product Info -->
+                    <TextBlock Text="General Information" Classes="SectionHeader" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource PrimaryTeal}"/>
+                    
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Product Name" Classes="FormLabel"/>
+                        <TextBox Text="{Binding ProductName}" Classes="FormInput" Watermark="e.g. Cement 50kg"/>
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*, 20, *">
+                        <StackPanel Grid.Column="0" Spacing="10">
+                            <TextBlock Text="Category" Classes="FormLabel"/>
+                            <!-- Editable ComboBox for Category -->
+                            <ComboBox ItemsSource="{Binding AvailableCategories}" 
+                                      Text="{Binding Category}"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      Classes="FormInput" 
+                                      HorizontalAlignment="Stretch"
+                                      PlaceholderText="Select or Type New..."/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" Spacing="10">
+                            <TextBlock Text="Unit of Measure" Classes="FormLabel"/>
+                            <!-- Standard Dropdown for UOM -->
+                             <ComboBox ItemsSource="{Binding AvailableUOMs}" 
+                                       SelectedItem="{Binding UnitOfMeasure}"
+                                       Classes="FormInput"
+                                       HorizontalAlignment="Stretch"
+                                       PlaceholderText="Select Unit"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Location (Warehouse)" Classes="FormLabel"/>
+                        <TextBox Text="{Binding Location}" Classes="FormInput" Watermark="e.g. Aisle 4, Shelf B"/>
+                    </StackPanel>
+
+                    <Separator Background="{DynamicResource SurfaceBorder}" Margin="0,10"/>
+
+                    <!-- Inventory Levels -->
+                    <TextBlock Text="Inventory Levels" Classes="SectionHeader" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource PrimaryTeal}"/>
+
+                    <Grid ColumnDefinitions="*, 20, *">
+                        <StackPanel Grid.Column="0" Spacing="10">
+                            <TextBlock Text="Quantity On Hand" Classes="FormLabel"/>
+                            <TextBox Text="{Binding QuantityOnHand}" Classes="FormInput" Watermark="0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="10">
+                            <TextBlock Text="Reorder Point" Classes="FormLabel"/>
+                            <TextBox Text="{Binding ReorderPoint}" Classes="FormInput" Watermark="10" ToolTip.Tip="Alert when stock falls below this level"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Avg Buying Price (R)" Classes="FormLabel"/>
+                        <Border BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="1" CornerRadius="4" Padding="10,5" Background="#F8FAFC">
+                             <TextBlock Text="{Binding AverageCost, StringFormat='R {0:F2}'}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryDark}"/>
+                        </Border>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer Separator -->
+            <Grid Grid.Row="2" Height="2" Background="{DynamicResource PrimaryTeal}"/>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10" Margin="20,15" HorizontalAlignment="Right">
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Classes="Cancel"/>
+                <Button Content="Save Item" Command="{Binding SaveCommand}" Classes="Primary"/>
+            </StackPanel>
+            
+            <!-- Loading Overlay -->
+            <Grid Grid.RowSpan="4" Background="#80FFFFFF" IsVisible="{Binding IsBusy}">
+                <TextBlock Text="Saving..." VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

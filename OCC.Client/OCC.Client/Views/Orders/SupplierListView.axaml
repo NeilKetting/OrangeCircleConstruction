@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OCC.Client.ViewModels.Orders"
              xmlns:models="using:OCC.Shared.Models"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
              x:Class="OCC.Client.Views.Orders.SupplierListView"
              x:DataType="vm:SupplierListViewModel">
@@ -34,7 +36,25 @@
                   GridLinesVisibility="Horizontal"
                   Background="White"
                   BorderThickness="0"
-                  HeadersVisibility="Column">
+                  HeadersVisibility="Column"
+                  SelectedItem="{Binding SelectedSupplier}">
+
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="DoubleTapped">
+                    <InvokeCommandAction Command="{Binding EditSupplierCommand}" CommandParameter="{Binding SelectedSupplier}"/>
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
+
+            <DataGrid.Styles>
+                 <Style Selector="DataGridRow" x:DataType="models:Supplier">
+                     <Setter Property="ContextMenu">
+                         <ContextMenu>
+                            <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:SupplierListViewModel)DataContext).EditSupplierCommand}" CommandParameter="{Binding .}"/>
+                            <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:SupplierListViewModel)DataContext).DeleteSupplierCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+                         </ContextMenu>
+                     </Setter>
+                 </Style>
+            </DataGrid.Styles>
             
             <DataGrid.Columns>
                 <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="2*" Foreground="{DynamicResource TextPrimaryDark}"/>
@@ -44,11 +64,18 @@
                 <DataGridTextColumn Header="CITY" Binding="{Binding City}" Width="*" Foreground="{DynamicResource TextPrimaryDark}"/>
                 
                 <!-- Actions -->
+                <!-- Actions -->
                 <DataGridTemplateColumn Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Classes="IconButton" Command="{Binding $parent[UserControl].((vm:SupplierListViewModel)DataContext).DeleteSupplierCommand}" CommandParameter="{Binding .}">
-                                <PathIcon Data="{StaticResource IconDelete}" Foreground="Red" Width="16" Height="16"/>
+                            <Button Classes="IconButton" Margin="0,0,20,0">
+                                <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuItem Header="Edit" Command="{Binding $parent[UserControl].((vm:SupplierListViewModel)DataContext).EditSupplierCommand}" CommandParameter="{Binding .}"/>
+                                        <MenuItem Header="Delete" Command="{Binding $parent[UserControl].((vm:SupplierListViewModel)DataContext).DeleteSupplierCommand}" CommandParameter="{Binding .}" Foreground="Red"/>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                                <PathIcon Data="{StaticResource IconMoreHorizontal}" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryGray}"/>
                             </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

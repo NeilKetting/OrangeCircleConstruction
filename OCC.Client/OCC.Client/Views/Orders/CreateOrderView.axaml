@@ -19,6 +19,10 @@
 		<vm:CreateOrderViewModel/>
 	</Design.DataContext>
 
+    <UserControl.KeyBindings>
+		<KeyBinding Gesture="Escape" Command="{Binding CancelCommand}" />
+	</UserControl.KeyBindings>
+
 	<UserControl.Styles>
 		<Style Selector="TextBox.FormInput">
 			<Setter Property="Height" Value="22"/>
@@ -31,9 +35,6 @@
 			<Setter Property="Padding" Value="8,3"/>
 			<Setter Property="FontSize" Value="12"/>
 		</Style>
-
-
-
 		<Style Selector="TextBlock.Label">
 			<Setter Property="FontSize" Value="12"/>
 			<Setter Property="Foreground" Value="{DynamicResource TextSecondaryDark}"/>
@@ -58,7 +59,7 @@
 				<Grid ColumnDefinitions="*, Auto">
 					<!-- Debug Validation -->
 					<StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
-						<TextBlock Text="{Binding NewOrder.OrderNumber}" FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
+						<TextBlock Text="{Binding NewOrder.OrderNumber}" FontSize="{StaticResource FontSizeXL}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryDark}"/>
 						<Border Background="#5A9CB5" CornerRadius="4" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding IsPurchaseOrder}">
 							<TextBlock Text="PURCHASE ORDER" Foreground="White" FontSize="11" FontWeight="Bold"/>
 						</Border>
@@ -77,7 +78,7 @@
 			</Border>
 
 			<!-- Form -->
-			<Grid Grid.Row="1" Margin="20, 10, 20, 0">
+			<Grid Grid.Row="1" Margin="20, 10, 20, 0" IsEnabled="{Binding !IsReadOnly}">
 				<StackPanel Spacing="5">
 
 					<!-- Order Type Selection (Radio / Toggle) -->
@@ -253,7 +254,7 @@
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
 											<Border Padding="15,10" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,0,0,1" Background="White">
-												<Grid ColumnDefinitions="2*, 15, 3*, 15, 0.7*, 15, 0.8*, 15, 1.5*, 15, 1.5*, 15, 80">
+												<Grid ColumnDefinitions="2*, 15, 3*, 15, 80, 15, 80, 15, 100, 15, 120, 20">
 													<TextBlock Grid.Column="0" Text="{Binding ItemCode}" Foreground="{DynamicResource ThemeForegroundLow}" VerticalAlignment="Center"/>
 													<TextBlock Grid.Column="2" Text="{Binding Description}" VerticalAlignment="Center" FontWeight="SemiBold"/>
 													<TextBlock Grid.Column="4" Text="{Binding QuantityOrdered}" VerticalAlignment="Center"/>
@@ -261,10 +262,10 @@
 													<TextBlock Grid.Column="8" Text="{Binding UnitPrice, StringFormat='{}{0:C}'}" VerticalAlignment="Center"/>
 													<TextBlock Grid.Column="10" Text="{Binding LineTotal, StringFormat='{}{0:C}'}" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold"/>
 
-													<Button Grid.Column="12" Content="Remove" FontSize="10" Height="24" Padding="5,0"
+													<Button Grid.Column="12" Content="-" FontSize="18" Height="24" VerticalContentAlignment="Center" HorizontalAlignment="Center"
 															Background="#FEE2E2" Foreground="#EF4444" BorderBrush="#FECACA" BorderThickness="1"
 															Command="{Binding $parent[UserControl].((vm:CreateOrderViewModel)DataContext).RemoveLineCommand}"
-															CommandParameter="{Binding .}" HorizontalAlignment="Stretch"/>
+															CommandParameter="{Binding .}"/>
 												</Grid>
 											</Border>
 										</DataTemplate>
@@ -303,13 +304,13 @@
 			<!-- Footer Actions -->
 			<Border Grid.Row="2" Background="#F8FAFC" BorderBrush="{DynamicResource ThemeBorderLow}" BorderThickness="0,1,0,0" Padding="20">
 				<Grid ColumnDefinitions="*, Auto">
-					<StackPanel Orientation="Horizontal" Spacing="20" VerticalAlignment="Center">
+					<StackPanel Orientation="Horizontal" Spacing="20" VerticalAlignment="Center" IsEnabled="{Binding !IsReadOnly}">
 						<CheckBox IsChecked="{Binding ShouldPrintOrder}" Content="Print Order"/>
 						<CheckBox IsChecked="{Binding ShouldEmailOrder}" Content="Email Order"/>
 					</StackPanel>
 
 					<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="15">
-						<Button Command="{Binding SubmitOrderCommand}" Content="CREATE ORDER" Classes="Primary" FontWeight="Bold"/>
+						<Button Command="{Binding SubmitOrderCommand}" Content="CREATE ORDER" Classes="Primary" FontWeight="Bold" IsEnabled="{Binding !IsReadOnly}"/>
 						<Button Command="{Binding CancelCommand}" Content="Cancel" Classes="Cancel" />
 					</StackPanel>
 				</Grid>

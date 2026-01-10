@@ -29,6 +29,9 @@ namespace OCC.Client.ViewModels.Orders
         [ObservableProperty]
         private Order _newOrder = new();
 
+        [ObservableProperty]
+        private bool _isReadOnly;
+
         // Proxy Properties for Order Totals (Model doesn't implement INPC)
         public decimal OrderSubTotal => NewOrder?.SubTotal ?? 0;
         public decimal OrderVat => NewOrder?.VatTotal ?? 0;
@@ -139,7 +142,7 @@ namespace OCC.Client.ViewModels.Orders
             _logger = logger;
             _pdfService = pdfService;
             
-            InitializeOrder();
+            Reset();
         }
 
         public CreateOrderViewModel() 
@@ -151,6 +154,7 @@ namespace OCC.Client.ViewModels.Orders
             _projectRepository = null!;
             _dialogService = null!;
             _logger = null!;
+            _pdfService = null!;
             NewOrder.OrderNumber = "DEMO-0000";
         } // Design-time support
 
@@ -173,7 +177,7 @@ namespace OCC.Client.ViewModels.Orders
             }
         }
 
-        private void InitializeOrder()
+        public void Reset()
         {
             NewOrder = new Order
             {
@@ -186,6 +190,34 @@ namespace OCC.Client.ViewModels.Orders
             IsOfficeDelivery = true;
             NewOrder.Attention = null; // Ensure null for validation test
             UpdateOrderTypeFlags();
+        }
+
+        public void LoadExistingOrder(Order order)
+        {
+            // Set the order
+            NewOrder = order;
+            
+            // Map Selections
+            if (Suppliers.Any()) 
+                SelectedSupplier = Suppliers.FirstOrDefault(s => s.Id == order.SupplierId);
+                
+            if (Customers.Any())
+                SelectedCustomer = Customers.FirstOrDefault(c => c.Id == order.CustomerId);
+                
+            if (Projects.Any())
+                SelectedProject = Projects.FirstOrDefault(p => p.Id == order.ProjectId);
+                
+            // Update Flags
+            UpdateOrderTypeFlags();
+            
+            // Delivery Flags
+            if (order.DestinationType == OrderDestinationType.Site) IsSiteDelivery = true;
+            else IsOfficeDelivery = true;
+            
+            OnPropertyChanged(nameof(NewOrder));
+            OnPropertyChanged(nameof(OrderSubTotal));
+            OnPropertyChanged(nameof(OrderVat));
+            OnPropertyChanged(nameof(OrderTotal));
         }
 
         partial void OnNewOrderChanged(Order value)
@@ -339,13 +371,14 @@ namespace OCC.Client.ViewModels.Orders
                     InventoryItemId = value.Id,
                     Description = value.ProductName,
                     ItemCode = value.ProductName,
-                    UnitOfMeasure = value.UnitOfMeasure
+                    UnitOfMeasure = value.UnitOfMeasure,
+                    UnitPrice = value.AverageCost // Prefill with Avg Cost
                 };
             }
         }
 
         [RelayCommand]
-        public void AddLine()
+        public async Task AddLine()
         {
             if (string.IsNullOrWhiteSpace(NewLine.Description) && SelectedInventoryItem == null) return;
 
@@ -372,6 +405,33 @@ namespace OCC.Client.ViewModels.Orders
             if (line.LineTotal == 0 && line.QuantityOrdered > 0 && line.UnitPrice > 0)
             {
                  line.CalculateTotal(NewOrder.TaxRate);
+            }
+
+            // Price Check
+            if (SelectedInventoryItem != null && SelectedInventoryItem.AverageCost > 0)
+            {
+                decimal threshold = SelectedInventoryItem.AverageCost * 1.10m;
+                if (line.UnitPrice > threshold)
+                {
+                    decimal pctIncrease = ((line.UnitPrice - SelectedInventoryItem.AverageCost) / SelectedInventoryItem.AverageCost) * 100m;
+                    bool confirm = await _dialogService.ShowConfirmationAsync(
+                        "Price Increase Warning", 
+                        $"The price of R{line.UnitPrice:F2} is {pctIncrease:F0}% higher than the average cost (R{SelectedInventoryItem.AverageCost:F2}).\n\nDo you want to accept this price and update the average cost?");
+                    
+                    if (confirm)
+                    {
+                        // Update Avg Cost immediately to suppress future warnings for this price
+                        SelectedInventoryItem.AverageCost = line.UnitPrice;
+                        try 
+                        {
+                            await _inventoryService.UpdateItemAsync(SelectedInventoryItem);
+                        }
+                        catch(Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to update avg cost");
+                        }
+                    }
+                }
             }
 
             NewOrder.Lines.Add(line);

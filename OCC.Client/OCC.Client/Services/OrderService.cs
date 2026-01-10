@@ -81,6 +81,29 @@ namespace OCC.Client.Services
                         var item = await _inventoryService.GetInventoryItemAsync(originalLine.InventoryItemId.Value);
                         if (item != null)
                         {
+                            // Weighted Average Cost Calculation
+                            // NewAvg = ((OldQty * OldAvg) + (ReceivedQty * BuyPrice)) / (OldQty + ReceivedQty)
+                            // Note: BuyPrice should be from the OrderLine.
+                            // We should handle the case where OldQty is negative (though unlikely if controlled) - treat as 0 for cost logic?
+                            // Standard practice: if Qty < 0, just reset to new price? Or simple addition? Let's assume > 0 base.
+
+                            decimal currentTotalValue = (decimal)(item.QuantityOnHand > 0 ? item.QuantityOnHand : 0) * item.AverageCost;
+                            decimal receivedTotalValue = (decimal)delta * originalLine.UnitPrice;
+                            double newTotalQty = (item.QuantityOnHand > 0 ? item.QuantityOnHand : 0) + delta;
+
+                            if (newTotalQty > 0)
+                            {
+                                item.AverageCost = (currentTotalValue + receivedTotalValue) / (decimal)newTotalQty;
+                            }
+                            else
+                            {
+                                // Should not happen for inbound, but if it does (e.g. net 0), keep old cost or update?
+                                // If 0 qty, cost is technically irrelevant or keeps last known.
+                                // Let's keep last known if newQty is 0. 
+                                // But if this was the *first* stock, newTotalQty would be delta.
+                                if (delta > 0 && item.QuantityOnHand <= 0) item.AverageCost = originalLine.UnitPrice;
+                            }
+
                             item.QuantityOnHand += delta;
                             await _inventoryService.UpdateItemAsync(item);
                         }

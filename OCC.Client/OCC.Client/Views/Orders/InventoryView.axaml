@@ -4,6 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OCC.Client.ViewModels.Orders"
              xmlns:models="using:OCC.Shared.Models"
+             xmlns:views="using:OCC.Client.Views.Orders"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
              xmlns:conv="clr-namespace:OCC.Client.Converters"
              x:Class="OCC.Client.Views.Orders.InventoryView"
@@ -12,6 +15,8 @@
     <UserControl.Resources>
         <conv:StatusColorConverter x:Key="StatusColorConverter" />
     </UserControl.Resources>
+
+
 
     <Grid RowDefinitions="Auto, *">
         <!-- Header / Tools -->
@@ -36,7 +41,20 @@
                   HeadersVisibility="Column"
                   GridLinesVisibility="Horizontal"
                   Background="White"
-                  BorderThickness="0">
+                  BorderThickness="0"
+                  SelectedItem="{Binding SelectedInventoryItem}">
+
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="DoubleTapped">
+                    <InvokeCommandAction Command="{Binding EditInventoryItemCommand}" CommandParameter="{Binding SelectedInventoryItem}"/>
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
+
+            <Interaction.Behaviors>
+                <EventTriggerBehavior EventName="DoubleTapped">
+                    <InvokeCommandAction Command="{Binding EditInventoryItemCommand}" CommandParameter="{Binding SelectedInventoryItem}"/>
+                </EventTriggerBehavior>
+            </Interaction.Behaviors>
 
             <DataGrid.Styles>
                  <Style Selector="DataGridRow" x:DataType="models:InventoryItem">
@@ -87,5 +105,14 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <!-- Popup Overlay -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Background="#80000000" IsVisible="{Binding IsDetailVisible}">
+            <Grid Background="#50000000"> <!-- Extra click shield -->
+                <views:InventoryDetailView DataContext="{Binding DetailViewModel}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

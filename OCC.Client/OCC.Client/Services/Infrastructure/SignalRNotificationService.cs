@@ -48,6 +48,20 @@ namespace OCC.Client.Services.Infrastructure
                 WeakReferenceMessenger.Default.Send(msg);
             });
 
+            // Specific Listeners for Orders
+            _hubConnection.On<OCC.Shared.Models.Order>("ReceiveOrderUpdate", (order) =>
+            {
+                 // Broadcast as generic Entity Update for simplicity
+                 var msg = new ViewModels.Messages.EntityUpdatedMessage("Order", "Update", order.Id);
+                 WeakReferenceMessenger.Default.Send(msg);
+            });
+
+            _hubConnection.On<Guid>("ReceiveOrderDelete", (id) =>
+            {
+                 var msg = new ViewModels.Messages.EntityUpdatedMessage("Order", "Delete", id);
+                 WeakReferenceMessenger.Default.Send(msg);
+            });
+
              _hubConnection.On<System.Collections.Generic.List<OCC.Shared.DTOs.UserConnectionInfo>>("UserListUpdate", (users) =>
             {
                 OnUserListReceived?.Invoke(users);

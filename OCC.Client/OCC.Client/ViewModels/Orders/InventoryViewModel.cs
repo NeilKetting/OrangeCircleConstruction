@@ -80,22 +80,59 @@ namespace OCC.Client.ViewModels.Orders
         {
             await LoadInventoryAsync();
         }
+        [ObservableProperty]
+        private bool _isDetailVisible;
+
+        [ObservableProperty]
+        private InventoryItem? _selectedInventoryItem;
+
+        [ObservableProperty]
+        private InventoryDetailViewModel? _detailViewModel;
+
+        // Factory/Service Locator needed? Or direct instantiation?
+        // Direct instantiation is easier for now, assuming DI for dependencies.
+        // But we need IDialogService and IInventoryService to pass.
+        // We have them in constructor!
+        
         [RelayCommand]
-        public async Task AddInventoryItem()
+        public void AddInventoryItem()
         {
-             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Add Item feature is under construction.");
+            var categories = _allItems.Select(i => i.Category).Distinct().OrderBy(c => c).ToList();
+
+            DetailViewModel = new InventoryDetailViewModel(_inventoryService, _dialogService);
+            DetailViewModel.Load(null, categories); // Add Mode with Categories
+            DetailViewModel.CloseRequested += (s, e) => IsDetailVisible = false;
+            DetailViewModel.ItemSaved += (s, e) => 
+            {
+                IsDetailVisible = false;
+                _ = LoadInventoryAsync();
+            };
+            IsDetailVisible = true;
         }
 
         [RelayCommand]
-        public async Task EditInventoryItem(InventoryItem item)
+        public void EditInventoryItem(InventoryItem item)
         {
-             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Edit Item feature is under construction.");
+            if (item == null) return;
+            var categories = _allItems.Select(i => i.Category).Distinct().OrderBy(c => c).ToList();
+
+            DetailViewModel = new InventoryDetailViewModel(_inventoryService, _dialogService);
+            DetailViewModel.Load(item, categories); // Edit Mode with Categories
+            DetailViewModel.CloseRequested += (s, e) => IsDetailVisible = false;
+            DetailViewModel.ItemSaved += (s, e) => 
+            {
+                IsDetailVisible = false;
+                _ = LoadInventoryAsync();
+            };
+            IsDetailVisible = true;
         }
 
         [RelayCommand]
         public async Task DeleteInventoryItem(InventoryItem item)
         {
-             if(_dialogService != null) await _dialogService.ShowAlertAsync("Coming Soon", "Delete Item feature is under construction.");
+             if (item == null) return;
+             // Stub for Delete logic
+             await _dialogService.ShowAlertAsync("Coming Soon", "Delete Inventory feature is under construction.");
         }
     }
 }

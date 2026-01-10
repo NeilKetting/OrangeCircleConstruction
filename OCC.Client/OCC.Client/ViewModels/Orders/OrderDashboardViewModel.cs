@@ -8,10 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace OCC.Client.ViewModels.Orders
 {
-    public partial class OrderDashboardViewModel : ViewModelBase
+    public partial class OrderDashboardViewModel : ViewModelBase, IRecipient<Messages.EntityUpdatedMessage>
     {
         private readonly IOrderService _orderService;
         private readonly IInventoryService _inventoryService;
@@ -37,7 +38,21 @@ namespace OCC.Client.ViewModels.Orders
             _orderService = orderService;
             _inventoryService = inventoryService;
             _logger = logger;
+            
+            // Register for Real-time Updates
+            WeakReferenceMessenger.Default.Register(this);
+
             _ = LoadData(); 
+        }
+
+        public void Receive(ViewModels.Messages.EntityUpdatedMessage message)
+        {
+            if (message.Value.EntityType == "Order" || message.Value.EntityType == "Inventory")
+            {
+                // Refresh dashboard if Orders or Inventory changes
+                // Fire and forget on UI thread
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () => await LoadData());
+            }
         }
 
         public async Task LoadData()
