@@ -7,6 +7,7 @@ namespace OCC.Client.Services.Interfaces
     public interface IDialogService
     {
         Task<string?> PickFileAsync(string title, IEnumerable<string> extensions);
+        Task ShowBugReportAsync(string viewName);
         Task<bool> ShowConfirmationAsync(string title, string message);
         Task ShowAlertAsync(string title, string message);
         Task<(bool Confirmed, string? Reason, string? Note)> ShowLeaveEarlyReasonAsync();

@@ -151,6 +151,7 @@ namespace OCC.Client
             services.AddHttpClient<IInventoryService, InventoryService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddHttpClient<ISupplierService, SupplierService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddHttpClient<ISettingsService, SettingsService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
+            services.AddHttpClient<IBugReportService, BugReportService>(client => client.BaseAddress = new Uri(ConnectionSettings.Instance.ApiBaseUrl));
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IPdfService, PdfService>();
 
@@ -228,6 +229,7 @@ namespace OCC.Client
             services.AddTransient<SupplierDetailViewModel>();
             services.AddTransient<ReceiveOrderViewModel>();
             services.AddTransient<OrderDashboardViewModel>();
+            services.AddTransient<ViewModels.Bugs.BugListViewModel>();
 
             // Settings
             services.AddTransient<CompanySettingsViewModel>();

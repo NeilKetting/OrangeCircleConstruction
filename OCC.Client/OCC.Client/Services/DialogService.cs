@@ -12,6 +12,29 @@ namespace OCC.Client.Services
 {
     public class DialogService : IDialogService
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public DialogService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        public async Task ShowBugReportAsync(string viewName)
+        {
+             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+             {
+                 var dialog = new OCC.Client.Views.Bugs.BugReportDialog();
+                 var vm = new OCC.Client.ViewModels.Bugs.BugReportDialogViewModel(
+                     Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IBugReportService>(_serviceProvider),
+                     Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IAuthService>(_serviceProvider),
+                     viewName,
+                     () => Avalonia.Threading.Dispatcher.UIThread.Post(() => dialog.Close())
+                 );
+                 dialog.DataContext = vm;
+                 await dialog.ShowDialog(desktop.MainWindow);
+             }
+        }
+
         public async Task<string?> PickFileAsync(string title, IEnumerable<string> extensions)
         {
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)

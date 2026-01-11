@@ -249,6 +249,16 @@ namespace OCC.Client.ViewModels.Core
             });
         }
 
+
+        [RelayCommand]
+        public async Task ReportBug()
+        {
+            var viewName = CurrentPage?.GetType().Name.Replace("ViewModel", "View") ?? "ShellView";
+            if (CurrentPage is ViewModels.Home.HomeViewModel) viewName = "Dashboard"; // Friendly names for common ones?
+            
+            await _dialogService.ShowBugReportAsync(viewName);
+        }
+
         [RelayCommand]
         public async Task TestBirthday()
         {

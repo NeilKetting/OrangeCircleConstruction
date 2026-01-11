@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OCC.Client.ViewModels.Bugs;assembly=OCC.Client"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="OCC.Client.Views.Bugs.BugListView"
+             x:DataType="vm:BugListViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,20">
+            <Grid ColumnDefinitions="*, Auto">
+                <StackPanel>
+                    <TextBlock Text="Bug Reports" Classes="H1"/>
+                    <TextBlock Text="Issues reported by users" Classes="LabelSmall"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" Command="{Binding LoadBugsCommand}" Classes="Ghost">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{StaticResource IconCart}" Width="16" Height="16"/> <!-- Reuse Icon or add Refresh -->
+                        <TextBlock Text="Refresh"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Grid -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Bugs}" SelectedItem="{Binding SelectedBug}"
+                  IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding ReportedDate, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="150"/>
+                <DataGridTextColumn Header="Reporter" Binding="{Binding ReporterName}" Width="150"/>
+                <DataGridTextColumn Header="View" Binding="{Binding ViewName}" Width="150"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <ProgressBar Grid.Row="1" IsIndeterminate="True" IsVisible="{Binding IsLoading}" VerticalAlignment="Top"/>
+    </Grid>
+</UserControl>

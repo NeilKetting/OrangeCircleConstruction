@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:OCC.Client.ViewModels.Bugs;assembly=OCC.Client"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        x:Class="OCC.Client.Views.Bugs.BugReportDialog"
+        x:DataType="vm:BugReportDialogViewModel"
+        Title="Report a Bug"
+        Width="500" Height="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        SystemDecorations="None"
+        Background="Transparent">
+
+    <Border Background="White" CornerRadius="8" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" ClipToBounds="True">
+        <Grid RowDefinitions="Auto, *, Auto">
+            <!-- Header -->
+            <Border Grid.Row="0" Background="{DynamicResource SurfaceLightGray}" Padding="15">
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Report a Bug" Classes="H1" FontSize="18"/>
+                        <TextBlock Text="Found an issue? Let us know so we can fix it." Classes="StatLabel"/>
+                    </StackPanel>
+                    <PathIcon Grid.Column="1" Data="{StaticResource IconBug}" Foreground="{DynamicResource AccentOrange}" Width="24" Height="24"/>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <Border Grid.Row="1" Padding="20">
+                <StackPanel Spacing="15">
+                    
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Detected View" Classes="FormLabel"/>
+                        <TextBox Text="{Binding ViewName}" IsReadOnly="True" Background="#F1F5F9" Foreground="#64748B"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Description" Classes="FormLabel"/>
+                        <TextBox Text="{Binding Description}" 
+                                 Height="150" 
+                                 AcceptsReturn="True" 
+                                 TextWrapping="Wrap" 
+                                 Watermark="Please describe what happened..."/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="#F8FAFC" Padding="15" BorderBrush="{DynamicResource BorderGray}" BorderThickness="0,1,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" Classes="Cancel" Width="100"/>
+                    <Button Content="Submit Report" Command="{Binding SubmitCommand}" Classes="Primary" Width="120" IsEnabled="{Binding !IsSubmitting}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Loading Overlay -->
+            <Grid Grid.RowSpan="3" Background="#80FFFFFF" IsVisible="{Binding IsSubmitting}">
+                <TextBlock Text="Submitting..." HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

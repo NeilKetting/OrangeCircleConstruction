@@ -57,6 +57,15 @@
 
                     <!-- Right: Online Users -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <!-- Bug Report Button -->
+                        <Button Background="Transparent" BorderThickness="0" Padding="4,2" Command="{Binding ReportBugCommand}" ToolTip.Tip="Report a Bug">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <PathIcon Data="{StaticResource IconBug}" Width="14" Height="14" Foreground="{DynamicResource AccentOrange}"/>
+                                <TextBlock Text="Report Bug" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextSecondaryGray}"/>
+                            </StackPanel>
+                        </Button>
+                        <Rectangle Width="1" Height="16" Fill="{DynamicResource BorderGray}"/>
+
                     <Button Background="Transparent" BorderThickness="0" Padding="4,2">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <PathIcon Data="{StaticResource IconUserOnline}" Width="14" Height="14" Foreground="{DynamicResource PrimaryTeal}"/>

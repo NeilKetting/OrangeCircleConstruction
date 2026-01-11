@@ -45,6 +45,7 @@ namespace OCC.API.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderLine> OrderLines { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<BugReport> BugReports { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
