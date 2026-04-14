@@ -25,7 +25,7 @@ if %errorlevel% neq 0 (
 :: 2. Package with Velopack
 echo [PACKAGE] Creating Velopack installer...
 :: Adding --icon to fix branding and ensuring packId matches your old script
-vpk pack -u "OrangeCircleConstruction" -p publish -e "OCC.Client.Desktop.exe" --packTitle "Orange Circle Construction" --packAuthors "Origize63" -v %VERSION% --icon "..\OCC.Client\OCC.Client.Desktop\Assets\app.ico"
+vpk pack -u "OCC.Beta" --packTitle "Orange Circle Construction" --packAuthors "Origize63" -v %VERSION% -p publish -e "OCC.Client.Desktop.exe" -o releases --icon "..\OCC.Client\OCC.Client.Desktop\Assets\app.ico"
 
 if %errorlevel% neq 0 (
     echo [ERROR] Packaging failed.

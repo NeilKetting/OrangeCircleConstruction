@@ -40,7 +40,7 @@ if (-not (Test-Path $ReleaseDir)) { New-Item -ItemType Directory -Path $ReleaseD
 
 # Run vpk
 # Including icon and metadata to match the batch script
-vpk pack -u "OrangeCircleConstruction" --packTitle "Orange Circle Construction" --packAuthors "Origize63" -v $Version -p $PublishDir -e "OCC.Client.Desktop.exe" -o $ReleaseDir --icon "..\OCC.Client\OCC.Client.Desktop\Assets\app.ico"
+vpk pack -u "OCC.Beta" --packTitle "Orange Circle Construction" --packAuthors "Origize63" -v $Version -p $PublishDir -e "OCC.Client.Desktop.exe" -o $ReleaseDir --icon "..\OCC.Client\OCC.Client.Desktop\Assets\app.ico"
 
 Write-Host "--------------------------------------------------------"
 Write-Host "Release created in $ReleaseDir"
