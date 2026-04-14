@@ -49,7 +49,9 @@
     <PackageReference Include="Velopack" />
   </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="..\OCC.Shared\OCC.Shared.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="ModelWrappers\" />

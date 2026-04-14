@@ -8,7 +8,7 @@ namespace OCC.WpfClient.Services
     public class UpdateService : IUpdateService
     {
         private readonly UpdateManager? _mgr;
-        private readonly string _updateUrl = "https://github.com/NeilKetting/OCC.WPF";
+        private readonly string _updateUrl = "https://github.com/NeilKetting/OrangeCircleConstruction";
         private readonly ILogger<UpdateService> _logger;
 
         public string CurrentVersion
