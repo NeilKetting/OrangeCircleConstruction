@@ -24,6 +24,9 @@ using OCC.WpfClient.Features.Shell.ViewModels;
 using OCC.WpfClient.Features.CustomerHub;
 using OCC.WpfClient.Features.SettingsHub;
 using OCC.WpfClient.Features.ProjectHub;
+using OCC.Shared.Interfaces;
+using OCC.Shared.Services;
+using System.Net.Http;
 
 
 namespace OCC.WpfClient
@@ -99,6 +102,13 @@ namespace OCC.WpfClient
 
             // Services
             services.AddHttpClient();
+            services.AddTransient<IGoogleMapsService>(sp => 
+            {
+                var factory = sp.GetRequiredService<IHttpClientFactory>();
+                var client = factory.CreateClient();
+                var settings = sp.GetRequiredService<ConnectionSettings>();
+                return new GoogleMapsService(client, settings.GoogleApiKey);
+            });
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<IUpdateService, UpdateService>();

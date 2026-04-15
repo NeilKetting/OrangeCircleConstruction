@@ -10,7 +10,8 @@ using OCC.Client.Services.Managers.Interfaces;
 using OCC.Client.Services.Repositories.Interfaces;
 using OCC.Client.ModelWrappers;
 using OCC.Client.ViewModels.Core;
-using OCC.Client.Services.External;
+using OCC.Shared.Interfaces;
+using OCC.Shared.Services;
 using System.Linq;
 
 namespace OCC.Client.Features.ProjectsHub.ViewModels

@@ -11,30 +11,41 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using OCC.Shared.Interfaces;
 
 namespace OCC.WpfClient.Features.ProjectHub.ViewModels
 {
     public partial class ProjectsViewModel : ViewModelBase
     {
         private readonly IProjectService _projectService;
+        private readonly ICustomerService _customerService;
         private readonly IDialogService _dialogService;
         private readonly ILogger<ProjectsViewModel> _logger;
         private readonly IToastService _toastService;
+        private readonly IServiceProvider _serviceProvider;
 
         [ObservableProperty] private ObservableCollection<ProjectSummaryDto> _projects = new();
         [ObservableProperty] private ProjectSummaryDto? _selectedProject;
         [ObservableProperty] private string _searchText = string.Empty;
 
+        [ObservableProperty] private bool _isCreateProjectVisible;
+        [ObservableProperty] private CreateProjectViewModel? _createProjectVM;
+
         public ProjectsViewModel(
             IProjectService projectService,
+            ICustomerService customerService,
             IDialogService dialogService,
             ILogger<ProjectsViewModel> logger,
-            IToastService toastService)
+            IToastService toastService,
+            IServiceProvider serviceProvider)
         {
             _projectService = projectService;
+            _customerService = customerService;
             _dialogService = dialogService;
             _logger = logger;
             _toastService = toastService;
+            _serviceProvider = serviceProvider;
 
             Title = "Projects";
             _ = LoadDataAsync();
@@ -63,8 +74,30 @@ namespace OCC.WpfClient.Features.ProjectHub.ViewModels
         [RelayCommand]
         private void AddProject()
         {
-            // TODO: Open CreateProjectDialog
-            _toastService.ShowInfo("Upcoming", "New project creation is coming soon.");
+            if (CreateProjectVM != null) return;
+
+            CreateProjectVM = new CreateProjectViewModel(
+                _projectService,
+                _customerService,
+                _serviceProvider.GetRequiredService<IEmployeeService>(),
+                _serviceProvider.GetRequiredService<IUserService>(),
+                _serviceProvider.GetRequiredService<IGoogleMapsService>(),
+                _serviceProvider.GetRequiredService<ISettingsService>(),
+                _toastService);
+
+            CreateProjectVM.CloseRequested += (s, e) => CloseCreateProject();
+            CreateProjectVM.ProjectCreated += (s, id) => { 
+                CloseCreateProject();
+                _ = LoadDataAsync();
+            };
+
+            IsCreateProjectVisible = true;
+        }
+
+        private void CloseCreateProject()
+        {
+            IsCreateProjectVisible = false;
+            CreateProjectVM = null;
         }
 
         [RelayCommand]

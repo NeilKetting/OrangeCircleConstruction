@@ -288,6 +288,35 @@
 		<Setter Property="Foreground" Value="White"/>
 	</Style>
 
+	<!-- Segmented RadioButtons -->
+	<Style Selector="RadioButton.Segment">
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Background="Transparent" Padding="15,0">
+					<TextBlock Text="{TemplateBinding Content}"
+							   HorizontalAlignment="Center"
+							   VerticalAlignment="Center"
+							   FontWeight="SemiBold"
+							   FontSize="13"
+							   Foreground="{TemplateBinding Foreground}"/>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+		<Setter Property="Foreground" Value="{DynamicResource TextSecondaryGray}"/>
+	</Style>
+
+	<Style Selector="RadioButton.Segment:pointerover">
+		<Setter Property="Foreground" Value="{DynamicResource PrimaryTeal}"/>
+	</Style>
+
+	<Style Selector="RadioButton.Segment:checked">
+		<Setter Property="Foreground" Value="White"/>
+	</Style>
+
+	<Style Selector="RadioButton.Segment:checked /template/ Border">
+		<Setter Property="Background" Value="{DynamicResource PrimaryTeal}"/>
+	</Style>
+
 	<!-- Social Button (Auth) -->
 	<Style Selector="Button.Social">
 		<Setter Property="Background" Value="{DynamicResource AppBackgroundSlate}" />

@@ -9,6 +9,9 @@ namespace OCC.WpfClient.Services.Infrastructure
         private string _apiBaseUrl = "http://102.221.36.149:8081/";
 
         [ObservableProperty]
+        private string _googleApiKey = "AIzaSyCnU8_bP_FTksXDd4qgTspUZuRp_zb-Bsk";
+
+        [ObservableProperty]
         private AppEnvironment _selectedEnvironment;
 
         public ConnectionSettings()

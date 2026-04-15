@@ -5,17 +5,19 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using OCC.Client.Services.Infrastructure;
+using OCC.Shared.Interfaces;
 
-namespace OCC.Client.Services.External
+namespace OCC.Shared.Services
 {
     public class GoogleMapsService : IGoogleMapsService
     {
         private readonly HttpClient _httpClient;
+        private readonly string _apiKey;
 
-        public GoogleMapsService(HttpClient httpClient)
+        public GoogleMapsService(HttpClient httpClient, string apiKey)
         {
             _httpClient = httpClient;
+            _apiKey = apiKey;
         }
 
         public async Task<IEnumerable<AddressSuggestion>> GetAddressSuggestionsAsync(string input, string sessionToken)
@@ -23,13 +25,12 @@ namespace OCC.Client.Services.External
             if (string.IsNullOrWhiteSpace(input) || input.Length < 3)
                 return Array.Empty<AddressSuggestion>();
 
-            var apiKey = ConnectionSettings.Instance.GoogleApiKey;
-            if (apiKey == "YOUR_API_KEY_HERE" || string.IsNullOrWhiteSpace(apiKey))
+            if (_apiKey == "YOUR_API_KEY_HERE" || string.IsNullOrWhiteSpace(_apiKey))
                 return Array.Empty<AddressSuggestion>();
 
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/place/autocomplete/json?input={Uri.EscapeDataString(input)}&types=address&components=country:za&sessiontoken={sessionToken}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/place/autocomplete/json?input={Uri.EscapeDataString(input)}&types=address&components=country:za&sessiontoken={sessionToken}&key={_apiKey}";
                 var response = await _httpClient.GetFromJsonAsync<GoogleAutocompleteResponse>(url);
 
                 var suggestions = new List<AddressSuggestion>();
@@ -55,45 +56,36 @@ namespace OCC.Client.Services.External
 
         public async Task<ProjectAddressInfo?> GetPlaceDetailsAsync(string placeId, string sessionToken)
         {
-            var apiKey = ConnectionSettings.Instance.GoogleApiKey;
-            if (apiKey == "YOUR_API_KEY_HERE" || string.IsNullOrWhiteSpace(apiKey))
+            if (_apiKey == "YOUR_API_KEY_HERE" || string.IsNullOrWhiteSpace(_apiKey))
                 return null;
 
             try
             {
-                var url = $"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=address_component,formatted_address,geometry&sessiontoken={sessionToken}&key={apiKey}";
+                var url = $"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=address_component,formatted_address,geometry&sessiontoken={sessionToken}&key={_apiKey}";
                 
-                // Using a more manual approach to be 100% sure about parsing and debugging
                 var json = await _httpClient.GetStringAsync(url);
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
                 if (root.TryGetProperty("status", out var statusProp) && statusProp.GetString() != "OK")
                 {
-                    System.Diagnostics.Debug.WriteLine($"[GoogleMapsService] Place Details Error: {statusProp.GetString()}");
                     return null;
                 }
 
                 if (!root.TryGetProperty("result", out var result))
                 {
-                    System.Diagnostics.Debug.WriteLine("[GoogleMapsService] No result found in response");
                     return null;
                 }
 
                 var info = new ProjectAddressInfo();
 
-                // Parse Geometry (Latitude/Longitude)
                 if (result.TryGetProperty("geometry", out var geometry) && geometry.TryGetProperty("location", out var location))
                 {
                     info.Latitude = location.GetProperty("lat").GetDouble();
                     info.Longitude = location.GetProperty("lng").GetDouble();
                 }
 
-                if (!result.TryGetProperty("address_components", out var components))
-                {
-                    System.Diagnostics.Debug.WriteLine("[GoogleMapsService] No address components found in result");
-                }
-                else
+                if (result.TryGetProperty("address_components", out var components))
                 {
                     string streetNumber = "";
                     string route = "";
@@ -120,7 +112,6 @@ namespace OCC.Client.Services.External
                         else if (types.Contains("country")) info.Country = longName;
                     }
 
-                    // If City is missing (common in SA for suburbs), use sublocality or neighborhood
                     if (string.IsNullOrEmpty(info.City))
                     {
                         info.City = !string.IsNullOrEmpty(sublocality) ? sublocality : neighborHood;
@@ -129,19 +120,16 @@ namespace OCC.Client.Services.External
                     info.StreetLine1 = $"{streetNumber} {route}".Trim();
                 }
 
-                // If still empty (no street number/route returned), use the first part of formatted address
                 if (string.IsNullOrEmpty(info.StreetLine1) && result.TryGetProperty("formatted_address", out var formattedProp))
                 {
                     var formatted = formattedProp.GetString() ?? "";
                     info.StreetLine1 = formatted.Split(',')[0].Trim();
                 }
                 
-                System.Diagnostics.Debug.WriteLine($"[GoogleMapsService] Populated: {info.StreetLine1}, {info.City}, {info.PostalCode}, Lat: {info.Latitude}, Lng: {info.Longitude}");
                 return info;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"[GoogleMapsService] Exception in GetPlaceDetailsAsync: {ex.Message}");
                 return null;
             }
         }

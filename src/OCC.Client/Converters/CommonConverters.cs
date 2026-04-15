@@ -95,4 +95,21 @@ namespace OCC.Client.Converters
             return Avalonia.Data.BindingOperations.DoNothing;
         }
     }
+
+    public class BoolToStarGridLengthConverter : IValueConverter
+    {
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool b && b)
+            {
+                return new Avalonia.Controls.GridLength(1, Avalonia.Controls.GridUnitType.Star);
+            }
+            return new Avalonia.Controls.GridLength(0, Avalonia.Controls.GridUnitType.Pixel);
+        }
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            return Avalonia.Data.BindingOperations.DoNothing;
+        }
+    }
 }

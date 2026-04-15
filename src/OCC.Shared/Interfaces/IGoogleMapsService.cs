@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace OCC.Client.Services.External
+namespace OCC.Shared.Interfaces
 {
     public interface IGoogleMapsService
     {

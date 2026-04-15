@@ -2,8 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using OCC.Client.ModelWrappers;
-using OCC.Client.Services.External;
-using OCC.Client.Services.Infrastructure;
+using OCC.Shared.Interfaces;
+using OCC.Shared.Services;
+using OCC.Shared.Utils;
 using OCC.Client.Infrastructure;
 using OCC.Client.Messages;
 using OCC.Client.Services.Repositories.Interfaces;
@@ -17,6 +18,12 @@ using System.Threading.Tasks;
 
 namespace OCC.Client.Features.ProjectsHub.ViewModels
 {
+    public enum ProjectCreationMode
+    {
+        Quick,
+        Comprehensive
+    }
+
     public partial class CreateProjectViewModel : ViewModelBase
     {
         #region Private Members
@@ -49,7 +56,10 @@ namespace OCC.Client.Features.ProjectsHub.ViewModels
         // UI State
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ModalWidth))]
-        private bool _isSettingsVisible = true;
+        [NotifyPropertyChangedFor(nameof(IsSettingsVisible))]
+        private ProjectCreationMode _creationMode = ProjectCreationMode.Quick;
+
+        public bool IsSettingsVisible => CreationMode == ProjectCreationMode.Comprehensive;
 
         [ObservableProperty]
         private bool _isJustMe = true;
@@ -259,7 +269,7 @@ namespace OCC.Client.Features.ProjectsHub.ViewModels
             {
                 IsAddressMissing = true;
                 ValidationMessage = "Please fix the validation errors before saving.";
-                IsSettingsVisible = true;
+                CreationMode = ProjectCreationMode.Comprehensive;
                 return;
             }
 
@@ -345,7 +355,7 @@ namespace OCC.Client.Features.ProjectsHub.ViewModels
                 // If missing coordinates, force "Review" mode to show the address form
                 IsAddressMissing = true;
                 ValidationMessage = "Project imported, but geofencing requires a site address. Please search for and select the project location.";
-                IsSettingsVisible = true;
+                CreationMode = ProjectCreationMode.Comprehensive;
             }
         }
 
@@ -428,7 +438,7 @@ namespace OCC.Client.Features.ProjectsHub.ViewModels
                 {
                     IsAddressMissing = true;
                     ValidationMessage = "Project imported successfully, but please select the site address to enable geofencing.";
-                    IsSettingsVisible = true;
+                    CreationMode = ProjectCreationMode.Comprehensive;
                 }
 
                 await Task.Delay(500); // UI delay

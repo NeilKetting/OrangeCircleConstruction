@@ -1,5 +1,7 @@
-using System;
+using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using OCC.Shared.Interfaces;
+using OCC.Shared.Services;
 using OCC.Client.Services;
 using OCC.Client.Services.Infrastructure;
 using OCC.Client.Services.Interfaces;
@@ -27,7 +29,6 @@ using OCC.Client.Features.CalendarHub.ViewModels;
 using OCC.Client.ViewModels.Shared;
 using OCC.Client.Views.Core;
 using OCC.Shared.Models;
-using OCC.Client.Services.External;
 using OCC.Client.Features.CoreHub.ViewModels;
 using OCC.Client.Mobile.Shell;
 using OCC.Client.Mobile.Shell.BottomNav;
@@ -58,8 +59,14 @@ namespace OCC.Client.Infrastructure.DependencyInjection
             services.AddSingleton<IPermissionService, PermissionService>();
             services.AddSingleton<LocalSettingsService>();
             services.AddSingleton<UserPreferencesService>();
-            services.AddHttpClient<IGoogleMapsService, GoogleMapsService>()
+            services.AddHttpClient("GoogleMaps", c => { })
                 .AddHttpMessageHandler<FailureLoggingHandler>();
+            services.AddTransient<IGoogleMapsService>(sp => 
+            {
+                var factory = sp.GetRequiredService<IHttpClientFactory>();
+                var client = factory.CreateClient("GoogleMaps");
+                return new GoogleMapsService(client, ConnectionSettings.Instance.GoogleApiKey);
+            });
             services.AddSingleton<ILogUploadService, LogUploadService>();
 
             // --- Database & Repositories ---

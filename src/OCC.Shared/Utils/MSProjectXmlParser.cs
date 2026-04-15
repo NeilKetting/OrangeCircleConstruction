@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using System.Threading.Tasks;
 using OCC.Shared.Models;
 
-namespace OCC.Client.Services.Infrastructure
+namespace OCC.Shared.Utils
 {
     public class MSProjectXmlParser
     {
@@ -14,13 +14,7 @@ namespace OCC.Client.Services.Infrastructure
         {
             try
             {
-
                 progress?.Report("Loading XML...");
-                // Load fully into memory (small XMLs) - for larger ones, XmlReader is better but XDocument is easiest.
-                // However, XDocument.Load is synchronous.
-                // In a true async parser we'd use XmlReader, but for now we wrap in Task.Run if needed or just accept the sync load.
-                // Since this is client side Wasm/Desktop, a few MB check is fine.
-
                 using var reader = new StreamReader(stream);
                 var xmlContent = await reader.ReadToEndAsync();
                 var doc = XDocument.Parse(xmlContent);
@@ -160,19 +154,6 @@ namespace OCC.Client.Services.Infrastructure
                         
                         if (!string.IsNullOrEmpty(predUid))
                         {
-                            // Default to FS (1 in MSP XML means FF, 2 is FS)
-                            // Wait: MSP XML Type:
-                            // 0: FF
-                            // 1: FS (Standard)
-                            // 2: SF
-                            // 3: SS
-                            // actually let's check standard. 
-                            // Microsoft docs:
-                            // 0 = FF, 1 = FS, 2 = SF, 3 = SS.
-                            // BUT some versions use 1=SS?
-                            // Let's assume standard: 1=FS.
-                            // If Type defaults to 1.
-                            
                             int type = 1; 
                             if (int.TryParse(typeStr, out var t)) type = t;
                             
@@ -230,12 +211,7 @@ namespace OCC.Client.Services.Infrastructure
                     foreach (var k in keysToRemove) levelStack.Remove(k);
                 }
 
-                // Try to get title from Title property or fallback to filename if possible (not passed here)
-                // Actually, MS Project XML usually has a <Title> element under <Project> (root) or <Title> under <ExtendedCreationDate>... no, standard is properties.
-                // It's often <Name> under Project? Wait, the root element IS Project.
-                // Let's check for <Title> or <Name> element under Root (if distinct from namespace)
-                // Project 2007+ XML often has <Title> inside <ExtendedAttributes>? No.
-                // Simple attempt:
+                // Try to get title from Title property or fallback to filename if possible
                 var projectName = project.Element(ns + "Title")?.Value ?? project.Element(ns + "Name")?.Value;
 
                 // Final Pass: Recalculate Dates for Summaries to ensure visual consistency
@@ -249,9 +225,8 @@ namespace OCC.Client.Services.Infrastructure
             }
             catch (Exception ex)
             {
-                // Log via console or rethrow
                 Console.WriteLine($"Error parsing XML: {ex.Message}");
-                return (new List<ProjectTask>(), null); // Or throw
+                return (new List<ProjectTask>(), null);
             }
         }
 
@@ -294,26 +269,16 @@ namespace OCC.Client.Services.Infrastructure
         private string FormatDuration(string? durationStr)
         {
             if (string.IsNullOrEmpty(durationStr)) return "";
-            // Format: PT240H0M0S
-            // Very basic parse
             try
             {
                 var time = System.Xml.XmlConvert.ToTimeSpan(durationStr);
-
-                // MS Project Standard: 1 Day = 8 Hours (Work hours)
-                // TimeSpan.TotalDays assumes 1 Day = 24 Hours.
-                // So we must convert manually.
-
                 double workingDays = time.TotalHours / 8.0;
-
-                if (workingDays >= 1)
-                    return $"{workingDays:0.##} days"; // e.g. "5 days"
-
+                if (workingDays >= 1) return $"{workingDays:0.##} days";
                 return $"{time.TotalHours:0.##} hours";
             }
             catch
             {
-                return durationStr;
+                return durationStr ?? "";
             }
         }
 
@@ -325,9 +290,9 @@ namespace OCC.Client.Services.Infrastructure
                 if (p < 500) return "Low";
                 if (p == 500) return "Medium";
                 if (p > 500 && p < 1000) return "High";
-                if (p >= 1000) return "Critical"; // Or "Do Not Level"
+                if (p >= 1000) return "Critical";
             }
-            return priorityStr; // Fallback
+            return priorityStr;
         }
     }
 }

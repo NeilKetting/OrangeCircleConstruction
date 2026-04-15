@@ -33,6 +33,7 @@
             <conv:StringToTitleCaseConverter x:Key="StringToTitleCaseConverter"/>
             <conv:StringEqualityConverter x:Key="StringEqualityConverter"/>
             <conv:EqualsConverter x:Key="EqualsConverter"/>
+            <conv:BoolToStarGridLengthConverter x:Key="BoolToStarGridLengthConverter"/>
 
             <!-- Font Sizes -->
             <x:Double x:Key="FontSizeXS">10</x:Double>
